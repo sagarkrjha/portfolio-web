@@ -8,7 +8,7 @@ import {
   SiDiscord,
   SiInstagram,
 } from "react-icons/si";
-import { FiMail, FiLinkedin, FiGlobe } from "react-icons/fi";
+import { FiMail, FiLinkedin, FiGlobe, FiDownload, FiExternalLink, FiArrowRight } from "react-icons/fi";
 
 import { Button } from "@/components/ui/button";
 import { heroConfig, siteConfig } from "@/lib/config";
@@ -142,23 +142,36 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4 pt-2">
         {heroConfig.actions && heroConfig.actions.length > 0 && (
           <div className="flex flex-wrap items-center gap-2.5">
-            {heroConfig.actions.map((act) => (
-              <Button
-                key={act.label}
-                asChild
-                size="sm"
-                variant={act.variant ?? "default"}
-                className="text-xs font-medium"
-              >
-                <Link
-                  href={act.href}
-                  target={act.external ? "_blank" : undefined}
-                  rel={act.external ? "noreferrer" : undefined}
+            {heroConfig.actions.map((act) => {
+              const Icon =
+                act.icon === "resume"
+                  ? FiDownload
+                  : act.icon === "arrow"
+                  ? FiArrowRight
+                  : act.external && !act.download
+                  ? FiExternalLink
+                  : null;
+
+              return (
+                <Button
+                  key={act.label}
+                  asChild
+                  size="sm"
+                  variant={act.variant ?? "default"}
+                  className="text-xs font-medium cursor-pointer"
                 >
-                  {act.label}
-                </Link>
-              </Button>
-            ))}
+                  <Link
+                    href={act.href}
+                    target={act.external ? "_blank" : undefined}
+                    rel={act.external ? "noreferrer" : undefined}
+                    download={typeof act.download === "string" ? act.download : act.download ? true : undefined}
+                  >
+                    {Icon ? <Icon className="mr-1.5 size-3.5" /> : null}
+                    {act.label}
+                  </Link>
+                </Button>
+              );
+            })}
           </div>
         )}
 

@@ -18,9 +18,12 @@ export const heroConfig: HeroConfig = {
       variant: "default",
     },
     {
-      label: "Read Architecture Blog",
-      href: "/blog",
+      label: "Download Resume",
+      href: "/sagar-resume.pdf",
       variant: "outline",
+      icon: "resume",
+      download: "sagar-resume.pdf",
+      external: true,
     },
   ],
 

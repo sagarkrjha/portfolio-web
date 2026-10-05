@@ -1,32 +1,33 @@
-# 🚀 Modern Config-Driven Developer Portfolio
+# Modern Config-Driven Developer Portfolio
 
 A sleek, high-performance, and fully config-driven developer portfolio built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, **TypeScript**, **shadcn/ui**, **Radix UI**, **next-themes**, and **MDX**.
 
-Designed with **separation of concerns** in mind: **99% of your portfolio is configured via centralized TypeScript configuration files**. You don't need to dig through component trees or write boilerplate UI code to make it entirely your own.
+Designed with **separation of concerns** in mind: **99% of your portfolio is configured via centralized TypeScript configuration files**. You do not need to dig through component trees or write boilerplate UI code to make it entirely your own.
 
 ---
 
-## ✨ Features
+## Features
 
-- **⚙️ 100% Config-Driven**: Update your bio, skills, socials, projects, terminal, and about narrative in `lib/config/` without touching layout code.
-- **🔄 Automated GitHub & LeetCode Sync**: A custom TypeScript script (`pnpm run sync:data`) pulls your public GitHub repositories, stars, forks, and live LeetCode stats into an offline-first cache (`lib/generated/portfolio-data.json`).
-- **🤖 Automated Daily GitHub Actions**: An automated CI workflow (`.github/workflows/build.yml`) runs nightly at 00:00 UTC to sync metrics, rebuild, and commit updated data back to your repo.
-- **🛡️ Bulletproof Fallbacks & ISR**: Combines Next.js Incremental Static Regeneration (ISR) with offline verified JSON fallbacks so your site never breaks, even if third-party APIs are rate-limited or offline.
-- **💻 Interactive Modal Terminal**: Emulates a real Unix CLI with 20+ functional commands (`neofetch`, `skills`, `projects`, `leetcode`, `github`, `whoami`, `foxy`, `cat`, etc.) dynamically bound to your config data.
-- **🦊 Floating Mascot (Foxy)**: An animated companion with speech bubbles, interactive toggles, and terminal integration.
-- **📊 GitHub Contributions Heatmap**: Real-time GitHub activity calendar with dark/light mode support.
-- **📝 MDX Tech Blog**: Built-in blogging engine with metadata frontmatter, tag filters, and Prism syntax highlighting.
-- **🎨 Dark & Light Modes**: System-aware theme toggling with smooth transitions via `next-themes`.
-- **⚡ Bleeding Edge Tech**: Built with Next.js 16 (Turbopack ready), React 19, Tailwind CSS v4, and Biome.
+- **100% Config-Driven**: Update your bio, skills, socials, projects, terminal, and about narrative in `lib/config/` without touching layout code.
+- **Automated GitHub & LeetCode Sync**: A custom TypeScript script (`pnpm run sync:data`) pulls public GitHub repositories, stars, forks, and live LeetCode stats into an offline-first cache (`lib/generated/portfolio-data.json`).
+- **Automated Daily GitHub Actions**: An automated CI workflow (`.github/workflows/build.yml`) runs nightly at 00:00 UTC to sync metrics, verify resume assets, build, upload resume artifacts, and commit updated data back to your repo.
+- **Resume Download & Preview**: Direct resume download via header, hero CTA, terminal (`resume`, `cat sagar-resume.pdf`), and automated build workflow artifacts.
+- **Bulletproof Fallbacks & ISR**: Combines Next.js Incremental Static Regeneration (ISR) with offline verified JSON fallbacks so your site never breaks, even if third-party APIs are rate-limited or offline.
+- **Interactive Modal Terminal**: Emulates a Unix CLI with 20+ functional commands (`neofetch`, `skills`, `projects`, `leetcode`, `github`, `whoami`, `resume`, `foxy`, `cat`, etc.) dynamically bound to config data.
+- **Floating Mascot (Foxy)**: An animated companion with speech bubbles, interactive toggles, and terminal integration.
+- **GitHub Contributions Heatmap**: Real-time GitHub activity calendar with dark/light mode support.
+- **MDX Tech Blog**: Built-in blogging engine with metadata frontmatter, tag filters, and Prism syntax highlighting.
+- **Dark & Light Modes**: System-aware theme toggling with smooth transitions via `next-themes`.
+- **Modern Tech Stack**: Built with Next.js 16 (Turbopack ready), React 19, Tailwind CSS v4, and Biome.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 ├── .github/
 │   └── workflows/
-│       └── build.yml               # Automated nightly sync & build action
+│       └── build.yml               # Automated nightly sync, build & resume artifact workflow
 ├── app/                            # Next.js 16 App Router pages & layouts
 │   ├── about/                      # About page route
 │   ├── blog/                       # MDX Blog listing & post routes ([slug])
@@ -40,21 +41,33 @@ Designed with **separation of concerns** in mind: **99% of your portfolio is con
 ├── content/
 │   └── blog/                       # MDX markdown articles & write-ups
 ├── lib/
-│   ├── config/                     # ⭐ PRIMARY CONFIGURATION FILES
-│   │   ├── site.ts                 # Master config (profile, links, skills, repos)
+│   ├── config/                     # PRIMARY CONFIGURATION FILES
+│   │   ├── site.ts                 # Master config (profile, links, skills, repos, resume)
 │   │   ├── hero.ts                 # Hero section copy, actions, and media
 │   │   └── about.ts                # Narrative & focus cards for About page
 │   ├── generated/
 │   │   └── portfolio-data.json     # Pre-fetched GitHub & LeetCode cache
 │   └── services/                   # Dynamic API fetchers & badge normalizers
-├── public/                         # Static assets (avatar.jpg, cover-image.jpg, etc.)
+├── public/                         # Static assets (sagar-resume.pdf, avatar.jpg, cover-image.jpg)
 └── scripts/
     └── sync-portfolio-data.ts      # Data aggregation script for GitHub & LeetCode
 ```
 
 ---
 
-## 🛠️ Quick Start
+## Resume Integration & Download
+
+Your resume is hosted directly in the `public/` directory and integrated across the entire portfolio:
+
+- **Direct Download URL**: Accessible at `/sagar-resume.pdf` (e.g. `https://your-domain.com/sagar-resume.pdf`).
+- **Header Navigation**: Dedicated `Resume` nav link opening your resume in a new tab.
+- **Hero CTA**: Primary hero action button configured to download your resume.
+- **Interactive Terminal**: Run `resume` or `cat sagar-resume.pdf` to download or open your resume directly from the shell.
+- **GitHub Actions Workflow**: Automatically verifies the resume file in CI and uploads it as a build artifact named `sagar-resume` on every workflow run.
+
+---
+
+## Quick Start
 
 ### 1. Prerequisites
 - **Node.js**: `v20.x` or higher
@@ -62,7 +75,7 @@ Designed with **separation of concerns** in mind: **99% of your portfolio is con
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/your-username/portfolio-web.git
+git clone https://github.com/sagarkrjha/portfolio-web.git
 cd portfolio-web
 ```
 
@@ -72,7 +85,7 @@ pnpm install
 ```
 
 ### 4. Sync Portfolio Data
-Fetch your live GitHub repositories and LeetCode statistics:
+Fetch live GitHub repositories and LeetCode statistics:
 ```bash
 pnpm run sync:data
 ```
@@ -86,9 +99,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view your
 
 ---
 
-## 🎯 Step-by-Step Customization Guide
+## Step-by-Step Customization Guide
 
-Customizing this portfolio for yourself takes just a few minutes by updating the config files in `lib/config/`.
+Customizing this portfolio takes just a few minutes by updating the config files in `lib/config/`.
 
 ### Step 1: Update Your Core Profile (`lib/config/site.ts`)
 
@@ -97,93 +110,113 @@ Open [`lib/config/site.ts`](lib/config/site.ts). This is the single source of tr
 #### 1. Identity & Bio
 ```typescript
 export const siteConfig: SiteConfig = {
-  title: "Your Name | Software Engineer",
-  name: "Your Name",
-  role: "Software Engineer",
-  bio: "Passionate about building scalable systems, developer tooling, and modern web applications.",
-  location: "San Francisco, CA",
-  availability: "Open to opportunities",
+  title: "Sagar Kumar Jha | Software Engineer",
+  name: "Sagar Kumar Jha",
+  role: "Systems & Full-Stack Engineer",
+  bio: "Building robust systems, developer tooling, and modern software from first principles with modern C++20 and TypeScript.",
+  location: "Delhi, India",
+  availability: "Open to engineering roles & collaborations",
   // ...
 };
 ```
 
-#### 2. Social Links
-Update the links to your social profiles:
+#### 2. Navigation & Resume
 ```typescript
-socialLinks: [
-  { platform: "github", label: "GitHub", href: "https://github.com/<your-username>", external: true },
-  { platform: "leetcode", label: "LeetCode", href: "https://leetcode.com/u/<your-username>/", external: true },
-  { platform: "linkedin", label: "LinkedIn", href: "https://linkedin.com/in/<your-handle>", external: true },
-  { platform: "twitter", label: "X (Twitter)", href: "https://x.com/<your-handle>", external: true },
-  { platform: "discord", label: "Discord", href: "https://discord.com/users/<your-id>", external: true },
+navItems: [
+  { label: "About", href: "/about" },
+  { label: "Projects", href: "/projects" },
+  { label: "Blog", href: "/blog" },
+  { label: "Resume", href: "/sagar-resume.pdf", external: true },
 ],
 ```
 
-#### 3. GitHub & LeetCode Handles
+#### 3. Social Links
+Update links to your social profiles:
+```typescript
+socialLinks: [
+  { platform: "github", label: "GitHub", href: "https://github.com/sagarkrjha", external: true },
+  { platform: "leetcode", label: "LeetCode", href: "https://leetcode.com/u/devsagarkrjha/", external: true },
+  { platform: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/devsagarkumarjha", external: true },
+  { platform: "twitter", label: "X (Twitter)", href: "https://x.com/devsagarkrjha", external: true },
+  { platform: "discord", label: "Discord", href: "https://discord.com/users/894502933801107476", external: true },
+],
+```
+
+#### 4. GitHub & LeetCode Handles
 Set your exact usernames so the automated sync script and live APIs know whose data to fetch:
 ```typescript
 github: {
-  username: "your-github-username",
-  repositoryCount: 4,          // Number of featured repos to prioritize
-  pinnedRepos: ["repo-one"],   // Specific repos you want highlighted
-  includeForks: false,         // Include or omit forked repos
+  username: "sagarkrjha",
+  repositoryCount: 5,                  // Number of repos to showcase
+  pinnedRepos: ["minigit", "codeshelf"], // Pinned repos on GitHub, highlighted as Featured
+  includeForks: false,                 // Include or omit forked repos
 },
 
 leetcode: {
-  username: "your-leetcode-username",
-  profileUrl: "https://leetcode.com/u/your-leetcode-username/",
+  username: "devsagarkrjha",
+  profileUrl: "https://leetcode.com/u/devsagarkrjha/",
 },
 ```
 
-#### 4. Terminal Configuration
+#### 5. Terminal Configuration
 Customize the shell prompt displayed in the interactive terminal modal:
 ```typescript
 terminal: {
-  unixUser: "yourusername",    // Displays as: yourusername@hostname:~$
-  hostname: "portfolio",
+  unixUser: "sagarkrjha",    // Displays as: sagarkrjha@github:~$
+  hostname: "github",
   homePath: "~",
 },
 ```
 
-#### 5. Skills & Categories
+#### 6. Skills & Categories
 Group your skills into categories. Marking `featured: true` highlights them in the skills grid and terminal `skills` command:
 ```typescript
 skills: [
   {
-    title: "Frontend & UI",
+    title: "Languages",
     skills: [
+      { name: "C++20", featured: true },
+      { name: "C", featured: false },
       { name: "TypeScript", featured: true },
-      { name: "React", featured: true },
-      { name: "Next.js", featured: true },
-      { name: "Tailwind CSS", featured: true },
+      { name: "JavaScript", featured: true },
     ],
   },
   {
-    title: "Backend & Systems",
+    title: "Systems & Core Tooling",
     skills: [
-      { name: "Node.js", featured: true },
-      { name: "PostgreSQL", featured: true },
-      { name: "Go", featured: true },
+      { name: "CMake", featured: true },
+      { name: "Content-Addressable Storage (CAS)", featured: true },
+      { name: "Git Internals", featured: true },
+      { name: "Linux / POSIX", featured: true },
     ],
   },
   // Add more categories as desired...
 ],
 ```
 
-#### 6. Featured Projects & Experience
-You can define projects explicitly to guarantee descriptions, links, and tags even before running GitHub sync:
+#### 7. Featured Projects
+Pinned projects are showcased as Featured Work:
 ```typescript
 featuredProjects: [
   {
-    repoName: "my-flagship-project",
-    title: "My Flagship Project",
-    description: "High-performance distributed system with real-time replication.",
-    techStack: ["Go", "Docker", "gRPC"],
-    githubUrl: "https://github.com/your-username/my-flagship-project",
-    liveUrl: "https://my-flagship-project.dev",
+    repoName: "minigit",
+    title: "MiniGit",
+    description: "Git-compatible version control system implemented from first principles in modern C++20.",
+    techStack: ["C++", "C++20"],
+    githubUrl: "https://github.com/sagarkrjha/minigit",
     featured: true,
-    stars: 50,
-    forks: 5,
+    stars: 14,
+    forks: 0,
+  },
+  {
+    repoName: "codeshelf",
+    title: "CodeShelf",
+    description: "Developer-focused snippet knowledge system across desktop, VS Code, and web.",
+    techStack: ["TypeScript", "React", "Electron"],
+    githubUrl: "https://github.com/sagarkrjha/codeshelf",
+    featured: true,
+    stars: 1,
+    forks: 0,
   },
 ],
 ```
@@ -196,7 +229,7 @@ Open [`lib/config/hero.ts`](lib/config/hero.ts) to adjust call-to-action buttons
 
 ```typescript
 export const heroConfig: HeroConfig = {
-  greeting: "Hello, I'm",
+  greeting: "I'm",
   name: siteConfig.name,
   role: siteConfig.role,
   description: siteConfig.bio,
@@ -204,16 +237,16 @@ export const heroConfig: HeroConfig = {
 
   actions: [
     { label: "View Projects", href: "#projects", variant: "default" },
-    { label: "Read Blog", href: "/blog", variant: "outline" },
+    { label: "Download Resume", href: "/sagar-resume.pdf", variant: "outline", external: true },
   ],
 
   media: {
     src: "/cover-image.jpg",
-    alt: "Cover Banner",
+    alt: "",
   },
   avatar: {
     src: "/avatar.jpg",
-    alt: "Profile Avatar",
+    alt: "",
   },
 };
 ```
@@ -227,17 +260,21 @@ Open [`lib/config/about.ts`](lib/config/about.ts) to define your personal engine
 ```typescript
 export const aboutConfig: AboutSectionConfig = {
   id: "about",
-  eyebrow: "About Me",
-  title: "Architecting reliable systems and crafting great user experiences.",
-  description: "Share your journey, philosophy, and what drives you...",
+  eyebrow: "About",
+  title: "Building robust systems and developer tools from first principles.",
+  description: "I specialize in low-level systems programming, version control internals, and developer infrastructure...",
   focus: [
     {
-      title: "Full-Stack Development",
-      description: "Building scalable web applications with clean, maintainable code.",
+      title: "Systems Programming",
+      description: "Building reliable software in modern C++20, focusing on memory safety and cache-conscious structures.",
     },
     {
-      title: "Systems Architecture",
-      description: "Designing performant, distributed backends and reliable data pipelines.",
+      title: "Developer Infrastructure",
+      description: "Designing content-addressable storage, build systems (CMake), and automated cross-platform CI/CD pipelines.",
+    },
+    {
+      title: "Algorithms & Competitive Programming",
+      description: "LeetCode Guardian (2382 rating, top 0.36% globally) with 715+ algorithmic problems solved.",
     },
   ],
 };
@@ -247,15 +284,14 @@ export const aboutConfig: AboutSectionConfig = {
 
 ### Step 4: Replace Images & Media (`public/`)
 
-Drop your custom images directly into the `public/` directory:
+Drop your custom assets directly into the `public/` directory:
 
 | File Path | Description | Recommended Dimensions |
 | :--- | :--- | :--- |
-| `public/avatar.jpg` | Your personal avatar / headshot | Square (e.g. 500x500px, JPG/PNG) |
+| `public/sagar-resume.pdf` | Developer Resume (PDF) | PDF document |
+| `public/avatar.jpg` | Personal avatar / headshot | Square (e.g. 500x500px, JPG/PNG) |
 | `public/cover-image.jpg` | Hero banner / background art | Landscape (e.g. 1920x1080px, JPG/WebP) |
 | `public/foxy.gif` | Floating mascot animation | Transparent GIF (optional) |
-
-> 💡 **Tip**: If you prefer custom filenames, just update the path in `lib/config/hero.ts`.
 
 ---
 
@@ -265,14 +301,14 @@ Articles live as `.mdx` files in `content/blog/`. Each post includes standard fr
 
 ```mdx
 ---
-title: "How I Built My Distributed Key-Value Store"
-description: "A deep dive into consensus algorithms and memory-mapped file persistence."
+title: "Building a Git-Compatible Version Control System in C++20"
+description: "A deep dive into content-addressable storage, commit graphs, and dynamic programming diff calculation."
 date: "2026-04-01"
 readTime: "6 min read"
-tags: ["Go", "Distributed Systems", "Database"]
+tags: ["C++", "Systems", "Version Control"]
 ---
 
-# How I Built My Distributed Key-Value Store
+# Building a Git-Compatible Version Control System in C++20
 
 Write your content using GitHub Flavored Markdown and interactive React/MDX components.
 Code blocks are automatically highlighted with PrismJS syntax coloring!
@@ -289,19 +325,21 @@ pnpm run sync:data
 ```
 
 This will:
-1. Connect to GitHub's REST API and fetch all your public repositories, languages, stars, and topics.
-2. Filter tech badges to keep only languages & frameworks (omitting noisy GitHub topics like "practice" or "code").
-3. Connect to the LeetCode stats API and fetch your solved problem count (Easy, Medium, Hard).
+1. Connect to GitHub REST API and fetch public repositories, languages, stars, and topics.
+2. Filter tech badges to keep only languages & frameworks (omitting noisy GitHub topics).
+3. Connect to the LeetCode stats API and fetch solved problem count (Easy, Medium, Hard).
 4. Save the compiled payload to [`lib/generated/portfolio-data.json`](lib/generated/portfolio-data.json).
 
 ---
 
-## 🤖 Automated Daily Sync with GitHub Actions
+## Automated Daily Sync with GitHub Actions
 
 The repository includes a GitHub Actions workflow in [`.github/workflows/build.yml`](.github/workflows/build.yml) that:
 - Runs every day at **00:00 UTC** via cron.
 - Runs automatically on every push to `main`.
-- Runs on-demand via GitHub's **Run workflow** button (`workflow_dispatch`).
+- Runs on-demand via GitHub **Run workflow** button (`workflow_dispatch`).
+- Verifies that `public/sagar-resume.pdf` is present and valid.
+- Uploads the resume as a build artifact named `sagar-resume` on every workflow run.
 - Commits updated stats back to `lib/generated/portfolio-data.json` with `[skip ci]`.
 
 ### Enabling Write Permissions for GitHub Actions:
@@ -316,28 +354,29 @@ To let the GitHub Action commit fresh stats back to your repository:
 
 ---
 
-## ⌨️ Interactive Terminal Commands
+## Interactive Terminal Commands
 
-Visitors can open the modal terminal anytime by clicking the terminal icon in the header or pressing the command triggers. Built-in commands include:
+Visitors can open the modal terminal anytime by clicking the terminal icon in the header or pressing `Ctrl+\`` / `Cmd+\``. Built-in commands include:
 
 | Command | Action |
 | :--- | :--- |
-| `neofetch` | Displays your system specs, tech summary, and ASCII mascot |
-| `about` | Prints your bio, location, and role |
+| `neofetch` | Displays system specs, tech summary, and ASCII mascot |
+| `about` | Prints bio, location, and engineering focus |
 | `skills` | Lists technical skills and core stack |
-| `projects` | Interactive list of your GitHub projects with links |
+| `projects` | Interactive list of GitHub projects with links |
 | `leetcode` | Shows live algorithmic problem-solving metrics |
 | `github` | Displays GitHub statistics and profile URL |
-| `social` | Lists all your social media channels and handles |
-| `blog` | Lists your latest blog articles |
-| `whoami` | Shows your current shell username |
+| `resume` | Downloads and opens developer resume (PDF) |
+| `social` | Lists all social media channels and handles |
+| `blog` | Lists latest blog articles |
+| `whoami` | Shows current shell username |
 | `fox` / `mascot` | Displays the cute ASCII Fox companion |
 | `clear` | Clears the terminal screen |
 | `help` | Lists all available terminal commands |
 
 ---
 
-## 📜 Available Scripts
+## Available Scripts
 
 | Script | Command | Purpose |
 | :--- | :--- | :--- |
@@ -351,7 +390,7 @@ Visitors can open the modal terminal anytime by clicking the terminal icon in th
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### Deploy on Vercel (Recommended)
 The easiest way to deploy this Next.js app:
@@ -375,10 +414,6 @@ And output directory:
 
 ---
 
-## 📄 License
+## License
 
 This project is open-source and available under the [MIT License](LICENSE). Feel free to fork, clone, and make it your own!
-
----
-
-⭐ **Enjoying this template?** Don't forget to star the repository on GitHub!

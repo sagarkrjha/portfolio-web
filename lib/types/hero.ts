@@ -17,6 +17,7 @@ export interface HeroAction {
   variant?: HeroActionVariant;
   icon?: HeroActionIcon;
   external?: boolean;
+  download?: boolean | string;
 }
 
 export type HeroSocialPlatform =

@@ -28,6 +28,7 @@ const AVAILABLE_COMMANDS = [
   "github",
   "social",
   "blog",
+  "resume",
   "whoami",
   "uname",
   "pwd",
@@ -271,6 +272,8 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
               <span>List social media and contact links</span>
               <span className="text-yellow-400">blog</span>
               <span>List blog navigation and recent articles</span>
+              <span className="text-yellow-400">resume</span>
+              <span>Open and download developer resume (PDF)</span>
               <span className="text-yellow-400">fox</span>
               <span>Display the portfolio fox mascot ASCII</span>
               <span className="text-yellow-400">whoami</span>
@@ -327,6 +330,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             <span className="text-emerald-400">about.md</span>
             <span className="text-yellow-400">skills.json</span>
             <span className="text-purple-400">leetcode.stats</span>
+            <span className="text-red-400 font-semibold">sagar-resume.pdf</span>
             <span className="text-amber-400">mascot.fox</span>
           </div>
         );
@@ -355,6 +359,15 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
           outputNode = (
             <p className="text-xs text-zinc-300 font-mono">
               LeetCode User: {siteConfig.leetcode.username} ({cachedData.leetcode?.totalSolved ?? 710}+ Solved across Easy, Medium, Hard)
+            </p>
+          );
+        } else if (file === "sagar-resume.pdf" || file === "resume.pdf") {
+          outputNode = (
+            <p className="text-xs text-zinc-300 font-mono">
+              Binary PDF file. Download or view online at:{" "}
+              <a href="/sagar-resume.pdf" download="sagar-resume.pdf" className="text-emerald-400 underline hover:opacity-80">
+                /sagar-resume.pdf
+              </a>
             </p>
           );
         } else {
@@ -525,6 +538,28 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             </p>
             <p className="text-zinc-400">
               Route: <a href="/blog" className="text-emerald-400 underline">/blog</a>
+            </p>
+          </div>
+        );
+        break;
+
+      case "resume":
+      case "cv":
+        outputNode = (
+          <div className="space-y-1.5 text-xs font-mono">
+            <p className="font-semibold text-zinc-100">Developer Resume (PDF)</p>
+            <p className="text-zinc-400">
+              Download or view Sagar Kumar Jha&apos;s resume:
+            </p>
+            <p className="text-zinc-400">
+              File:{" "}
+              <a
+                href="/sagar-resume.pdf"
+                download="sagar-resume.pdf"
+                className="text-emerald-400 underline hover:opacity-80 font-medium"
+              >
+                /sagar-resume.pdf (Click to Download)
+              </a>
             </p>
           </div>
         );

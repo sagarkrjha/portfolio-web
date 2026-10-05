@@ -1,17 +1,18 @@
 import type { SiteConfig } from "@/lib/types";
 
 export const siteConfig: SiteConfig = {
-  title: "Sagar Kumar Jha | Software Developer",
+  title: "Sagar Kumar Jha | Software Engineer",
   name: "Sagar Kumar Jha",
-  role: "Software Developer",
-  bio: "Passionate about building modern, scalable software with clean architecture, high performance, and great user experiences.",
-  location: "India",
-  availability: "Building my latest project",
+  role: "Systems & Full-Stack Engineer",
+  bio: "Building robust systems, developer tooling, and modern software from first principles with modern C++20 and TypeScript.",
+  location: "Delhi, India",
+  availability: "Open to engineering roles & collaborations",
 
   navItems: [
     { label: "About", href: "/about" },
     { label: "Projects", href: "/projects" },
     { label: "Blog", href: "/blog" },
+    { label: "Resume", href: "/sagar-resume.pdf", external: true, download: "sagar-resume.pdf" },
   ],
 
   socialLinks: [
@@ -49,8 +50,8 @@ export const siteConfig: SiteConfig = {
 
   github: {
     username: "sagarkrjha",
-    repositoryCount: 4,
-    pinnedRepos: ["minigit"],
+    repositoryCount: 5,
+    pinnedRepos: ["minigit", "codeshelf"],
     includeForks: false,
   },
 
@@ -74,21 +75,21 @@ export const siteConfig: SiteConfig = {
       badge: "Featured Work",
       title: "Featured Engineering Projects",
       description:
-        "Core open-source systems, developer tooling, and highlighted projects built with high performance and clean architecture.",
+        "First-principles systems programming, developer tooling, and highlighted projects built with high performance and clean architecture.",
     },
     skills: {
       number: "02",
       badge: "Core Competencies",
       title: "Technical Stack & Architecture",
       description:
-        "Core systems programming, frontend architectures, databases, and DevOps automation tooling.",
+        "Systems programming, frontend and desktop architectures, build pipelines, and DevOps automation tooling.",
     },
     leetcode: {
       number: "03",
       badge: "LeetCode Stats",
       title: "Competitive Programming & Problem Solving",
       description:
-        "Live metrics, contest rating, and algorithmic mastery across data structures and complex algorithms.",
+        "Live metrics, LeetCode Guardian rank (2382 contest rating, top 0.36% globally), and algorithmic mastery across data structures.",
     },
     contributions: {
       number: "04",
@@ -101,7 +102,7 @@ export const siteConfig: SiteConfig = {
 
   statusCards: {
     architectureFocus: {
-      title: "Distributed Tools",
+      title: "Systems & CAS Tools",
       subtitle: "Clean Architecture",
     },
     coreLanguagesFallback: "C++, TypeScript",
@@ -109,45 +110,52 @@ export const siteConfig: SiteConfig = {
 
   skills: [
     {
-      title: "Frontend & UI",
+      title: "Languages",
       skills: [
+        { name: "C++20", featured: true },
+        { name: "C", featured: false },
         { name: "TypeScript", featured: true },
         { name: "JavaScript", featured: true },
+      ],
+    },
+    {
+      title: "Systems & Core Tooling",
+      skills: [
+        { name: "CMake", featured: true },
+        { name: "Content-Addressable Storage (CAS)", featured: true },
+        { name: "Git Internals", featured: true },
+        { name: "OpenSSL / SHA-256", featured: false },
+        { name: "Linux / POSIX", featured: true },
+        { name: "Windows API", featured: false },
+      ],
+    },
+    {
+      title: "Frontend & Applications",
+      skills: [
         { name: "React", featured: true },
         { name: "Next.js", featured: true },
         { name: "Tailwind CSS", featured: true },
-        { name: "HTML5/CSS3", featured: false },
-        { name: "Radix UI", featured: false },
-      ],
-    },
-    {
-      title: "Backend & Systems",
-      skills: [
+        { name: "Electron", featured: true },
         { name: "Node.js", featured: true },
-        { name: "Express", featured: false },
-        { name: "REST APIs", featured: true },
-        { name: "PostgreSQL", featured: true },
-        { name: "MongoDB", featured: false },
-        { name: "C++20", featured: true },
       ],
     },
     {
-      title: "Tools & DevOps",
+      title: "DevOps & Build Infrastructure",
       skills: [
-        { name: "Git & GitHub", featured: true },
         { name: "GitHub Actions", featured: true },
+        { name: "Git & GitHub", featured: true },
         { name: "Docker", featured: false },
-        { name: "Linux / Bash", featured: true },
         { name: "pnpm", featured: false },
-        { name: "VS Code", featured: false },
+        { name: "GCC / Clang / MSVC", featured: false },
       ],
     },
     {
-      title: "Core CS",
+      title: "Core CS & Algorithms",
       skills: [
         { name: "Data Structures & Algorithms", featured: true },
+        { name: "Dynamic Programming", featured: true },
+        { name: "Graph Algorithms (DAG)", featured: true },
         { name: "System Design", featured: false },
-        { name: "Object-Oriented Programming", featured: true },
       ],
     },
   ],
@@ -155,22 +163,33 @@ export const siteConfig: SiteConfig = {
   featuredProjects: [
     {
       repoName: "minigit",
-      title: "minigit",
+      title: "MiniGit",
       description:
-        "Distributed Version Control System built in Modern C++20 featuring SHA-256 content-addressable storage, commit graphs, and branch management.",
+        "Git-compatible version control system implemented from first principles in modern C++20. Features SHA-256 content-addressable storage, two-phase staging index, dynamic programming diff calculation, and branch management.",
       techStack: ["C++", "C++20"],
       githubUrl: "https://github.com/sagarkrjha/minigit",
       featured: true,
-      stars: 13,
+      stars: 14,
       forks: 0,
     },
     {
-      repoName: "Portfolio-web",
+      repoName: "codeshelf",
+      title: "CodeShelf",
+      description:
+        "Developer-focused snippet knowledge system across desktop, VS Code, and web. Built with TypeScript, React 19, Electron, and a pnpm monorepo architecture with semantic search and Web Streams compression.",
+      techStack: ["TypeScript", "React", "Electron"],
+      githubUrl: "https://github.com/sagarkrjha/codeshelf",
+      featured: true,
+      stars: 1,
+      forks: 0,
+    },
+    {
+      repoName: "portfolio-web",
       title: "Portfolio Website",
       description:
-        "My portfolio website as a Software developer to showcase my personal work and stats with dynamic GitHub sync, interactive modal terminal, and MDX engine.",
+        "Modern developer portfolio featuring automated GitHub sync, LeetCode metrics integration, interactive modal terminal, and an MDX engineering blog.",
       techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
-      githubUrl: "https://github.com/sagarkrjha/Portfolio-web",
+      githubUrl: "https://github.com/sagarkrjha/portfolio-web",
       liveUrl: "https://sagarkrjha.vercel.app",
       featured: false,
       stars: 0,
@@ -180,7 +199,7 @@ export const siteConfig: SiteConfig = {
       repoName: "next-mdx-starter",
       title: "Next.js MDX Starter",
       description:
-        "A modern, reusable starter template built with Next.js (App Router), Tailwind CSS v4, Biome, shadcn/ui, Radix UI, next-themes, and react-icons.",
+        "A modern, reusable starter template built with Next.js (App Router), Tailwind CSS v4, Biome, shadcn/ui, Radix UI, next-themes, and Hugeicons.",
       techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
       githubUrl: "https://github.com/sagarkrjha/next-mdx-starter",
       featured: false,
@@ -189,7 +208,7 @@ export const siteConfig: SiteConfig = {
     },
     {
       repoName: "sagarkrjha",
-      title: "Developer Profile README & Workflow",
+      title: "Automated GitHub Profile System",
       description:
         "Automated developer profile powered by GitHub Actions, showcasing projects, engineering interests, GitHub activity, and LeetCode metrics.",
       techStack: ["JavaScript"],
@@ -202,16 +221,16 @@ export const siteConfig: SiteConfig = {
 
   hobbies: [
     {
-      title: "Exploring Open Source",
-      description: "Reading codebase architectures and experimenting with developer tooling.",
+      title: "Low-Level Systems",
+      description: "Exploring memory management, cache-conscious data structures, and POSIX system calls.",
     },
     {
       title: "Competitive Programming",
-      description: "Solving algorithmic problems and optimizing time/space complexity.",
+      description: "LeetCode Guardian (2382 rating) with 715+ algorithmic problems solved across data structures.",
     },
     {
-      title: "Tech Reading & Writing",
-      description: "Writing about software design, web systems, and problem-solving lessons.",
+      title: "Developer Infrastructure",
+      description: "Building cross-platform CI/CD automation, reproducible builds, and developer tooling.",
     },
   ],
 
@@ -219,13 +238,14 @@ export const siteConfig: SiteConfig = {
     {
       period: "2024 — Present",
       role: "Software Developer",
-      company: "Independent / Projects",
-      location: "India",
+      company: "Independent / Open Source",
+      location: "Delhi, India",
       description: [
-        "Architecting modern full-stack web applications and developer tools.",
-        "Focusing on performance optimization, responsive UX, and scalable codebases.",
+        "Architecting systems programming tools and developer infrastructure in modern C++20 and TypeScript.",
+        "Implemented MiniGit, a Git-compatible version control system with content-addressable storage and DP diff.",
+        "Engineered CodeShelf, a desktop and web snippet knowledge system with pnpm monorepo and Web Streams.",
       ],
-      technologies: ["TypeScript", "Next.js", "React", "Node.js", "PostgreSQL", "C++"],
+      technologies: ["C++20", "TypeScript", "React", "Next.js", "Electron", "CMake", "GitHub Actions"],
     },
   ],
 };

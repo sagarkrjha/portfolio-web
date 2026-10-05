@@ -3,25 +3,25 @@ import type { AboutSectionConfig } from "@/lib/types";
 export const aboutConfig: AboutSectionConfig = {
   id: "about",
   eyebrow: "About",
-  title: "Building software and understanding how it works.",
+  title: "Building robust systems and developer tools from first principles.",
   description:
-    "I enjoy working across software development, algorithms, systems, and developer tooling. My focus is on understanding the fundamentals behind the abstractions I use and turning that knowledge into practical software.",
+    "I specialize in low-level systems programming, version control internals, and developer infrastructure. My engineering philosophy centers on understanding complex abstractions by implementing them from first principles—spanning modern C++20 and full-stack TypeScript architectures.",
 
   focus: [
     {
-      title: "Software Engineering",
+      title: "Systems Programming",
       description:
-        "Designing maintainable applications with clear architecture and thoughtful engineering decisions.",
+        "Building reliable software in modern C++20, focusing on memory safety, cache-conscious data structures, and POSIX system calls.",
     },
     {
-      title: "Algorithms & Data Structures",
+      title: "Developer Infrastructure",
       description:
-        "Studying algorithms and data structures to understand how software solves problems efficiently.",
+        "Designing content-addressable storage, build systems (CMake), and automated cross-platform CI/CD release pipelines.",
     },
     {
-      title: "Developer Tools",
+      title: "Algorithms & Competitive Programming",
       description:
-        "Building tools that improve development workflows and exploring how developer infrastructure works internally.",
+        "LeetCode Guardian (2382 rating, top 0.36% globally) with 715+ algorithmic problems solved across advanced data structures and dynamic programming.",
     },
   ],
 };

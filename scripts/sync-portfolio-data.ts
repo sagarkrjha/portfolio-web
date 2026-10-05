@@ -65,7 +65,7 @@ const ALLOWED_TECH = new Set([
   // Frameworks & key libraries
   "next.js", "nextjs", "react", "node.js", "nodejs", "express",
   "tailwind css", "tailwindcss", "mdx", "vue", "nuxt", "svelte",
-  "fastapi", "django", "flask", "spring", "angular",
+  "fastapi", "django", "flask", "spring", "angular", "electron",
 ]);
 
 const DISPLAY_NAME: Record<string, string> = {
@@ -104,6 +104,7 @@ const DISPLAY_NAME: Record<string, string> = {
   "flask": "Flask",
   "spring": "Spring",
   "angular": "Angular",
+  "electron": "Electron",
 };
 
 function normalizeTechBadge(raw: string): string | null {

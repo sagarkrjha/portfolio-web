@@ -14,6 +14,9 @@ export const Header = () => {
             <Link
               key={item.href}
               href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noreferrer" : undefined}
+              download={typeof item.download === "string" ? item.download : item.download ? true : undefined}
               className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50"
             >
               {item.label}

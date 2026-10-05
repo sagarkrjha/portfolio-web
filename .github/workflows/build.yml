@@ -55,10 +55,21 @@ jobs:
         run: |
           pnpm run sync:data
 
+      - name: Verify Resume PDF Asset
+        run: |
+          test -f public/sagar-resume.pdf || { echo "Resume file public/sagar-resume.pdf missing"; exit 1; }
+
       - name: Run Linter & Build
         run: |
           pnpm run lint || true
           pnpm run build
+
+      - name: Upload Resume as Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sagar-resume
+          path: public/sagar-resume.pdf
+          if-no-files-found: error
 
       - name: Commit & Push updated portfolio data
         # Commit on main after push, schedule, or manual dispatch — skipped on PRs
