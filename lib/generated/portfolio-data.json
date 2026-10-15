@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-14T02:45:37.732Z",
+  "lastUpdated": "2026-10-15T02:24:47.514Z",
   "profile": {
     "role": "Systems & Full-Stack Developer",
     "bio": "Engineer specializing in TypeScript, JavaScript, C++. Architect of minigit (Distributed Version Control System in Modern C++20). Passionate about building high-performance, clean-architecture software and developer tools.",
@@ -87,14 +87,14 @@
         "releases_url": "https://api.github.com/repos/sagarkrjha/portfolio-web/releases{/id}",
         "deployments_url": "https://api.github.com/repos/sagarkrjha/portfolio-web/deployments",
         "created_at": "2026-10-01T09:47:41Z",
-        "updated_at": "2026-10-13T04:36:34Z",
-        "pushed_at": "2026-10-13T04:36:30Z",
+        "updated_at": "2026-10-14T02:45:58Z",
+        "pushed_at": "2026-10-14T02:45:53Z",
         "git_url": "git://github.com/sagarkrjha/portfolio-web.git",
         "ssh_url": "git@github.com:sagarkrjha/portfolio-web.git",
         "clone_url": "https://github.com/sagarkrjha/portfolio-web.git",
         "svn_url": "https://github.com/sagarkrjha/portfolio-web",
         "homepage": "https://sagarkrjha.vercel.app",
-        "size": 825,
+        "size": 826,
         "stargazers_count": 0,
         "watchers_count": 0,
         "language": "TypeScript",
@@ -771,10 +771,10 @@
   },
   "leetcode": {
     "username": "devsagarkrjha",
-    "totalSolved": 710,
-    "easySolved": 204,
-    "mediumSolved": 358,
-    "hardSolved": 148,
-    "totalQuestions": 4069
+    "totalSolved": 722,
+    "easySolved": 208,
+    "mediumSolved": 364,
+    "hardSolved": 150,
+    "totalQuestions": 4082
   }
 }
