@@ -32,12 +32,34 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   };
 }
 
-// Helper to format inline code, bold, italics, math, and links
+// Format LaTeX math expressions cleanly into readable text and symbols
+function formatMathExpression(expr: string): string {
+  return expr
+    .replace(/\\Delta/g, "Δ")
+    .replace(/\\in/g, "∈")
+    .replace(/\\le/g, "≤")
+    .replace(/\\ge/g, "≥")
+    .replace(/\\ll/g, "≪")
+    .replace(/\\gg/g, "≫")
+    .replace(/\\dots/g, "…")
+    .replace(/\\cdots/g, "⋯")
+    .replace(/\\to/g, "→")
+    .replace(/\\times/g, "×")
+    .replace(/\\cdot/g, "·")
+    .replace(/\\{/g, "{")
+    .replace(/\\}/g, "}")
+    .replace(/_\{([^}]+)\}/g, "_$1")
+    .replace(/\^\{([^}]+)\}/g, "^$1");
+}
+
+// Helper to format inline code, bold, italics, math, and links without broken symbols
 function renderInlineFormatted(text: string): React.ReactNode {
-  // Regex to match inline code (`...`), bold (**...**), math ($...$), and italic (*...*)
-  const tokens = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\$[^\$]+\$)/g);
+  // Regex to split on inline code (`...`), bold (**...**), math ($...$), and italic (*...*)
+  const tokens = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\$[^\$]+\$|\*[^*]+\*)/g);
 
   return tokens.map((token, i) => {
+    if (!token) return null;
+
     if (token.startsWith("`") && token.endsWith("`")) {
       return (
         <code
@@ -48,23 +70,35 @@ function renderInlineFormatted(text: string): React.ReactNode {
         </code>
       );
     }
+
     if (token.startsWith("**") && token.endsWith("**")) {
       return (
         <strong key={i} className="font-semibold text-foreground">
-          {token.slice(2, -2)}
+          {renderInlineFormatted(token.slice(2, -2))}
         </strong>
       );
     }
+
+    if (token.startsWith("*") && token.endsWith("*") && token.length > 2) {
+      return (
+        <em key={i} className="italic text-foreground">
+          {token.slice(1, -1)}
+        </em>
+      );
+    }
+
     if (token.startsWith("$") && token.endsWith("$")) {
+      const mathContent = formatMathExpression(token.slice(1, -1));
       return (
         <span
           key={i}
-          className="font-mono text-xs italic bg-muted/40 px-1 py-0.5 rounded text-foreground"
+          className="font-mono text-[13px] bg-muted/50 px-1 py-0.5 rounded text-foreground font-medium border border-border/40"
         >
-          {token.slice(1, -1)}
+          {mathContent}
         </span>
       );
     }
+
     return token;
   });
 }
@@ -115,7 +149,7 @@ function renderMarkdownContent(content: string) {
           if (trimmed.startsWith("# ")) {
             return (
               <h1 key={pIdx} className="text-2xl sm:text-3xl font-bold tracking-tight mt-8 mb-4">
-                {trimmed.replace("# ", "")}
+                {renderInlineFormatted(trimmed.replace("# ", ""))}
               </h1>
             );
           }
@@ -125,7 +159,7 @@ function renderMarkdownContent(content: string) {
                 key={pIdx}
                 className="text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-border pb-2"
               >
-                {trimmed.replace("## ", "")}
+                {renderInlineFormatted(trimmed.replace("## ", ""))}
               </h2>
             );
           }
@@ -135,7 +169,7 @@ function renderMarkdownContent(content: string) {
                 key={pIdx}
                 className="text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2 text-foreground"
               >
-                {trimmed.replace("### ", "")}
+                {renderInlineFormatted(trimmed.replace("### ", ""))}
               </h3>
             );
           }
@@ -145,7 +179,7 @@ function renderMarkdownContent(content: string) {
                 key={pIdx}
                 className="text-base font-semibold tracking-tight mt-4 mb-1 text-foreground"
               >
-                {trimmed.replace("#### ", "")}
+                {renderInlineFormatted(trimmed.replace("#### ", ""))}
               </h4>
             );
           }
@@ -184,12 +218,14 @@ function renderMarkdownContent(content: string) {
 
           // Block math expression ($$...$$)
           if (trimmed.startsWith("$$") && trimmed.endsWith("$$")) {
+            const rawExpr = trimmed.slice(2, -2).trim();
+            const formattedExpr = formatMathExpression(rawExpr);
             return (
               <div
                 key={pIdx}
                 className="my-4 py-3 px-4 rounded-md bg-muted/40 border border-border/40 text-center font-mono text-sm sm:text-base text-foreground overflow-x-auto"
               >
-                {trimmed.slice(2, -2).trim()}
+                {formattedExpr}
               </div>
             );
           }
@@ -227,7 +263,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <span>•</span>
           <span>{post.meta.readTime}</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{post.meta.title}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          {post.meta.title}
+        </h1>
         <div className="flex flex-wrap gap-1.5 mt-4">
           {post.meta.tags.map((tag) => (
             <span
@@ -240,7 +278,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       </div>
 
-      <div className="border-t pt-8 space-y-4">{renderMarkdownContent(post.content)}</div>
+      <div className="border-t pt-8 space-y-4">
+        {renderMarkdownContent(post.content)}
+      </div>
     </article>
   );
 }
