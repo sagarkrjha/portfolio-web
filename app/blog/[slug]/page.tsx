@@ -56,9 +56,9 @@ function formatMathExpression(expr: string): string {
 function renderInlineFormatted(text: string): React.ReactNode {
   // Regex:
   // 1. Inline code: `...`
-  // 2. Inline math: $...$ (non-greedy, strictly between $$ boundaries)
+  // 2. Inline math: $...$ (strictly within $$ boundaries)
   // 3. Bold: **...**
-  // 4. Italic: *...* (must not touch other asterisks)
+  // 4. Italic: *...*
   const tokens = text.split(/(`[^`]+`|\$(?:[^\$\n]+)\$|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+\*(?=\s|$|[.,:;!?]))/g);
 
   return tokens.map((token, i) => {
@@ -138,12 +138,12 @@ function renderMarkdownContent(content: string) {
       );
     }
 
-    // Process normal markdown sections
-    const lines = part.split(/\n\n+/);
+    // Process normal markdown sections by paragraphs
+    const paragraphs = part.split(/\n\n+/);
     return (
       <div key={index} className="space-y-4">
-        {lines.map((paragraph, pIdx) => {
-          const trimmed = paragraph.trim();
+        {paragraphs.map((rawParagraph, pIdx) => {
+          const trimmed = rawParagraph.trim();
           if (!trimmed) return null;
 
           if (trimmed === "---") {
@@ -188,44 +188,6 @@ function renderMarkdownContent(content: string) {
             );
           }
 
-          // Bullet list (starts with "- " or "* ")
-          if (/^[-*]\s/.test(trimmed)) {
-            const items = trimmed
-              .split(/\n(?=[-*]\s)/)
-              .map((i) => i.replace(/^[-*]\s+/, "").trim());
-            return (
-              <ul
-                key={pIdx}
-                className="list-disc list-inside space-y-1.5 text-sm sm:text-base text-muted-foreground my-3 pl-2"
-              >
-                {items.map((it, itIdx) => (
-                  <li key={itIdx} className="leading-relaxed">
-                    {renderInlineFormatted(it)}
-                  </li>
-                ))}
-              </ul>
-            );
-          }
-
-          // Numbered list
-          if (/^\d+\.\s/.test(trimmed)) {
-            const items = trimmed
-              .split(/\n(?=\d+\.\s)/)
-              .map((i) => i.replace(/^\d+\.\s+/, "").trim());
-            return (
-              <ol
-                key={pIdx}
-                className="list-decimal list-inside space-y-1.5 text-sm sm:text-base text-muted-foreground my-3 pl-2"
-              >
-                {items.map((it, itIdx) => (
-                  <li key={itIdx} className="leading-relaxed">
-                    {renderInlineFormatted(it)}
-                  </li>
-                ))}
-              </ol>
-            );
-          }
-
           // Block math expression ($$...$$)
           if (trimmed.startsWith("$$") && trimmed.endsWith("$$")) {
             const rawExpr = trimmed.slice(2, -2).trim();
@@ -236,6 +198,76 @@ function renderMarkdownContent(content: string) {
                 className="my-4 py-3 px-4 rounded-md bg-muted/40 border border-border/40 text-center font-mono text-sm sm:text-base text-foreground overflow-x-auto"
               >
                 {formattedExpr}
+              </div>
+            );
+          }
+
+          // Process line-by-line for structured content (nested lists, numbered steps, bullets, embedded math)
+          const rawLines = trimmed.split("\n");
+          const hasListItems = rawLines.some((l) => /^\s*(\*|-|\d+\.)\s/.test(l));
+
+          if (hasListItems) {
+            return (
+              <div key={pIdx} className="space-y-2 my-3 text-sm sm:text-base text-muted-foreground">
+                {rawLines.map((line, lIdx) => {
+                  const lineTrimmed = line.trim();
+                  if (!lineTrimmed) return null;
+
+                  // Block math within a list block:
+                  if (lineTrimmed.startsWith("$$") && lineTrimmed.endsWith("$$")) {
+                    const rawExpr = lineTrimmed.slice(2, -2).trim();
+                    const formattedExpr = formatMathExpression(rawExpr);
+                    return (
+                      <div
+                        key={lIdx}
+                        className="my-2 py-2 px-3 rounded-md bg-muted/50 border border-border/40 text-center font-mono text-sm sm:text-base text-foreground overflow-x-auto mx-4"
+                      >
+                        {formattedExpr}
+                      </div>
+                    );
+                  }
+
+                  const isSubItem = /^\s{4,}/.test(line) || /^\t+/.test(line);
+                  const isBullet = /^\s*[-*]\s/.test(line);
+                  const isNumbered = /^\s*\d+\.\s/.test(line);
+
+                  if (isNumbered) {
+                    const cleanText = lineTrimmed.replace(/^\d+\.\s+/, "");
+                    return (
+                      <div key={lIdx} className="flex items-start gap-2 pt-2 first:pt-0">
+                        <span className="font-semibold text-foreground shrink-0 select-none">
+                          {lineTrimmed.match(/^\d+\./)?.[0]}
+                        </span>
+                        <div className="leading-relaxed flex-1">
+                          {renderInlineFormatted(cleanText)}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (isBullet) {
+                    const cleanText = lineTrimmed.replace(/^[-*]\s+/, "");
+                    return (
+                      <div
+                        key={lIdx}
+                        className={`flex items-start gap-2 leading-relaxed ${
+                          isSubItem ? "pl-8 text-muted-foreground/90" : "pl-4"
+                        }`}
+                      >
+                        <span className="text-primary/70 shrink-0 select-none mt-1">
+                          {isSubItem ? "◦" : "•"}
+                        </span>
+                        <div className="flex-1">{renderInlineFormatted(cleanText)}</div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={lIdx} className="leading-relaxed pl-8">
+                      {renderInlineFormatted(lineTrimmed)}
+                    </div>
+                  );
+                })}
               </div>
             );
           }

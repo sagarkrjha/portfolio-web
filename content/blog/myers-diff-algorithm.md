@@ -74,6 +74,7 @@ Myers observed that progress can be tracked along diagonal lines defined by:
 $$k = x - y$$
 
 Key algebraic properties of $k$:
+
 * Moving horizontally (deletion) moves to $(x + 1, y)$:
   $$(x + 1) - y = k + 1$$
   Moving right increases $k$ by 1.
@@ -219,6 +220,7 @@ Function Backtrack(History, Sequence A, Sequence B, Distance D):
 ## Complexity Analysis
 
 The standard Myers algorithm runs in:
+
 * **Time**: $O(N \cdot D)$, where $N$ is sequence length and $D$ is the edit distance.
 * **Space**: $O(D^2)$ to store frontier states across all rounds for backtracking.
 
@@ -243,15 +245,18 @@ Reverse Search (N,M)  <======= /
 1. **Simultaneous Search**:
    * Run a forward search from $(0, 0)$ computing the furthest-reaching points.
    * Run a reverse search backward from $(N, M)$ computing the furthest-reaching points from the opposite end.
+
 2. **Find the Middle Snake**:
    * Let $\Delta = N - M$.
    * An overlap occurs when the forward frontier on diagonal $k$ meets or crosses the reverse frontier on diagonal $\Delta - k$.
    * This intersection identifies the exact midpoint $(x_{mid}, y_{mid})$ of the optimal path.
+
 3. **Divide and Conquer**:
    * Split the problem into two smaller subproblems:
      * Upper-left rectangle: from $(0, 0)$ to $(x_{mid}, y_{mid})$.
      * Lower-right rectangle: from $(x_{mid}, y_{mid})$ to $(N, M)$.
    * Recursively diff each half.
+
 4. **Memory Advantage**:
    * Only the current forward and reverse frontiers need to be kept in memory during the search.
    * Space complexity drops from $O(D^2)$ to $O(N + M)$ strictly linear space.
