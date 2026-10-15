@@ -9,10 +9,7 @@ import { getPortfolioProjects, deriveProfileFromProjects } from "@/lib/services/
 import { getLeetCodeStats } from "@/lib/services/leetcode";
 
 export default async function HomePage() {
-  const [projects, leetCodeStats] = await Promise.all([
-    getPortfolioProjects(),
-    getLeetCodeStats(),
-  ]);
+  const [projects, leetCodeStats] = await Promise.all([getPortfolioProjects(), getLeetCodeStats()]);
 
   const metrics = deriveProfileFromProjects(projects);
 

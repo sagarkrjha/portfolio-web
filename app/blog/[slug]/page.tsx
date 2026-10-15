@@ -57,7 +57,10 @@ function renderInlineFormatted(text: string): React.ReactNode {
     }
     if (token.startsWith("$") && token.endsWith("$")) {
       return (
-        <span key={i} className="font-mono text-xs italic bg-muted/40 px-1 py-0.5 rounded text-foreground">
+        <span
+          key={i}
+          className="font-mono text-xs italic bg-muted/40 px-1 py-0.5 rounded text-foreground"
+        >
           {token.slice(1, -1)}
         </span>
       );
@@ -118,21 +121,30 @@ function renderMarkdownContent(content: string) {
           }
           if (trimmed.startsWith("## ")) {
             return (
-              <h2 key={pIdx} className="text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-border pb-2">
+              <h2
+                key={pIdx}
+                className="text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-border pb-2"
+              >
                 {trimmed.replace("## ", "")}
               </h2>
             );
           }
           if (trimmed.startsWith("### ")) {
             return (
-              <h3 key={pIdx} className="text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2 text-foreground">
+              <h3
+                key={pIdx}
+                className="text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2 text-foreground"
+              >
                 {trimmed.replace("### ", "")}
               </h3>
             );
           }
           if (trimmed.startsWith("#### ")) {
             return (
-              <h4 key={pIdx} className="text-base font-semibold tracking-tight mt-4 mb-1 text-foreground">
+              <h4
+                key={pIdx}
+                className="text-base font-semibold tracking-tight mt-4 mb-1 text-foreground"
+              >
                 {trimmed.replace("#### ", "")}
               </h4>
             );
@@ -140,7 +152,10 @@ function renderMarkdownContent(content: string) {
           if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
             const items = trimmed.split("\n").map((i) => i.replace(/^[-*]\s+/, ""));
             return (
-              <ul key={pIdx} className="list-disc list-inside space-y-1.5 text-sm sm:text-base text-muted-foreground my-3 pl-2">
+              <ul
+                key={pIdx}
+                className="list-disc list-inside space-y-1.5 text-sm sm:text-base text-muted-foreground my-3 pl-2"
+              >
                 {items.map((it, itIdx) => (
                   <li key={itIdx} className="leading-relaxed">
                     {renderInlineFormatted(it)}
@@ -154,7 +169,10 @@ function renderMarkdownContent(content: string) {
           if (/^\d+\.\s/.test(trimmed)) {
             const items = trimmed.split("\n").map((i) => i.replace(/^\d+\.\s+/, ""));
             return (
-              <ol key={pIdx} className="list-decimal list-inside space-y-1.5 text-sm sm:text-base text-muted-foreground my-3 pl-2">
+              <ol
+                key={pIdx}
+                className="list-decimal list-inside space-y-1.5 text-sm sm:text-base text-muted-foreground my-3 pl-2"
+              >
                 {items.map((it, itIdx) => (
                   <li key={itIdx} className="leading-relaxed">
                     {renderInlineFormatted(it)}
@@ -209,9 +227,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <span>•</span>
           <span>{post.meta.readTime}</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          {post.meta.title}
-        </h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{post.meta.title}</h1>
         <div className="flex flex-wrap gap-1.5 mt-4">
           {post.meta.tags.map((tag) => (
             <span
@@ -224,9 +240,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       </div>
 
-      <div className="border-t pt-8 space-y-4">
-        {renderMarkdownContent(post.content)}
-      </div>
+      <div className="border-t pt-8 space-y-4">{renderMarkdownContent(post.content)}</div>
     </article>
   );
 }

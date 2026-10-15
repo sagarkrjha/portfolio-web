@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { SiGithub, SiLeetcode, SiX, SiDiscord, SiInstagram } from "react-icons/si";
 import {
-  SiGithub,
-  SiLeetcode,
-  SiX,
-  SiDiscord,
-  SiInstagram,
-} from "react-icons/si";
-import { FiMail, FiLinkedin, FiGlobe, FiDownload, FiExternalLink, FiArrowRight } from "react-icons/fi";
+  FiMail,
+  FiLinkedin,
+  FiGlobe,
+  FiDownload,
+  FiExternalLink,
+  FiArrowRight,
+} from "react-icons/fi";
 
 import { Button } from "@/components/ui/button";
 import { heroConfig, siteConfig } from "@/lib/config";
@@ -78,10 +79,7 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
         </h1>
 
         <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          <strong className="font-semibold text-foreground">
-            {displayRole}
-          </strong>{" "}
-          — {displayBio}
+          <strong className="font-semibold text-foreground">{displayRole}</strong> — {displayBio}
         </p>
 
         {/* Live Dynamic Status Cards Grid */}
@@ -93,9 +91,7 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
             <span className="text-lg font-bold tracking-tight text-foreground">
               {metrics ? metrics.totalRepos : (siteConfig.github.repositoryCount ?? 4)}
             </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">
-              Live GitHub sync
-            </span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">Live GitHub sync</span>
           </div>
 
           <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
@@ -103,11 +99,11 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
               Algorithmic Problems
             </span>
             <span className="text-lg font-bold tracking-tight text-foreground">
-              {leetCodeStats ? `${leetCodeStats.totalSolved}+` : `${cachedData.leetcode?.totalSolved ?? 710}+`}
+              {leetCodeStats
+                ? `${leetCodeStats.totalSolved}+`
+                : `${cachedData.leetcode?.totalSolved ?? 710}+`}
             </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">
-              LeetCode solved
-            </span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">LeetCode solved</span>
           </div>
 
           <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
@@ -119,9 +115,7 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
                 ? metrics.primaryLanguages.slice(0, 3).join(", ")
                 : (siteConfig.statusCards?.coreLanguagesFallback ?? "C++, TypeScript")}
             </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">
-              Systems & Web
-            </span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">Systems & Web</span>
           </div>
 
           <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
@@ -147,10 +141,10 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
                 act.icon === "resume"
                   ? FiDownload
                   : act.icon === "arrow"
-                  ? FiArrowRight
-                  : act.external && !act.download
-                  ? FiExternalLink
-                  : null;
+                    ? FiArrowRight
+                    : act.external && !act.download
+                      ? FiExternalLink
+                      : null;
 
               return (
                 <Button
@@ -164,7 +158,13 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
                     href={act.href}
                     target={act.external ? "_blank" : undefined}
                     rel={act.external ? "noreferrer" : undefined}
-                    download={typeof act.download === "string" ? act.download : act.download ? true : undefined}
+                    download={
+                      typeof act.download === "string"
+                        ? act.download
+                        : act.download
+                          ? true
+                          : undefined
+                    }
                   >
                     {Icon ? <Icon className="mr-1.5 size-3.5" /> : null}
                     {act.label}

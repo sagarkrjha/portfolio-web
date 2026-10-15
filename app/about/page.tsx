@@ -1,19 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  FiCode,
-  FiBriefcase,
-  FiMail,
-  FiLinkedin,
-} from "react-icons/fi";
+import { FiCode, FiBriefcase, FiMail, FiLinkedin } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
-import {
-  SiGithub,
-  SiLeetcode,
-  SiX,
-  SiDiscord,
-  SiInstagram,
-} from "react-icons/si";
+import { SiGithub, SiLeetcode, SiX, SiDiscord, SiInstagram } from "react-icons/si";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -22,7 +11,8 @@ import { getPortfolioProjects, deriveProfileFromProjects } from "@/lib/services/
 
 export const metadata: Metadata = {
   title: "About | Sagar Kumar Jha",
-  description: "Learn more about Sagar Kumar Jha, software engineering focus, experience journey, skills, and interests.",
+  description:
+    "Learn more about Sagar Kumar Jha, software engineering focus, experience journey, skills, and interests.",
 };
 
 export default async function AboutPage() {
@@ -35,16 +25,10 @@ export default async function AboutPage() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Badge variant="outline">About Me</Badge>
-          <span className="text-xs text-muted-foreground font-mono">
-            {metrics.role}
-          </span>
+          <span className="text-xs text-muted-foreground font-mono">{metrics.role}</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          {aboutConfig.title}
-        </h1>
-        <p className="mt-4 text-base leading-7 text-muted-foreground">
-          {metrics.bio}
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{aboutConfig.title}</h1>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">{metrics.bio}</p>
 
         {/* Social / Professional links */}
         <div className="flex flex-wrap items-center gap-3 mt-6">
@@ -80,9 +64,7 @@ export default async function AboutPage() {
 
       {/* Focus & Engineering */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight mb-6">
-          Core Engineering Focus
-        </h2>
+        <h2 className="text-xl font-semibold tracking-tight mb-6">Core Engineering Focus</h2>
         <div className="grid gap-6 sm:grid-cols-3">
           {aboutConfig.focus.map((item) => (
             <div key={item.title} className="p-4 rounded-lg border bg-muted/20">
@@ -90,9 +72,7 @@ export default async function AboutPage() {
                 <FiCode className="size-4" />
               </div>
               <h3 className="font-medium text-sm">{item.title}</h3>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                {item.description}
-              </p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.description}</p>
             </div>
           ))}
         </div>
@@ -100,9 +80,7 @@ export default async function AboutPage() {
 
       {/* Skills & Technologies */}
       <div className="mt-14">
-        <h2 className="text-xl font-semibold tracking-tight mb-6">
-          Technologies & Skills
-        </h2>
+        <h2 className="text-xl font-semibold tracking-tight mb-6">Technologies & Skills</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {siteConfig.skills.map((category) => (
             <div key={category.title} className="border rounded-lg p-4 bg-muted/10">
@@ -135,7 +113,9 @@ export default async function AboutPage() {
           {siteConfig.experience.map((exp) => (
             <div key={exp.company} className="border-l-2 border-primary/40 pl-4 py-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                <span className="text-sm font-semibold">{exp.role} · {exp.company}</span>
+                <span className="text-sm font-semibold">
+                  {exp.role} · {exp.company}
+                </span>
                 <span className="text-xs text-muted-foreground">{exp.period}</span>
               </div>
               <ul className="mt-3 text-xs text-muted-foreground space-y-1.5 list-disc list-inside">
@@ -146,7 +126,10 @@ export default async function AboutPage() {
               {exp.technologies && (
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {exp.technologies.map((t) => (
-                    <span key={t} className="text-[11px] bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                    <span
+                      key={t}
+                      className="text-[11px] bg-muted px-2 py-0.5 rounded text-muted-foreground"
+                    >
                       {t}
                     </span>
                   ))}

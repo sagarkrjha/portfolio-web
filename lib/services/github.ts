@@ -34,51 +34,80 @@ export interface MergedProject {
 
 const ALLOWED_TECH = new Set([
   // Languages
-  "typescript", "javascript", "c++", "c++20", "c", "python",
-  "rust", "go", "java", "html", "css", "bash", "shell", "ruby", "kotlin", "swift",
+  "typescript",
+  "javascript",
+  "c++",
+  "c++20",
+  "c",
+  "python",
+  "rust",
+  "go",
+  "java",
+  "html",
+  "css",
+  "bash",
+  "shell",
+  "ruby",
+  "kotlin",
+  "swift",
   // Frameworks & key libraries
-  "next.js", "nextjs", "react", "node.js", "nodejs", "express",
-  "tailwind css", "tailwindcss", "mdx", "vue", "nuxt", "svelte",
-  "fastapi", "django", "flask", "spring", "angular", "electron",
+  "next.js",
+  "nextjs",
+  "react",
+  "node.js",
+  "nodejs",
+  "express",
+  "tailwind css",
+  "tailwindcss",
+  "mdx",
+  "vue",
+  "nuxt",
+  "svelte",
+  "fastapi",
+  "django",
+  "flask",
+  "spring",
+  "angular",
+  "electron",
 ]);
 
 const DISPLAY_NAME: Record<string, string> = {
-  "typescript": "TypeScript",
-  "javascript": "JavaScript",
+  typescript: "TypeScript",
+  javascript: "JavaScript",
   "c++": "C++",
   "c++20": "C++20",
-  "cpp": "C++",
-  "cpp20": "C++20",
-  "c": "C",
-  "python": "Python",
-  "rust": "Rust",
-  "go": "Go",
-  "java": "Java",
-  "html": "HTML",
-  "css": "CSS",
-  "bash": "Bash",
-  "shell": "Shell",
-  "ruby": "Ruby",
-  "kotlin": "Kotlin",
-  "swift": "Swift",
+  cpp: "C++",
+  cpp20: "C++20",
+  c: "C",
+  python: "Python",
+  rust: "Rust",
+  go: "Go",
+  java: "Java",
+  html: "HTML",
+  css: "CSS",
+  bash: "Bash",
+  shell: "Shell",
+  ruby: "Ruby",
+  kotlin: "Kotlin",
+  swift: "Swift",
   "next.js": "Next.js",
-  "nextjs": "Next.js",
-  "react": "React",
+  nextjs: "Next.js",
+  react: "React",
   "node.js": "Node.js",
-  "nodejs": "Node.js",
-  "express": "Express",
+  nodejs: "Node.js",
+  express: "Express",
   "tailwind css": "Tailwind CSS",
-  "tailwindcss": "Tailwind CSS",
-  "mdx": "MDX",
-  "vue": "Vue",
-  "nuxt": "Nuxt",
-  "svelte": "Svelte",
-  "fastapi": "FastAPI",
-  "django": "Django",
-  "flask": "Flask",
-  "spring": "Spring",
-  "angular": "Angular",
-  "electron": "Electron",
+  tailwindcss: "Tailwind CSS",
+  mdx: "MDX",
+  vue: "Vue",
+  nuxt: "Nuxt",
+  svelte: "Svelte",
+  fastapi: "FastAPI",
+  django: "Django",
+  flask: "Flask",
+  spring: "Spring",
+  angular: "Angular",
+  electron: "Electron",
 };
 
 /** Returns the display name for a tech if it's a language/framework, or null to skip it. */
@@ -115,7 +144,7 @@ export async function fetchGitHubRepos(username: string): Promise<GitHubRepo[]> 
           "User-Agent": "portfolio-web-app",
         },
         signal: AbortSignal.timeout(6000),
-      }
+      },
     );
 
     if (res.ok) {
@@ -146,7 +175,7 @@ export async function fetchGitHubPinnedRepos(username: string): Promise<string[]
       const html = await res.text();
       // Matches GitHub profile pinned repositories
       const matches = [...html.matchAll(/PINNED_REPO[\s\S]*?href=["']\/[^/]+\/([^"'/]+)["']/g)].map(
-        (m) => m[1]
+        (m) => m[1],
       );
       if (matches.length > 0) {
         return matches;
@@ -172,15 +201,16 @@ export async function getPortfolioProjects(): Promise<MergedProject[]> {
 
   // Map of optional local configuration to enhance repository information
   const configuredMap = new Map(
-    siteConfig.featuredProjects.map((proj) => [proj.repoName.toLowerCase(), proj])
+    siteConfig.featuredProjects.map((proj) => [proj.repoName.toLowerCase(), proj]),
   );
 
   const mergedProjects: MergedProject[] = [];
 
   // Pre-computed badge map from sync script (workflow-generated, authoritative)
   const cachedBadgeMap = new Map<string, string[]>(
-    (cachedData.github as { repoBadges?: { name: string; techStack: string[] }[] })
-      .repoBadges?.map((b) => [b.name.toLowerCase(), b.techStack]) ?? []
+    (cachedData.github as { repoBadges?: { name: string; techStack: string[] }[] }).repoBadges?.map(
+      (b) => [b.name.toLowerCase(), b.techStack],
+    ) ?? [],
   );
 
   for (const repo of repos) {
@@ -278,10 +308,12 @@ export function deriveProfileFromProjects(projects: MergedProject[]): DynamicPro
 
   // Derive specialized role based on project tech stack
   const hasSystems = sortedTech.some((t) =>
-    ["c++", "c++20", "rust", "go", "c"].includes(t.toLowerCase())
+    ["c++", "c++20", "rust", "go", "c"].includes(t.toLowerCase()),
   );
   const hasWeb = sortedTech.some((t) =>
-    ["typescript", "javascript", "react", "next.js", "tailwind css", "node.js"].includes(t.toLowerCase())
+    ["typescript", "javascript", "react", "next.js", "tailwind css", "node.js"].includes(
+      t.toLowerCase(),
+    ),
   );
 
   let derivedRole = siteConfig.role;

@@ -60,51 +60,80 @@ interface GeneratedPortfolioData {
 
 const ALLOWED_TECH = new Set([
   // Languages
-  "typescript", "javascript", "c++", "c++20", "c", "python",
-  "rust", "go", "java", "html", "css", "bash", "shell", "ruby", "kotlin", "swift",
+  "typescript",
+  "javascript",
+  "c++",
+  "c++20",
+  "c",
+  "python",
+  "rust",
+  "go",
+  "java",
+  "html",
+  "css",
+  "bash",
+  "shell",
+  "ruby",
+  "kotlin",
+  "swift",
   // Frameworks & key libraries
-  "next.js", "nextjs", "react", "node.js", "nodejs", "express",
-  "tailwind css", "tailwindcss", "mdx", "vue", "nuxt", "svelte",
-  "fastapi", "django", "flask", "spring", "angular", "electron",
+  "next.js",
+  "nextjs",
+  "react",
+  "node.js",
+  "nodejs",
+  "express",
+  "tailwind css",
+  "tailwindcss",
+  "mdx",
+  "vue",
+  "nuxt",
+  "svelte",
+  "fastapi",
+  "django",
+  "flask",
+  "spring",
+  "angular",
+  "electron",
 ]);
 
 const DISPLAY_NAME: Record<string, string> = {
-  "typescript": "TypeScript",
-  "javascript": "JavaScript",
+  typescript: "TypeScript",
+  javascript: "JavaScript",
   "c++": "C++",
   "c++20": "C++20",
-  "cpp": "C++",
-  "cpp20": "C++20",
-  "c": "C",
-  "python": "Python",
-  "rust": "Rust",
-  "go": "Go",
-  "java": "Java",
-  "html": "HTML",
-  "css": "CSS",
-  "bash": "Bash",
-  "shell": "Shell",
-  "ruby": "Ruby",
-  "kotlin": "Kotlin",
-  "swift": "Swift",
+  cpp: "C++",
+  cpp20: "C++20",
+  c: "C",
+  python: "Python",
+  rust: "Rust",
+  go: "Go",
+  java: "Java",
+  html: "HTML",
+  css: "CSS",
+  bash: "Bash",
+  shell: "Shell",
+  ruby: "Ruby",
+  kotlin: "Kotlin",
+  swift: "Swift",
   "next.js": "Next.js",
-  "nextjs": "Next.js",
-  "react": "React",
+  nextjs: "Next.js",
+  react: "React",
   "node.js": "Node.js",
-  "nodejs": "Node.js",
-  "express": "Express",
+  nodejs: "Node.js",
+  express: "Express",
   "tailwind css": "Tailwind CSS",
-  "tailwindcss": "Tailwind CSS",
-  "mdx": "MDX",
-  "vue": "Vue",
-  "nuxt": "Nuxt",
-  "svelte": "Svelte",
-  "fastapi": "FastAPI",
-  "django": "Django",
-  "flask": "Flask",
-  "spring": "Spring",
-  "angular": "Angular",
-  "electron": "Electron",
+  tailwindcss: "Tailwind CSS",
+  mdx: "MDX",
+  vue: "Vue",
+  nuxt: "Nuxt",
+  svelte: "Svelte",
+  fastapi: "FastAPI",
+  django: "Django",
+  flask: "Flask",
+  spring: "Spring",
+  angular: "Angular",
+  electron: "Electron",
 };
 
 function normalizeTechBadge(raw: string): string | null {
@@ -119,7 +148,7 @@ function normalizeTechBadge(raw: string): string | null {
  */
 function computeRepoBadges(
   repos: GitHubRepo[],
-  configuredMap: Map<string, { techStack: string[] }>
+  configuredMap: Map<string, { techStack: string[] }>,
 ): RepoBadge[] {
   return repos
     .filter((r) => !r.fork)
@@ -130,8 +159,8 @@ function computeRepoBadges(
       const rawTech: string[] = configured?.techStack?.length
         ? [...configured.techStack]
         : repo.language
-        ? [repo.language]
-        : [];
+          ? [repo.language]
+          : [];
 
       const techStack: string[] = [];
       for (const t of rawTech) {
@@ -172,7 +201,7 @@ async function fetchRealGitHubData() {
   try {
     let res = await fetch(
       `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
-      { headers }
+      { headers },
     );
     if (!res.ok && headers.Authorization) {
       console.warn(`[GitHub] API returned ${res.status} with token, retrying unauthenticated...`);
@@ -183,7 +212,7 @@ async function fetchRealGitHubData() {
             Accept: "application/vnd.github.v3+json",
             "User-Agent": "portfolio-updater-script",
           },
-        }
+        },
       );
     }
     if (res.ok) {
@@ -205,7 +234,7 @@ async function fetchRealGitHubData() {
     if (profileRes.ok) {
       const html = await profileRes.text();
       const matches = [...html.matchAll(/PINNED_REPO[\s\S]*?href=["']\/[^/]+\/([^"'/]+)["']/g)].map(
-        (m) => m[1]
+        (m) => m[1],
       );
       if (matches.length > 0) {
         pinnedRepos = matches;
@@ -240,7 +269,7 @@ async function fetchRealLeetCodeData(): Promise<LeetCodeStats> {
       {
         headers: { "User-Agent": "portfolio-updater-script" },
         signal: AbortSignal.timeout(8000),
-      }
+      },
     );
     if (res.ok) {
       const data = await res.json();
@@ -253,7 +282,9 @@ async function fetchRealLeetCodeData(): Promise<LeetCodeStats> {
           hardSolved: data.hardSolved ?? fallback.hardSolved,
           totalQuestions: data.totalQuestions ?? fallback.totalQuestions,
         };
-        console.log(`[LeetCode] Fetched: ${stats.totalSolved} solved (E:${stats.easySolved} M:${stats.mediumSolved} H:${stats.hardSolved})`);
+        console.log(
+          `[LeetCode] Fetched: ${stats.totalSolved} solved (E:${stats.easySolved} M:${stats.mediumSolved} H:${stats.hardSolved})`,
+        );
         return stats;
       }
     }
@@ -271,13 +302,15 @@ function deriveProfile(
   repos: GitHubRepo[],
   pinnedRepos: string[],
   totalStars: number,
-  primaryLanguages: string[]
+  primaryLanguages: string[],
 ): DynamicProfileMetrics {
   const hasSystems = primaryLanguages.some((t) =>
-    ["c++", "c++20", "rust", "go", "c"].includes(t.toLowerCase())
+    ["c++", "c++20", "rust", "go", "c"].includes(t.toLowerCase()),
   );
   const hasWeb = primaryLanguages.some((t) =>
-    ["typescript", "javascript", "react", "next.js", "tailwind css", "node.js"].includes(t.toLowerCase())
+    ["typescript", "javascript", "react", "next.js", "tailwind css", "node.js"].includes(
+      t.toLowerCase(),
+    ),
   );
 
   let derivedRole = siteConfig.role ?? "Software Developer";
@@ -330,7 +363,9 @@ async function main() {
   if (fs.existsSync(generatedFilePath)) {
     try {
       existingData = JSON.parse(fs.readFileSync(generatedFilePath, "utf-8"));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   const finalRepos = repos.length > 0 ? repos : (existingData.github?.repos ?? []);
@@ -359,7 +394,7 @@ async function main() {
 
   // ── Compute per-repo badge techStack ──────────────────────────────────────
   const configuredMap = new Map(
-    siteConfig.featuredProjects.map((p) => [p.repoName.toLowerCase(), p])
+    siteConfig.featuredProjects.map((p) => [p.repoName.toLowerCase(), p]),
   );
   const repoBadges = computeRepoBadges(finalRepos, configuredMap);
 
@@ -383,10 +418,14 @@ async function main() {
   console.log(`\n✓ portfolio-data.json updated at ${payload.lastUpdated}`);
   console.log(`  Role:       ${profile.role}`);
   console.log(`  Languages:  ${primaryLanguages.join(", ")}`);
-  console.log(`  Repos:      ${finalRepos.length} (${finalRepos.filter((r) => !r.fork).length} non-fork)`);
+  console.log(
+    `  Repos:      ${finalRepos.length} (${finalRepos.filter((r) => !r.fork).length} non-fork)`,
+  );
   console.log(`  Stars:      ${totalStars}`);
   console.log(`  Pinned:     ${finalPinned.join(", ")}`);
-  console.log(`  LeetCode:   ${leetCodeStats.totalSolved} solved (E:${leetCodeStats.easySolved} M:${leetCodeStats.mediumSolved} H:${leetCodeStats.hardSolved})`);
+  console.log(
+    `  LeetCode:   ${leetCodeStats.totalSolved} solved (E:${leetCodeStats.easySolved} M:${leetCodeStats.mediumSolved} H:${leetCodeStats.hardSolved})`,
+  );
   console.log(`  Badges:`);
   for (const b of repoBadges) {
     console.log(`    ${b.name}: [${b.techStack.join(", ")}]`);

@@ -32,7 +32,9 @@ class LocalBlogProvider implements BlogDataSource {
       return [];
     }
 
-    const files = fs.readdirSync(LOCAL_BLOG_DIR).filter((f) => f.endsWith(".md") || f.endsWith(".mdx"));
+    const files = fs
+      .readdirSync(LOCAL_BLOG_DIR)
+      .filter((f) => f.endsWith(".md") || f.endsWith(".mdx"));
     const posts: BlogPostMeta[] = [];
 
     for (const filename of files) {
@@ -96,7 +98,10 @@ class LocalBlogProvider implements BlogDataSource {
     for (const line of str.split("\n")) {
       const [key, ...rest] = line.split(":");
       if (key && rest.length > 0) {
-        const val = rest.join(":").trim().replace(/^['"](.*)['"]$/, "$1");
+        const val = rest
+          .join(":")
+          .trim()
+          .replace(/^['"](.*)['"]$/, "$1");
         if (key.trim() === "tags") {
           data.tags = val
             .replace(/[\[\]]/g, "")

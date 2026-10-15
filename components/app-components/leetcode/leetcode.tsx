@@ -29,7 +29,8 @@ export const LeetCodeSection = ({ stats }: LeetCodeSectionProps) => {
             {sectionConfig?.title ?? "Competitive Programming & Problem Solving"}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground max-w-xl">
-            {sectionConfig?.description ?? "Live metrics, contest rating, and algorithmic mastery across data structures and complex algorithms."}
+            {sectionConfig?.description ??
+              "Live metrics, contest rating, and algorithmic mastery across data structures and complex algorithms."}
           </p>
         </div>
 
@@ -45,52 +46,50 @@ export const LeetCodeSection = ({ stats }: LeetCodeSectionProps) => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <FiCheckCircle className="size-4" />
-                <span className="text-xs">Total Solved</span>
-              </div>
-              <p className="text-2xl font-bold tracking-tight">
-                {stats?.totalSolved ?? "Active"}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                {stats ? `out of ${stats.totalQuestions}` : "Continuous practice"}
-              </p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-emerald-500 mb-1">
-                <FiTarget className="size-4" />
-                <span className="text-xs font-medium text-foreground">Easy</span>
-              </div>
-              <p className="text-2xl font-bold text-emerald-500 tracking-tight">
-                {stats?.easySolved ?? "—"}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">Fundamental patterns</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-amber-500 mb-1">
-                <FiTarget className="size-4" />
-                <span className="text-xs font-medium text-foreground">Medium</span>
-              </div>
-              <p className="text-2xl font-bold text-amber-500 tracking-tight">
-                {stats?.mediumSolved ?? "—"}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">Core interview problems</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-red-500 mb-1">
-                <FiAward className="size-4" />
-                <span className="text-xs font-medium text-foreground">Hard</span>
-              </div>
-              <p className="text-2xl font-bold text-red-500 tracking-tight">
-                {stats?.hardSolved ?? "—"}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">Advanced algorithms</p>
-            </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <FiCheckCircle className="size-4" />
+            <span className="text-xs">Total Solved</span>
           </div>
+          <p className="text-2xl font-bold tracking-tight">{stats?.totalSolved ?? "Active"}</p>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            {stats ? `out of ${stats.totalQuestions}` : "Continuous practice"}
+          </p>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-emerald-500 mb-1">
+            <FiTarget className="size-4" />
+            <span className="text-xs font-medium text-foreground">Easy</span>
+          </div>
+          <p className="text-2xl font-bold text-emerald-500 tracking-tight">
+            {stats?.easySolved ?? "—"}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-1">Fundamental patterns</p>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-amber-500 mb-1">
+            <FiTarget className="size-4" />
+            <span className="text-xs font-medium text-foreground">Medium</span>
+          </div>
+          <p className="text-2xl font-bold text-amber-500 tracking-tight">
+            {stats?.mediumSolved ?? "—"}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-1">Core interview problems</p>
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-red-500 mb-1">
+            <FiAward className="size-4" />
+            <span className="text-xs font-medium text-foreground">Hard</span>
+          </div>
+          <p className="text-2xl font-bold text-red-500 tracking-tight">
+            {stats?.hardSolved ?? "—"}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-1">Advanced algorithms</p>
+        </Card>
+      </div>
     </section>
   );
 };

@@ -4,7 +4,8 @@ import { getPortfolioProjects } from "@/lib/services/github";
 
 export const metadata: Metadata = {
   title: "Projects | Sagar Kumar Jha",
-  description: "All open-source projects, tools, libraries, and experiments sourced directly from GitHub.",
+  description:
+    "All open-source projects, tools, libraries, and experiments sourced directly from GitHub.",
 };
 
 export default async function ProjectsPage() {

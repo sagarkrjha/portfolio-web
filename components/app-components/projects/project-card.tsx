@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { FiGithub, FiExternalLink, FiStar, FiGitBranch } from "react-icons/fi";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { MergedProject } from "@/lib/services/github";
@@ -14,11 +21,12 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
     <Card className="flex flex-col justify-between transition-all hover:border-foreground/30 hover:shadow-sm">
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base font-semibold leading-snug">
-            {project.title}
-          </CardTitle>
+          <CardTitle className="text-base font-semibold leading-snug">{project.title}</CardTitle>
           {project.featured && (
-            <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider shrink-0">
+            <Badge
+              variant="secondary"
+              className="text-[10px] uppercase font-bold tracking-wider shrink-0"
+            >
               Featured
             </Badge>
           )}

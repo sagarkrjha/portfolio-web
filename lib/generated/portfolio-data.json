@@ -5,19 +5,12 @@
     "bio": "Engineer specializing in TypeScript, JavaScript, C++. Architect of codeshelf (Developer-focused snippet knowledge system — capture, organize and reuse code across desktop, VS Code, and web. AI autofill, version history, and Markdown-first editor.). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 5,
     "totalStars": 15,
-    "primaryLanguages": [
-      "TypeScript",
-      "JavaScript",
-      "C++"
-    ],
+    "primaryLanguages": ["TypeScript", "JavaScript", "C++"],
     "activeProjectsCount": 2
   },
   "github": {
     "username": "sagarkrjha",
-    "pinnedRepos": [
-      "minigit",
-      "codeshelf"
-    ],
+    "pinnedRepos": ["minigit", "codeshelf"],
     "repos": [
       {
         "id": 1399684059,
@@ -732,40 +725,23 @@
     "repoBadges": [
       {
         "name": "portfolio-web",
-        "techStack": [
-          "Next.js",
-          "TypeScript",
-          "Tailwind CSS"
-        ]
+        "techStack": ["Next.js", "TypeScript", "Tailwind CSS"]
       },
       {
         "name": "codeshelf",
-        "techStack": [
-          "TypeScript",
-          "React",
-          "Electron"
-        ]
+        "techStack": ["TypeScript", "React", "Electron"]
       },
       {
         "name": "sagarkrjha",
-        "techStack": [
-          "JavaScript"
-        ]
+        "techStack": ["JavaScript"]
       },
       {
         "name": "minigit",
-        "techStack": [
-          "C++",
-          "C++20"
-        ]
+        "techStack": ["C++", "C++20"]
       },
       {
         "name": "next-mdx-starter",
-        "techStack": [
-          "Next.js",
-          "TypeScript",
-          "Tailwind CSS"
-        ]
+        "techStack": ["Next.js", "TypeScript", "Tailwind CSS"]
       }
     ]
   },

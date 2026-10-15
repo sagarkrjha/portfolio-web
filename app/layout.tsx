@@ -48,6 +48,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Foxy />
         </ThemeProvider>
       </body>
-    </html >
+    </html>
   );
 }

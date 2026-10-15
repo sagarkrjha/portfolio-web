@@ -16,11 +16,10 @@ export default async function BlogIndexPage() {
         <Badge variant="outline" className="mb-4">
           Writings & Thoughts
         </Badge>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Technical Articles
-        </h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Technical Articles</h1>
         <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-          Writings and notes on software engineering, computer science fundamentals, system design, and developer tools.
+          Writings and notes on software engineering, computer science fundamentals, system design,
+          and developer tools.
         </p>
       </div>
 
@@ -37,9 +36,7 @@ export default async function BlogIndexPage() {
               <Link href={`/blog/${post.slug}`}>{post.title}</Link>
             </h2>
 
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              {post.description}
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{post.description}</p>
 
             <div className="mt-4 flex flex-wrap gap-1.5">
               {post.tags.map((tag) => (

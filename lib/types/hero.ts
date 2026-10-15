@@ -1,7 +1,4 @@
-export type HeroActionIcon =
-  | "github"
-  | "resume"
-  | "arrow";
+export type HeroActionIcon = "github" | "resume" | "arrow";
 
 export type HeroActionVariant =
   | "default"

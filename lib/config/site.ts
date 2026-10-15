@@ -222,15 +222,18 @@ export const siteConfig: SiteConfig = {
   hobbies: [
     {
       title: "Low-Level Systems",
-      description: "Exploring memory management, cache-conscious data structures, and POSIX system calls.",
+      description:
+        "Exploring memory management, cache-conscious data structures, and POSIX system calls.",
     },
     {
       title: "Competitive Programming",
-      description: "LeetCode Guardian (2382 rating) with 715+ algorithmic problems solved across data structures.",
+      description:
+        "LeetCode Guardian (2382 rating) with 715+ algorithmic problems solved across data structures.",
     },
     {
       title: "Developer Infrastructure",
-      description: "Building cross-platform CI/CD automation, reproducible builds, and developer tooling.",
+      description:
+        "Building cross-platform CI/CD automation, reproducible builds, and developer tooling.",
     },
   ],
 
@@ -245,7 +248,15 @@ export const siteConfig: SiteConfig = {
         "Implemented MiniGit, a Git-compatible version control system with content-addressable storage and DP diff.",
         "Engineered CodeShelf, a desktop and web snippet knowledge system with pnpm monorepo and Web Streams.",
       ],
-      technologies: ["C++20", "TypeScript", "React", "Next.js", "Electron", "CMake", "GitHub Actions"],
+      technologies: [
+        "C++20",
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Electron",
+        "CMake",
+        "GitHub Actions",
+      ],
     },
   ],
 };

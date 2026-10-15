@@ -14,7 +14,10 @@ interface ProjectsSectionProps {
   featuredOnly?: boolean;
 }
 
-export const ProjectsSection = ({ initialProjects, featuredOnly = false }: ProjectsSectionProps) => {
+export const ProjectsSection = ({
+  initialProjects,
+  featuredOnly = false,
+}: ProjectsSectionProps) => {
   const sectionConfig = siteConfig.sections?.projects;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
@@ -70,11 +73,14 @@ export const ProjectsSection = ({ initialProjects, featuredOnly = false }: Proje
               </Badge>
             </div>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl text-foreground">
-              {featuredOnly ? (sectionConfig?.title ?? "Featured Engineering Projects") : "GitHub Repositories"}
+              {featuredOnly
+                ? (sectionConfig?.title ?? "Featured Engineering Projects")
+                : "GitHub Repositories"}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground max-w-xl">
               {featuredOnly
-                ? (sectionConfig?.description ?? "Core open-source systems, developer tooling, and highlighted projects built with high performance and clean architecture.")
+                ? (sectionConfig?.description ??
+                  "Core open-source systems, developer tooling, and highlighted projects built with high performance and clean architecture.")
                 : "Complete collection of open-source tools, experiments, and libraries sourced directly from GitHub."}
             </p>
           </div>
@@ -104,7 +110,6 @@ export const ProjectsSection = ({ initialProjects, featuredOnly = false }: Proje
         </div>
 
         <div className="mt-6">
-
           {/* Tech stack filter chips */}
           {allTechnologies.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 mt-4">

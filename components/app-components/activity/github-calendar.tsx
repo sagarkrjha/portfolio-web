@@ -69,9 +69,7 @@ export const GitHubContributionsSection = ({
                 <FiGitCommit className="size-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs font-medium text-foreground">
-                  github.com/{username}
-                </p>
+                <p className="text-xs font-medium text-foreground">github.com/{username}</p>
                 <p className="text-[11px] text-muted-foreground">
                   Contribution graph in the last year
                 </p>

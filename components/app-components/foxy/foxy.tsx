@@ -252,7 +252,10 @@ export const Foxy = () => {
         <div
           className="fixed z-50 whitespace-nowrap bg-background/95 text-foreground border border-amber-500/40 shadow-xl rounded-2xl px-3 py-1.5 text-xs font-mono font-medium backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 pointer-events-none max-w-[calc(100vw-32px)] truncate"
           style={{
-            left: mode === "run" ? `${Math.max(16, Math.min(pos.x - 32, (typeof window !== "undefined" ? window.innerWidth : 800) - 220))}px` : "auto",
+            left:
+              mode === "run"
+                ? `${Math.max(16, Math.min(pos.x - 32, (typeof window !== "undefined" ? window.innerWidth : 800) - 220))}px`
+                : "auto",
             right: mode === "run" ? "auto" : "16px",
             top: mode === "run" ? `${Math.max(16, pos.y - 44)}px` : "72px",
           }}
@@ -285,9 +288,7 @@ export const Foxy = () => {
           type="button"
           onClick={handleToggle}
           title={
-            mode === "watch"
-              ? "Click to let Foxy run toward cursor 🐾"
-              : "Click to stop Foxy 🦊"
+            mode === "watch" ? "Click to let Foxy run toward cursor 🐾" : "Click to stop Foxy 🦊"
           }
           className={`flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-2xl backdrop-blur-md border shadow-lg transition-all cursor-pointer active:scale-95 ring-1 ${
             mode === "run"
@@ -311,14 +312,10 @@ export const Foxy = () => {
           {/* Label and Mode Indicator */}
           <div className="hidden sm:flex flex-col text-left pr-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="font-mono text-xs font-semibold text-foreground">
-                Foxy
-              </span>
+              <span className="font-mono text-xs font-semibold text-foreground">Foxy</span>
               <span
                 className={`size-1.5 rounded-full ${
-                  mode === "run"
-                    ? "bg-amber-400 animate-ping"
-                    : "bg-emerald-500 animate-pulse"
+                  mode === "run" ? "bg-amber-400 animate-ping" : "bg-emerald-500 animate-pulse"
                 }`}
               />
             </div>

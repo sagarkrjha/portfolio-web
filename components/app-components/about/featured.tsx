@@ -1,8 +1,4 @@
-import {
-  FiCode,
-  FiArrowUpRight,
-  FiBriefcase,
-} from "react-icons/fi";
+import { FiCode, FiArrowUpRight, FiBriefcase } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +7,10 @@ import { aboutConfig, siteConfig } from "@/lib/config";
 
 const AboutComponent = () => {
   return (
-    <section
-      id={aboutConfig.id}
-      className="border-t py-16 sm:py-20"
-    >
+    <section id={aboutConfig.id} className="border-t py-16 sm:py-20">
       <div className="grid gap-10 md:grid-cols-[180px_1fr]">
         <div>
-          <Badge variant="outline">
-            {aboutConfig.eyebrow}
-          </Badge>
+          <Badge variant="outline">{aboutConfig.eyebrow}</Badge>
         </div>
 
         <div>
@@ -42,16 +33,12 @@ const AboutComponent = () => {
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <h3 className="font-medium text-sm">
-                    {item.title}
-                  </h3>
+                  <h3 className="font-medium text-sm">{item.title}</h3>
 
                   <FiArrowUpRight className="size-3.5 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </div>
 
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                  {item.description}
-                </p>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.description}</p>
               </article>
             ))}
           </div>
@@ -87,7 +74,9 @@ const AboutComponent = () => {
                 {siteConfig.experience.map((exp) => (
                   <div key={exp.company} className="border-l-2 border-primary/30 pl-4 py-1">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                      <span className="text-sm font-medium">{exp.role} · {exp.company}</span>
+                      <span className="text-sm font-medium">
+                        {exp.role} · {exp.company}
+                      </span>
                       <span className="text-xs text-muted-foreground">{exp.period}</span>
                     </div>
                     <ul className="mt-2 text-xs text-muted-foreground space-y-1 list-disc list-inside">
@@ -98,7 +87,10 @@ const AboutComponent = () => {
                     {exp.technologies && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {exp.technologies.map((t) => (
-                          <span key={t} className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                          <span
+                            key={t}
+                            className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground"
+                          >
                             {t}
                           </span>
                         ))}
