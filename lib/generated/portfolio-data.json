@@ -1,16 +1,23 @@
 {
-  "lastUpdated": "2026-10-15T10:22:52.247Z",
+  "lastUpdated": "2026-10-15T10:33:31.443Z",
   "profile": {
     "role": "Systems & Full-Stack Developer",
     "bio": "Engineer specializing in TypeScript, JavaScript, C++. Architect of codeshelf (Developer-focused snippet knowledge system — capture, organize and reuse code across desktop, VS Code, and web. AI autofill, version history, and Markdown-first editor.). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 5,
     "totalStars": 15,
-    "primaryLanguages": ["TypeScript", "JavaScript", "C++"],
+    "primaryLanguages": [
+      "TypeScript",
+      "JavaScript",
+      "C++"
+    ],
     "activeProjectsCount": 2
   },
   "github": {
     "username": "sagarkrjha",
-    "pinnedRepos": ["minigit", "codeshelf"],
+    "pinnedRepos": [
+      "minigit",
+      "codeshelf"
+    ],
     "repos": [
       {
         "id": 1399684059,
@@ -80,8 +87,8 @@
         "releases_url": "https://api.github.com/repos/sagarkrjha/portfolio-web/releases{/id}",
         "deployments_url": "https://api.github.com/repos/sagarkrjha/portfolio-web/deployments",
         "created_at": "2026-10-01T09:47:41Z",
-        "updated_at": "2026-10-15T10:22:32Z",
-        "pushed_at": "2026-10-15T10:22:28Z",
+        "updated_at": "2026-10-15T10:33:06Z",
+        "pushed_at": "2026-10-15T10:33:01Z",
         "git_url": "git://github.com/sagarkrjha/portfolio-web.git",
         "ssh_url": "git@github.com:sagarkrjha/portfolio-web.git",
         "clone_url": "https://github.com/sagarkrjha/portfolio-web.git",
@@ -725,32 +732,49 @@
     "repoBadges": [
       {
         "name": "portfolio-web",
-        "techStack": ["Next.js", "TypeScript", "Tailwind CSS"]
+        "techStack": [
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS"
+        ]
       },
       {
         "name": "codeshelf",
-        "techStack": ["TypeScript", "React", "Electron"]
+        "techStack": [
+          "TypeScript",
+          "React",
+          "Electron"
+        ]
       },
       {
         "name": "sagarkrjha",
-        "techStack": ["JavaScript"]
+        "techStack": [
+          "JavaScript"
+        ]
       },
       {
         "name": "minigit",
-        "techStack": ["C++", "C++20"]
+        "techStack": [
+          "C++",
+          "C++20"
+        ]
       },
       {
         "name": "next-mdx-starter",
-        "techStack": ["Next.js", "TypeScript", "Tailwind CSS"]
+        "techStack": [
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS"
+        ]
       }
     ]
   },
   "leetcode": {
     "username": "devsagarkrjha",
-    "totalSolved": 722,
-    "easySolved": 208,
-    "mediumSolved": 364,
-    "hardSolved": 150,
-    "totalQuestions": 4082
+    "totalSolved": 710,
+    "easySolved": 204,
+    "mediumSolved": 358,
+    "hardSolved": 148,
+    "totalQuestions": 4069
   }
 }
