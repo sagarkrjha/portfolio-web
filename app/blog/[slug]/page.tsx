@@ -45,7 +45,7 @@ function formatMathExpression(expr: string): string {
     .replace(/\\cdots/g, "⋯")
     .replace(/\\to/g, "→")
     .replace(/\\times/g, "×")
-    .replace(/\\cdot/g, "·")
+    .replace(/\\cdot/g, " · ")
     .replace(/\\{/g, "{")
     .replace(/\\}/g, "}")
     .replace(/_\{([^}]+)\}/g, "_$1")
@@ -54,8 +54,12 @@ function formatMathExpression(expr: string): string {
 
 // Helper to format inline code, bold, italics, math, and links without broken symbols
 function renderInlineFormatted(text: string): React.ReactNode {
-  // Regex to split on inline code (`...`), bold (**...**), math ($...$), and italic (*...*)
-  const tokens = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\$[^\$]+\$|\*[^*]+\*)/g);
+  // Regex:
+  // 1. Inline code: `...`
+  // 2. Inline math: $...$ (non-greedy, strictly between $$ boundaries)
+  // 3. Bold: **...**
+  // 4. Italic: *...* (must not touch other asterisks)
+  const tokens = text.split(/(`[^`]+`|\$(?:[^\$\n]+)\$|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+\*(?=\s|$|[.,:;!?]))/g);
 
   return tokens.map((token, i) => {
     if (!token) return null;
@@ -68,6 +72,18 @@ function renderInlineFormatted(text: string): React.ReactNode {
         >
           {token.slice(1, -1)}
         </code>
+      );
+    }
+
+    if (token.startsWith("$") && token.endsWith("$") && token.length > 2) {
+      const mathContent = formatMathExpression(token.slice(1, -1));
+      return (
+        <span
+          key={i}
+          className="font-mono text-xs sm:text-[13px] bg-muted/60 px-1.5 py-0.5 rounded text-foreground font-medium border border-border/40 inline-block align-baseline whitespace-nowrap"
+        >
+          {mathContent}
+        </span>
       );
     }
 
@@ -84,18 +100,6 @@ function renderInlineFormatted(text: string): React.ReactNode {
         <em key={i} className="italic text-foreground">
           {token.slice(1, -1)}
         </em>
-      );
-    }
-
-    if (token.startsWith("$") && token.endsWith("$")) {
-      const mathContent = formatMathExpression(token.slice(1, -1));
-      return (
-        <span
-          key={i}
-          className="font-mono text-[13px] bg-muted/50 px-1 py-0.5 rounded text-foreground font-medium border border-border/40"
-        >
-          {mathContent}
-        </span>
       );
     }
 
@@ -183,8 +187,12 @@ function renderMarkdownContent(content: string) {
               </h4>
             );
           }
-          if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-            const items = trimmed.split("\n").map((i) => i.replace(/^[-*]\s+/, ""));
+
+          // Bullet list (starts with "- " or "* ")
+          if (/^[-*]\s/.test(trimmed)) {
+            const items = trimmed
+              .split(/\n(?=[-*]\s)/)
+              .map((i) => i.replace(/^[-*]\s+/, "").trim());
             return (
               <ul
                 key={pIdx}
@@ -201,7 +209,9 @@ function renderMarkdownContent(content: string) {
 
           // Numbered list
           if (/^\d+\.\s/.test(trimmed)) {
-            const items = trimmed.split("\n").map((i) => i.replace(/^\d+\.\s+/, ""));
+            const items = trimmed
+              .split(/\n(?=\d+\.\s)/)
+              .map((i) => i.replace(/^\d+\.\s+/, "").trim());
             return (
               <ol
                 key={pIdx}
