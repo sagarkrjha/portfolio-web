@@ -99,7 +99,7 @@ const NeofetchOutput = () => {
           <span className="text-emerald-400">24/7 (Always building &amp; learning)</span>
           <span className="text-amber-400 font-semibold">Packages:</span>
           <span>
-            {siteConfig.github.repositoryCount ?? 4} (repos), {totalSolved}+ (LeetCode)
+            {siteConfig.github.repositoryCount ?? 4} (repos), 12 (skills)
           </span>
           <span className="text-amber-400 font-semibold">Shell:</span>
           <span>bash 5.2.0 (github-workspace)</span>

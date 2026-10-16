@@ -96,14 +96,12 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
 
           <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
             <span className="text-[11px] font-medium text-muted-foreground block">
-              Algorithmic Problems
+              Specialization
             </span>
-            <span className="text-lg font-bold tracking-tight text-foreground">
-              {leetCodeStats
-                ? `${leetCodeStats.totalSolved}+`
-                : `${cachedData.leetcode?.totalSolved ?? 710}+`}
+            <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
+              Systems &amp; CAS Tools
             </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">LeetCode solved</span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">Low-level &amp; Tools</span>
           </div>
 
           <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
