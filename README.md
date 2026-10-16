@@ -1,6 +1,6 @@
 # Modern Config-Driven Developer Portfolio
 
-A sleek, high-performance, and fully config-driven developer portfolio built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, **TypeScript**, **shadcn/ui**, **Radix UI**, **next-themes**, and **MDX**.
+A sleek, high-performance, and fully config-driven developer portfolio built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, **TypeScript**, **shadcn/ui**, **Radix UI**, **next-themes**, **Mermaid.js**, and **Markdown/MDX**.
 
 Designed with **separation of concerns** in mind: **99% of your portfolio is configured via centralized TypeScript configuration files**. You do not need to dig through component trees or write boilerplate UI code to make it entirely your own.
 
@@ -8,15 +8,16 @@ Designed with **separation of concerns** in mind: **99% of your portfolio is con
 
 ## Features
 
-- **100% Config-Driven**: Update your bio, skills, socials, projects, terminal, and about narrative in `lib/config/` without touching layout code.
-- **Automated GitHub & LeetCode Sync**: A custom TypeScript script (`pnpm run sync:data`) pulls public GitHub repositories, stars, forks, and live LeetCode stats into an offline-first cache (`lib/generated/portfolio-data.json`).
+- **100% Config-Driven**: Update your bio, skills, socials, projects, terminal, and narrative in `lib/config/` without touching layout code.
+- **Interactive Mermaid Diagram Support**: Native Markdown diagram rendering with dark/light theme synchronization, inline zoom in/out controls, scale indicators, and a full-screen interactive modal with smooth pan/drag canvas navigation.
+- **Automated GitHub Sync & Offline-First Cache**: A custom TypeScript script (`pnpm run sync:data`) pulls public GitHub repositories, stars, forks, and metrics into an offline-first cache (`lib/generated/portfolio-data.json`).
 - **Automated Daily GitHub Actions**: An automated CI workflow (`.github/workflows/build.yml`) runs nightly at 00:00 UTC to sync metrics, verify resume assets, build, upload resume artifacts, and commit updated data back to your repo.
 - **Resume Download & Preview**: Direct resume download via header, hero CTA, terminal (`resume`, `cat sagar-resume.pdf`), and automated build workflow artifacts.
 - **Bulletproof Fallbacks & ISR**: Combines Next.js Incremental Static Regeneration (ISR) with offline verified JSON fallbacks so your site never breaks, even if third-party APIs are rate-limited or offline.
-- **Interactive Modal Terminal**: Emulates a Unix CLI with 20+ functional commands (`neofetch`, `skills`, `projects`, `leetcode`, `github`, `whoami`, `resume`, `foxy`, `cat`, etc.) dynamically bound to config data.
+- **Interactive Modal Terminal**: Emulates a Unix CLI with 20+ functional commands (`neofetch`, `skills`, `projects`, `github`, `whoami`, `resume`, `foxy`, `cat`, etc.) dynamically bound to config data.
 - **Floating Mascot (Foxy)**: An animated companion with speech bubbles, interactive toggles, and terminal integration.
 - **GitHub Contributions Heatmap**: Real-time GitHub activity calendar with dark/light mode support.
-- **MDX Tech Blog**: Built-in blogging engine with metadata frontmatter, tag filters, and Prism syntax highlighting.
+- **Rich Tech Blog Engine**: Built-in blogging system with frontmatter metadata, subtitles, clean tag badges, GitHub alert callouts (`> [!NOTE]`, `> [!IMPORTANT]`, etc.), GFM markdown tables, checklists, and Prism syntax highlighting.
 - **Dark & Light Modes**: System-aware theme toggling with smooth transitions via `next-themes`.
 - **Modern Tech Stack**: Built with Next.js 16 (Turbopack ready), React 19, Tailwind CSS v4, and Biome.
 
@@ -30,27 +31,27 @@ Designed with **separation of concerns** in mind: **99% of your portfolio is con
 │       └── build.yml               # Automated nightly sync, build & resume artifact workflow
 ├── app/                            # Next.js 16 App Router pages & layouts
 │   ├── about/                      # About page route
-│   ├── blog/                       # MDX Blog listing & post routes ([slug])
+│   ├── blog/                       # Tech Blog listing & post routes ([slug])
 │   ├── projects/                   # Dedicated projects directory page
 │   ├── layout.tsx                  # Root layout with providers & theme
 │   └── page.tsx                    # Landing page composing all sections
 ├── components/
-│   ├── app-components/             # Portfolio sections (Hero, Projects, Terminal, etc.)
+│   ├── app-components/             # Portfolio sections (Hero, Projects, Terminal, Skills, etc.)
 │   ├── layouts/                    # Header, Footer, and navigation
-│   └── ui/                         # shadcn/ui & Radix UI primitives
+│   └── ui/                         # shadcn/ui primitives, Mermaid diagram canvas, badges
 ├── content/
-│   └── blog/                       # MDX markdown articles & write-ups
+│   └── blog/                       # Markdown & MDX articles with frontmatter & Mermaid diagrams
 ├── lib/
 │   ├── config/                     # PRIMARY CONFIGURATION FILES
 │   │   ├── site.ts                 # Master config (profile, links, skills, repos, resume)
 │   │   ├── hero.ts                 # Hero section copy, actions, and media
 │   │   └── about.ts                # Narrative & focus cards for About page
 │   ├── generated/
-│   │   └── portfolio-data.json     # Pre-fetched GitHub & LeetCode cache
-│   └── services/                   # Dynamic API fetchers & badge normalizers
+│   │   └── portfolio-data.json     # Pre-fetched GitHub cache
+│   └── services/                   # Dynamic API fetchers, blog loaders, and metrics
 ├── public/                         # Static assets (sagar-resume.pdf, avatar.jpg, cover-image.jpg)
 └── scripts/
-    └── sync-portfolio-data.ts      # Data aggregation script for GitHub & LeetCode
+    └── sync-portfolio-data.ts      # Data aggregation script for GitHub repository metrics
 ```
 
 ---
@@ -85,7 +86,7 @@ pnpm install
 ```
 
 ### 4. Sync Portfolio Data
-Fetch live GitHub repositories and LeetCode statistics:
+Fetch live GitHub repositories and update local cache:
 ```bash
 pnpm run sync:data
 ```
@@ -135,26 +136,20 @@ Update links to your social profiles:
 ```typescript
 socialLinks: [
   { platform: "github", label: "GitHub", href: "https://github.com/sagarkrjha", external: true },
-  { platform: "leetcode", label: "LeetCode", href: "https://leetcode.com/u/devsagarkrjha/", external: true },
   { platform: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/devsagarkumarjha", external: true },
   { platform: "twitter", label: "X (Twitter)", href: "https://x.com/devsagarkrjha", external: true },
   { platform: "discord", label: "Discord", href: "https://discord.com/users/894502933801107476", external: true },
 ],
 ```
 
-#### 4. GitHub & LeetCode Handles
-Set your exact usernames so the automated sync script and live APIs know whose data to fetch:
+#### 4. GitHub Handle
+Set your exact username so the automated sync script and live APIs know whose data to fetch:
 ```typescript
 github: {
   username: "sagarkrjha",
   repositoryCount: 5,                  // Number of repos to showcase
   pinnedRepos: ["minigit", "codeshelf"], // Pinned repos on GitHub, highlighted as Featured
   includeForks: false,                 // Include or omit forked repos
-},
-
-leetcode: {
-  username: "devsagarkrjha",
-  profileUrl: "https://leetcode.com/u/devsagarkrjha/",
 },
 ```
 
@@ -273,8 +268,8 @@ export const aboutConfig: AboutSectionConfig = {
       description: "Designing content-addressable storage, build systems (CMake), and automated cross-platform CI/CD pipelines.",
     },
     {
-      title: "Algorithms & Competitive Programming",
-      description: "LeetCode Guardian (2382 rating, top 0.36% globally) with 715+ algorithmic problems solved.",
+      title: "Algorithms & Complexity",
+      description: "Deep interest in algorithmic optimizations, sequence comparisons, and state reconciliation models.",
     },
   ],
 };
@@ -297,38 +292,46 @@ Drop your custom assets directly into the `public/` directory:
 
 ### Step 5: Add or Edit Blog Posts (`content/blog/`)
 
-Articles live as `.mdx` files in `content/blog/`. Each post includes standard frontmatter:
+Articles live as `.md` or `.mdx` files in `content/blog/`. Each post includes standard frontmatter:
 
-```mdx
+```markdown
 ---
-title: "Building a Git-Compatible Version Control System in C++20"
-description: "A deep dive into content-addressable storage, commit graphs, and dynamic programming diff calculation."
-date: "2026-04-01"
-readTime: "6 min read"
-tags: ["C++", "Systems", "Version Control"]
+title: "Anatomy of a File-System Race Condition"
+subtitle: "Why In-Place Overwrites Corrupt Concurrent Readers and How to Achieve Zero-Downtime Persistence"
+description: "Operating system mechanics behind torn file reads under concurrency, kernel O_TRUNC behavior, and implementing a reliable atomic sibling swap pattern."
+date: "2026-10-16"
+readTime: "9 min read"
+tags: ["Systems", "Architecture", "Concurrency", "FileSystem", "OS"]
 ---
-
-# Building a Git-Compatible Version Control System in C++20
-
-Write your content using GitHub Flavored Markdown and interactive React/MDX components.
-Code blocks are automatically highlighted with PrismJS syntax coloring!
 ```
+
+#### Markdown & Diagram Features Supported:
+- **Mermaid Diagrams**: Fenced blocks with ```` ```mermaid ```` automatically render with zoom controls and full-screen modal expansion.
+- **GitHub Alert Callouts**:
+  ```markdown
+  > [!NOTE]
+  > Informational highlight.
+
+  > [!IMPORTANT]
+  > Critical operational requirements.
+  ```
+- **Markdown Tables & Checklists**: Standard GitHub Flavored Markdown tables and interactive-styled task lists (`- [x] Done`).
+- **Syntax Highlighting**: Pre-rendered via PrismJS.
 
 ---
 
 ### Step 6: Test Data Sync Locally
 
-Once you have set your GitHub and LeetCode usernames in `lib/config/site.ts`, test the data aggregator:
+Once you have set your GitHub username in `lib/config/site.ts`, test the data aggregator:
 
 ```bash
 pnpm run sync:data
 ```
 
 This will:
-1. Connect to GitHub REST API and fetch public repositories, languages, stars, and topics.
+1. Connect to the GitHub REST API and fetch public repositories, languages, stars, and topics.
 2. Filter tech badges to keep only languages & frameworks (omitting noisy GitHub topics).
-3. Connect to the LeetCode stats API and fetch solved problem count (Easy, Medium, Hard).
-4. Save the compiled payload to [`lib/generated/portfolio-data.json`](lib/generated/portfolio-data.json).
+3. Save the compiled payload to [`lib/generated/portfolio-data.json`](lib/generated/portfolio-data.json).
 
 ---
 
@@ -364,7 +367,6 @@ Visitors can open the modal terminal anytime by clicking the terminal icon in th
 | `about` | Prints bio, location, and engineering focus |
 | `skills` | Lists technical skills and core stack |
 | `projects` | Interactive list of GitHub projects with links |
-| `leetcode` | Shows live algorithmic problem-solving metrics |
 | `github` | Displays GitHub statistics and profile URL |
 | `resume` | Downloads and opens developer resume (PDF) |
 | `social` | Lists all social media channels and handles |
@@ -383,7 +385,7 @@ Visitors can open the modal terminal anytime by clicking the terminal icon in th
 | **Dev** | `pnpm run dev` | Starts local Next.js development server on `localhost:3000` |
 | **Build** | `pnpm run build` | Compiles optimized production bundle |
 | **Start** | `pnpm run start` | Serves the production build locally |
-| **Sync** | `pnpm run sync:data` | Pulls live GitHub repos, project badges & LeetCode stats into local cache |
+| **Sync** | `pnpm run sync:data` | Pulls live GitHub repos & project badges into local cache |
 | **Lint** | `pnpm run lint` | Runs Biome linter check |
 | **Lint Fix**| `pnpm run lint:fix` | Fixes formatting and linting errors automatically |
 | **Format** | `pnpm run format` | Formats the codebase using Biome |
