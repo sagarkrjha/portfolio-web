@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/services/blog";
 import { highlightCode } from "@/lib/prism";
+import { Mermaid } from "@/components/ui/mermaid";
 import React from "react";
 
 interface BlogPostPageProps {
@@ -55,14 +56,46 @@ function formatMathExpression(expr: string): string {
 // Helper to format inline code, bold, italics, math, and links without broken symbols
 function renderInlineFormatted(text: string): React.ReactNode {
   // Regex:
-  // 1. Inline code: `...`
-  // 2. Inline math: $...$ (strictly within $$ boundaries)
-  // 3. Bold: **...**
-  // 4. Italic: *...*
-  const tokens = text.split(/(`[^`]+`|\$(?:[^\$\n]+)\$|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+\*(?=\s|$|[.,:;!?]))/g);
+  // 1. Markdown link: [text](url)
+  // 2. Inline code: `...`
+  // 3. Inline math: $...$
+  // 4. Bold: **...**
+  // 5. Italic: *...*
+  const tokens = text.split(
+    /(\[[^\]]+\]\([^\)]+\)|`[^`]+`|\$(?:[^\$\n]+)\$|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+\*(?=\s|$|[.,:;!?]))/g,
+  );
 
   return tokens.map((token, i) => {
     if (!token) return null;
+
+    // Link: [label](url)
+    const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      const [, label, url] = linkMatch;
+      const isInternal = url.startsWith("/");
+      if (isInternal) {
+        return (
+          <Link
+            key={i}
+            href={url}
+            className="text-primary underline underline-offset-4 font-medium hover:text-primary/80 transition-colors"
+          >
+            {renderInlineFormatted(label)}
+          </Link>
+        );
+      }
+      return (
+        <a
+          key={i}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-4 font-medium hover:text-primary/80 transition-colors"
+        >
+          {renderInlineFormatted(label)}
+        </a>
+      );
+    }
 
     if (token.startsWith("`") && token.endsWith("`")) {
       return (
@@ -108,7 +141,7 @@ function renderInlineFormatted(text: string): React.ReactNode {
 }
 
 // Custom markdown content renderer with syntax highlighting and rich element support
-function renderMarkdownContent(content: string) {
+function renderMarkdownContent(content: string, postTitle?: string) {
   // Split on code blocks and normal paragraphs
   const parts = content.split(/(```[\s\S]*?```)/g);
 
@@ -117,6 +150,10 @@ function renderMarkdownContent(content: string) {
       const firstLineEnd = part.indexOf("\n");
       const lang = part.slice(3, firstLineEnd).trim();
       const code = part.slice(firstLineEnd + 1, -3);
+
+      if (lang === "mermaid") {
+        return <Mermaid key={index} chart={code} />;
+      }
 
       const { highlightedHtml, language } = highlightCode(code, lang);
 
@@ -151,9 +188,18 @@ function renderMarkdownContent(content: string) {
           }
 
           if (trimmed.startsWith("# ")) {
+            const h1Text = trimmed.replace("# ", "").trim();
+            // If the H1 in markdown repeats the post's page title, skip rendering it to avoid duplicate titles
+            if (postTitle) {
+              const cleanH1 = h1Text.replace(/[`*]/g, "").trim().toLowerCase();
+              const cleanTitle = postTitle.replace(/[`*]/g, "").trim().toLowerCase();
+              if (cleanH1 === cleanTitle || cleanH1.includes(cleanTitle) || cleanTitle.includes(cleanH1)) {
+                return null;
+              }
+            }
             return (
               <h1 key={pIdx} className="text-2xl sm:text-3xl font-bold tracking-tight mt-8 mb-4">
-                {renderInlineFormatted(trimmed.replace("# ", ""))}
+                {renderInlineFormatted(h1Text)}
               </h1>
             );
           }
@@ -202,9 +248,96 @@ function renderMarkdownContent(content: string) {
             );
           }
 
-          // Process line-by-line for structured content (nested lists, numbered steps, bullets, embedded math)
+          // Blockquote or GitHub Alert Callouts (> [!IMPORTANT] ...)
+          if (trimmed.startsWith(">")) {
+            const quoteLines = trimmed.split("\n").map((l) => l.replace(/^>\s?/, ""));
+            const firstLine = quoteLines[0] || "";
+            const isAlert = firstLine.startsWith("[!");
+            
+            if (isAlert) {
+              const alertTypeMatch = firstLine.match(/^\[!([A-Z]+)\]/i);
+              const alertType = alertTypeMatch ? alertTypeMatch[1].toUpperCase() : "NOTE";
+              const restLines = [firstLine.replace(/^\[![A-Z]+\]\s*/i, ""), ...quoteLines.slice(1)].filter(Boolean);
+              
+              const alertColors: Record<string, { border: string; bg: string; title: string; text: string }> = {
+                NOTE: { border: "border-blue-500/40", bg: "bg-blue-500/10", title: "text-blue-500", text: "Note" },
+                IMPORTANT: { border: "border-amber-500/40", bg: "bg-amber-500/10", title: "text-amber-500", text: "Important" },
+                WARNING: { border: "border-red-500/40", bg: "bg-red-500/10", title: "text-red-500", text: "Warning" },
+                TIP: { border: "border-emerald-500/40", bg: "bg-emerald-500/10", title: "text-emerald-500", text: "Tip" },
+                CAUTION: { border: "border-red-600/40", bg: "bg-red-600/10", title: "text-red-600", text: "Caution" },
+              };
+              
+              const conf = alertColors[alertType] || alertColors.NOTE;
+              
+              return (
+                <div key={pIdx} className={`my-4 rounded-lg border ${conf.border} ${conf.bg} p-4 text-sm leading-relaxed`}>
+                  <div className={`font-semibold mb-1 text-xs uppercase tracking-wider ${conf.title}`}>
+                    {conf.text}
+                  </div>
+                  <div className="text-foreground/90 space-y-1">
+                    {restLines.map((rl, rIdx) => (
+                      <p key={rIdx}>{renderInlineFormatted(rl)}</p>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <blockquote key={pIdx} className="my-4 border-l-2 border-primary/60 pl-4 italic text-muted-foreground">
+                {quoteLines.map((ql, qIdx) => (
+                  <p key={qIdx}>{renderInlineFormatted(ql)}</p>
+                ))}
+              </blockquote>
+            );
+          }
+
+          // Markdown Table
+          if (trimmed.includes("|") && trimmed.split("\n").length >= 2) {
+            const tableLines = trimmed.split("\n").filter((l) => l.trim().startsWith("|") && l.trim().endsWith("|"));
+            if (tableLines.length >= 2) {
+              const headerLine = tableLines[0];
+              const delimiterLine = tableLines[1];
+              if (delimiterLine.includes("---")) {
+                const headerCells = headerLine.split("|").slice(1, -1).map((c) => c.trim());
+                const bodyLines = tableLines.slice(2);
+                
+                return (
+                  <div key={pIdx} className="my-6 overflow-x-auto rounded-lg border border-border">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-muted/50 border-b border-border text-foreground font-semibold">
+                        <tr>
+                          {headerCells.map((h, hIdx) => (
+                            <th key={hIdx} className="px-4 py-2.5">
+                              {renderInlineFormatted(h)}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {bodyLines.map((row, rIdx) => {
+                          const cells = row.split("|").slice(1, -1).map((c) => c.trim());
+                          return (
+                            <tr key={rIdx} className="hover:bg-muted/30 transition-colors">
+                              {cells.map((cell, cIdx) => (
+                                <td key={cIdx} className="px-4 py-2 text-muted-foreground align-top">
+                                  {renderInlineFormatted(cell)}
+                                </td>
+                              ))}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              }
+            }
+          }
+
+          // Process line-by-line for structured content (nested lists, numbered steps, bullets, checkboxes, embedded math)
           const rawLines = trimmed.split("\n");
-          const hasListItems = rawLines.some((l) => /^\s*(\*|-|\d+\.)\s/.test(l));
+          const hasListItems = rawLines.some((l) => /^\s*(\*|-|\d+\.|- \[[ xX]\])\s/.test(l));
 
           if (hasListItems) {
             return (
@@ -228,8 +361,27 @@ function renderMarkdownContent(content: string) {
                   }
 
                   const isSubItem = /^\s{4,}/.test(line) || /^\t+/.test(line);
+                  const isChecklist = /^\s*[-*]\s\[([ xX])\]\s/.test(line);
                   const isBullet = /^\s*[-*]\s/.test(line);
                   const isNumbered = /^\s*\d+\.\s/.test(line);
+
+                  if (isChecklist) {
+                    const checked = /\[[xX]\]/.test(lineTrimmed);
+                    const cleanText = lineTrimmed.replace(/^[-*]\s\[([ xX])\]\s+/, "");
+                    return (
+                      <div key={lIdx} className="flex items-start gap-2.5 pt-1">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          readOnly
+                          className="mt-1 h-3.5 w-3.5 rounded border-border accent-primary pointer-events-none"
+                        />
+                        <div className="leading-relaxed flex-1">
+                          {renderInlineFormatted(cleanText)}
+                        </div>
+                      </div>
+                    );
+                  }
 
                   if (isNumbered) {
                     const cleanText = lineTrimmed.replace(/^\d+\.\s+/, "");
@@ -308,20 +460,25 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
           {post.meta.title}
         </h1>
+        {post.meta.subtitle && (
+          <p className="mt-3 text-lg sm:text-xl text-muted-foreground font-normal leading-relaxed">
+            {post.meta.subtitle}
+          </p>
+        )}
         <div className="flex flex-wrap gap-1.5 mt-4">
           {post.meta.tags.map((tag) => (
             <span
               key={tag}
               className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded text-muted-foreground"
             >
-              #{tag}
+              {tag}
             </span>
           ))}
         </div>
       </div>
 
       <div className="border-t pt-8 space-y-4">
-        {renderMarkdownContent(post.content)}
+        {renderMarkdownContent(post.content, post.meta.title)}
       </div>
     </article>
   );

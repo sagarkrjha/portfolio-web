@@ -4,6 +4,7 @@ import path from "node:path";
 export interface BlogPostMeta {
   slug: string;
   title: string;
+  subtitle?: string;
   description: string;
   date: string;
   readTime: string;
@@ -48,6 +49,7 @@ class LocalBlogProvider implements BlogDataSource {
         posts.push({
           slug,
           title: data.title || slug,
+          subtitle: data.subtitle || undefined,
           description: data.description || "",
           date: data.date || "2026-01-01",
           readTime: data.readTime || "5 min read",
@@ -80,10 +82,24 @@ class LocalBlogProvider implements BlogDataSource {
       data = this.parseFrontmatter(frontmatterMatch[1]);
     }
 
+    const title = data.title || slug;
+    // Strip leading Markdown H1 if it duplicates or matches the frontmatter title
+    body = body.replace(/^\s*#\s+[^\n]+\r?\n+/, (matchedH1) => {
+      const headingText = matchedH1.replace(/^\s*#\s+/, "").trim();
+      // If the heading is identical (or stripped of backticks/formatting matches the title)
+      const cleanHeading = headingText.replace(/[`*]/g, "").trim().toLowerCase();
+      const cleanTitle = title.replace(/[`*]/g, "").trim().toLowerCase();
+      if (cleanHeading === cleanTitle || cleanHeading.includes(cleanTitle) || cleanTitle.includes(cleanHeading)) {
+        return "";
+      }
+      return matchedH1;
+    });
+
     return {
       meta: {
         slug,
-        title: data.title || slug,
+        title,
+        subtitle: data.subtitle || undefined,
         description: data.description || "",
         date: data.date || "2026-01-01",
         readTime: data.readTime || "5 min read",

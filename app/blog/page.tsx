@@ -36,6 +36,12 @@ export default async function BlogIndexPage() {
               <Link href={`/blog/${post.slug}`}>{post.title}</Link>
             </h2>
 
+            {post.subtitle && (
+              <p className="mt-1 text-sm font-medium text-foreground/80 leading-snug">
+                {post.subtitle}
+              </p>
+            )}
+
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{post.description}</p>
 
             <div className="mt-4 flex flex-wrap gap-1.5">
@@ -44,7 +50,7 @@ export default async function BlogIndexPage() {
                   key={tag}
                   className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded text-muted-foreground"
                 >
-                  #{tag}
+                  {tag}
                 </span>
               ))}
             </div>
