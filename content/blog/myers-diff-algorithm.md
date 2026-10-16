@@ -2,7 +2,7 @@
 title: "Inside the Myers Diff Algorithm"
 subtitle: "How Git and Modern Version Control Compare Files Under the Hood"
 description: "A deep dive into Eugene W. Myers' 1986 difference algorithm: edit graphs, diagonal progression, bidirectional divide-and-conquer, and production diff optimizations."
-date: "2026-03-28"
+date: "2026-19-15"
 readTime: "8 min read"
 tags: ["Algorithms", "Git", "Systems", "DataStructures"]
 ---
