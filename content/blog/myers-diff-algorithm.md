@@ -1,21 +1,20 @@
 ---
-title: "Inside the Engine of Git: How the Myers Diff Algorithm Works"
+title: "Inside the Myers Diff Algorithm"
+subtitle: "How Git and Modern Version Control Compare Files Under the Hood"
 description: "A deep dive into Eugene W. Myers' 1986 difference algorithm: edit graphs, diagonal progression, bidirectional divide-and-conquer, and production diff optimizations."
 date: "2026-03-28"
 readTime: "8 min read"
-tags: ["Algorithms", "Git", "Systems", "C++"]
+tags: ["Algorithms", "Git", "Systems", "DataStructures"]
 ---
 
-# Inside the Engine of Git: How the Myers Diff Algorithm Works
-
-Every day, millions of software engineers run `git diff`, review pull requests, and resolve merge conflicts. We take for granted that our tools can take two text files, compare them line by line, and clearly highlight what was added and what was removed.
-
-Beneath almost every version control system and code editor lies the work of computer scientist Eugene W. Myers. In 1986, Myers published a landmark paper titled *"An O(ND) Difference Algorithm and Its Variations"*. It revolutionized sequence comparison by showing that calculating differences between files can be modeled as finding the shortest path across a grid.
-
-This article explains how the Myers difference algorithm works from intuition to formal mechanics, including its edit graph formulation, diagonal progression, bidirectional divide-and-conquer strategy, and practical production considerations.
-
+Every day, version control systems run `git diff` to compare text files line by line and compute minimal change sets.
+ 
+At the foundation of `git diff`—as well as diff implementations across editors and VCS tools—is Eugene W. Myers' 1986 paper, *"An O(ND) Difference Algorithm and Its Variations"*. The algorithm models sequence comparison as finding the shortest path through a directed edit grid, prioritizing matching content with zero traversal cost.
+ 
+This article breaks down how the algorithm operates: formulating the edit graph, optimizing search with diagonal coordinates, and reducing memory from quadratic to linear with bidirectional divide-and-conquer.
+ 
 ---
-
+ 
 ## The Core Problem: Finding the Shortest Edit Script
 
 Given an original sequence $A$ of length $N$ and a target sequence $B$ of length $M$, our goal is to find the minimum number of insertions and deletions required to transform $A$ into $B$. This sequence of changes is called the **Shortest Edit Script (SES)**.
@@ -39,18 +38,23 @@ The horizontal axis represents elements of sequence $A$ ($0 \le x \le N$). The v
 
 Starting at coordinate $(0, 0)$ (the top-left corner), the algorithm must find a path to coordinate $(N, M)$ (the bottom-right corner).
 
-```text
-        (0,0) ---- A ----> (1,0) ---- B ----> (2,0) ... (N,0)
-          |                  |                  |
-          |                  |                  |
-          C                  C                  C
-          |                  |                  |
-          v                  v                  v
-        (0,1) ---- A ----> (1,1) ---- B ----> (2,1) ... (N,1)
-          |                  | \                |
-          :                  :   \ (diagonal)   :
-          v                  v     v            v
-        (0,M) ...                          ... (N,M)
+```mermaid
+flowchart TD
+    subgraph EditGraph["Myers Edit Graph (Cost Model)"]
+        direction LR
+        A00["(0, 0) Start"] -- "Horizontal (Delete A)<br/>Cost: 1" --> A10["(1, 0)"]
+        A10 -- "Horizontal (Delete A)<br/>Cost: 1" --> A20["(2, 0)"]
+        
+        A00 -- "Vertical (Insert B)<br/>Cost: 1" --> A01["(0, 1)"]
+        A10 -- "Vertical (Insert B)<br/>Cost: 1" --> A11["(1, 1)"]
+        A20 -- "Vertical (Insert B)<br/>Cost: 1" --> A21["(2, 1)"]
+
+        A01 -- "Horizontal (Delete A)<br/>Cost: 1" --> A11
+        A11 -- "Horizontal (Delete A)<br/>Cost: 1" --> A21
+
+        A00 -. "Snake Diagonal (Match A=B)<br/>Cost: 0 (Free Step)" .-> A11
+        A11 -. "Snake Diagonal (Match A=B)<br/>Cost: 0" .-> Target["(N, M) Finish"]
+    end
 ```
 
 Only three types of movements are permitted:
@@ -234,10 +238,11 @@ However, when comparing completely different files, $D$ approaches $N + M$, caus
 
 To eliminate the $O(D^2)$ memory bottleneck, Myers introduced a bidirectional search combined with divide-and-conquer (analogous to Hirschberg's algorithm for sequence alignment).
 
-```text
-Forward Search  (0,0)  =======> \
-                                 [Middle Snake Split Point]
-Reverse Search (N,M)  <======= /
+```mermaid
+flowchart LR
+    Origin["(0, 0) Start"] -- "Forward Frontier: k = x - y" --> Middle["Middle Snake Intersection<br/><code>(x_mid, y_mid)</code>"]
+    Destination["(N, M) Target"] -- "Reverse Frontier: k = Δ - k" --> Middle
+    Middle --> Bisect["Recursive Divide-and-Conquer<br/>Linear Memory: O(N + M)"]
 ```
 
 ### How It Works
@@ -291,3 +296,14 @@ Eugene Myers' 1986 algorithm remains the foundation of modern file comparison be
 4. With bidirectional divide-and-conquer, it operates within strict $O(N + M)$ linear memory bounds.
 
 Whether you are viewing a one-line fix in a pull request or merging branches across thousands of commits, the Myers algorithm ensures the calculation is fast, deterministic, and minimal.
+
+---
+
+## Further Reading & References
+
+- [Eugene W. Myers: An O(ND) Difference Algorithm and Its Variations (1986 Original Paper PDF)](http://www.xmailserver.org/diff2.pdf)
+- [Git Source Code: `xdiff-interface.c` Implementation in Git Core](https://github.com/git/git/blob/master/xdiff-interface.c)
+- [James Coglan: Building Git (In-depth Analysis of Myers Algorithm and LCS Graph Traversal)](https://shop.jcoglan.com/building-git/)
+- [Neil Fraser: Diff Strategies and Line-by-Line Matching Optimizations](https://neil.fraser.name/writing/diff/)
+- [WebKit Engine: Myers Diff Implementation in WebKit Source](https://github.com/WebKit/WebKit/blob/main/Source/WTF/wtf/text/LineEnding.cpp)
+- [Nicholas Butler: Investigating the Myers Diff Algorithm](https://blog.jcoglan.com/2017/02/12/the-myers-diff-algorithm-part-1/)
