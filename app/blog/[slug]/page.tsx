@@ -329,10 +329,37 @@ function renderMarkdownContent(content: string, postTitle?: string) {
           if (trimmed.includes("|") && trimmed.split("\n").length >= 2) {
             const tableLines = trimmed.split("\n").filter((l) => l.trim().startsWith("|") && l.trim().endsWith("|"));
             if (tableLines.length >= 2) {
+              const parseRowCells = (rowStr: string): string[] => {
+                const trimmedRow = rowStr.trim();
+                const inner = trimmedRow.startsWith("|") && trimmedRow.endsWith("|")
+                  ? trimmedRow.slice(1, -1)
+                  : trimmedRow;
+                const cells: string[] = [];
+                let current = "";
+                let inCode = false;
+                for (let i = 0; i < inner.length; i++) {
+                  const ch = inner[i];
+                  if (ch === "`") {
+                    inCode = !inCode;
+                    current += ch;
+                  } else if (ch === "\\" && i + 1 < inner.length && inner[i + 1] === "|") {
+                    current += "|";
+                    i++;
+                  } else if (ch === "|" && !inCode) {
+                    cells.push(current.trim());
+                    current = "";
+                  } else {
+                    current += ch;
+                  }
+                }
+                cells.push(current.trim());
+                return cells;
+              };
+
               const headerLine = tableLines[0];
               const delimiterLine = tableLines[1];
               if (delimiterLine.includes("---")) {
-                const headerCells = headerLine.split("|").slice(1, -1).map((c) => c.trim());
+                const headerCells = parseRowCells(headerLine);
                 const bodyLines = tableLines.slice(2);
                 
                 return (
@@ -349,14 +376,21 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {bodyLines.map((row, rIdx) => {
-                          const cells = row.split("|").slice(1, -1).map((c) => c.trim());
+                          const cells = parseRowCells(row);
                           return (
                             <tr key={rIdx} className="hover:bg-muted/30 transition-colors">
-                              {cells.map((cell, cIdx) => (
-                                <td key={cIdx} className="px-4 py-2 text-muted-foreground align-top">
-                                  {renderInlineFormatted(cell)}
-                                </td>
-                              ))}
+                              {cells.map((cell, cIdx) => {
+                                const subLines = cell.split(/<br\s*\/?>/i);
+                                return (
+                                  <td key={cIdx} className="px-4 py-2 text-muted-foreground align-top">
+                                    {subLines.map((sub, sIdx) => (
+                                      <div key={sIdx} className={sIdx > 0 ? "mt-1.5" : ""}>
+                                        {renderInlineFormatted(sub.trim())}
+                                      </div>
+                                    ))}
+                                  </td>
+                                );
+                              })}
                             </tr>
                           );
                         })}
