@@ -10,7 +10,7 @@ author: "Sagar Kr Jha"
 
 # The 2027 DSA Mastery Blueprint: From Core Foundations to Advanced Problem Solving
 
-*By **Sagar Kr Jha***
+By **Sagar Kr Jha**
 
 > ### ⚠️ Disclaimer & Ground Reality Check
 > 

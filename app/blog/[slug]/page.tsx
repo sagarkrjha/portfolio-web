@@ -59,10 +59,11 @@ function renderInlineFormatted(text: string): React.ReactNode {
   // 1. Markdown link: [text](url)
   // 2. Inline code: `...`
   // 3. Inline math: $...$
-  // 4. Bold: **...**
-  // 5. Italic: *...*
+  // 4. Bold-italic: ***...***
+  // 5. Bold: **...**
+  // 6. Italic: *...*
   const tokens = text.split(
-    /(\[[^\]]+\]\([^\)]+\)|`[^`]+`|\$(?:[^\$\n]+)\$|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+\*(?=\s|$|[.,:;!?]))/g,
+    /(\[[^\]]+\]\([^\)]+\)|`[^`]+`|\$(?:[^\$\n]+)\$|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+?\*(?=\s|$|[.,:;!?]))/g,
   );
 
   return tokens.map((token, i) => {
@@ -117,6 +118,14 @@ function renderInlineFormatted(text: string): React.ReactNode {
         >
           {mathContent}
         </span>
+      );
+    }
+
+    if (token.startsWith("***") && token.endsWith("***") && token.length > 6) {
+      return (
+        <strong key={i} className="font-semibold italic text-foreground">
+          {renderInlineFormatted(token.slice(3, -3))}
+        </strong>
       );
     }
 
