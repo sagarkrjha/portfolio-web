@@ -250,14 +250,14 @@ function renderMarkdownContent(content: string, postTitle?: string) {
 
           // Blockquote or GitHub Alert Callouts (> [!IMPORTANT] ...)
           if (trimmed.startsWith(">")) {
-            const quoteLines = trimmed.split("\n").map((l) => l.replace(/^>\s?/, ""));
-            const firstLine = quoteLines[0] || "";
+            const rawQuoteLines = trimmed.split("\n").map((l) => l.replace(/^>\s?/, ""));
+            const firstLine = rawQuoteLines[0]?.trim() || "";
             const isAlert = firstLine.startsWith("[!");
             
             if (isAlert) {
               const alertTypeMatch = firstLine.match(/^\[!([A-Z]+)\]/i);
               const alertType = alertTypeMatch ? alertTypeMatch[1].toUpperCase() : "NOTE";
-              const restLines = [firstLine.replace(/^\[![A-Z]+\]\s*/i, ""), ...quoteLines.slice(1)].filter(Boolean);
+              const restLines = [firstLine.replace(/^\[![A-Z]+\]\s*/i, ""), ...rawQuoteLines.slice(1)].filter((l) => l.trim().length > 0);
               
               const alertColors: Record<string, { border: string; bg: string; title: string; text: string }> = {
                 NOTE: { border: "border-blue-500/40", bg: "bg-blue-500/10", title: "text-blue-500", text: "Note" },
@@ -271,23 +271,56 @@ function renderMarkdownContent(content: string, postTitle?: string) {
               
               return (
                 <div key={pIdx} className={`my-4 rounded-lg border ${conf.border} ${conf.bg} p-4 text-sm leading-relaxed`}>
-                  <div className={`font-semibold mb-1 text-xs uppercase tracking-wider ${conf.title}`}>
+                  <div className={`font-semibold mb-2 text-xs uppercase tracking-wider ${conf.title}`}>
                     {conf.text}
                   </div>
-                  <div className="text-foreground/90 space-y-1">
-                    {restLines.map((rl, rIdx) => (
-                      <p key={rIdx}>{renderInlineFormatted(rl)}</p>
-                    ))}
+                  <div className="text-foreground/90 space-y-2">
+                    {restLines.map((rl, rIdx) => {
+                      const trimmedLine = rl.trim();
+                      if (trimmedLine.startsWith("* ") || trimmedLine.startsWith("- ")) {
+                        return (
+                          <div key={rIdx} className="flex items-start gap-2 text-sm text-foreground/90">
+                            <span className="text-primary mt-1">•</span>
+                            <span>{renderInlineFormatted(trimmedLine.replace(/^[-*]\s+/, ""))}</span>
+                          </div>
+                        );
+                      }
+                      return <p key={rIdx}>{renderInlineFormatted(rl)}</p>;
+                    })}
                   </div>
                 </div>
               );
             }
 
             return (
-              <blockquote key={pIdx} className="my-4 border-l-2 border-primary/60 pl-4 italic text-muted-foreground">
-                {quoteLines.map((ql, qIdx) => (
-                  <p key={qIdx}>{renderInlineFormatted(ql)}</p>
-                ))}
+              <blockquote key={pIdx} className="my-4 border-l-2 border-primary/60 pl-4 py-1 space-y-2 text-sm sm:text-base text-muted-foreground bg-muted/20 rounded-r-md">
+                {rawQuoteLines.map((ql, qIdx) => {
+                  const lineTrimmed = ql.trim();
+                  if (!lineTrimmed) return null;
+
+                  if (lineTrimmed.startsWith("### ")) {
+                    return (
+                      <h4 key={qIdx} className="text-base font-semibold text-foreground tracking-tight not-italic">
+                        {renderInlineFormatted(lineTrimmed.replace("### ", ""))}
+                      </h4>
+                    );
+                  }
+
+                  if (lineTrimmed.startsWith("* ") || lineTrimmed.startsWith("- ")) {
+                    return (
+                      <div key={qIdx} className="flex items-start gap-2 text-sm not-italic text-foreground/90 pl-1">
+                        <span className="text-primary mt-1">•</span>
+                        <span>{renderInlineFormatted(lineTrimmed.replace(/^[-*]\s+/, ""))}</span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <p key={qIdx} className="italic">
+                      {renderInlineFormatted(ql)}
+                    </p>
+                  );
+                })}
               </blockquote>
             );
           }
