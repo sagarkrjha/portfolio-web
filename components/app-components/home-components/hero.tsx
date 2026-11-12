@@ -83,9 +83,9 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
         </p>
 
         {/* Live Dynamic Status Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
-          <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
-            <span className="text-[11px] font-medium text-muted-foreground block">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
+          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
+            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
               Active Repositories
             </span>
             <span className="text-lg font-bold tracking-tight text-foreground">
@@ -94,8 +94,8 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
             <span className="text-[10px] text-muted-foreground block mt-0.5">Live GitHub sync</span>
           </div>
 
-          <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
-            <span className="text-[11px] font-medium text-muted-foreground block">
+          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
+            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
               Specialization
             </span>
             <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
@@ -104,8 +104,8 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
             <span className="text-[10px] text-muted-foreground block mt-0.5">Low-level &amp; Tools</span>
           </div>
 
-          <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
-            <span className="text-[11px] font-medium text-muted-foreground block">
+          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
+            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
               Core Languages
             </span>
             <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
@@ -113,11 +113,11 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
                 ? metrics.primaryLanguages.slice(0, 3).join(", ")
                 : (siteConfig.statusCards?.coreLanguagesFallback ?? "C++, TypeScript")}
             </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">Systems & Web</span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">Systems &amp; Web</span>
           </div>
 
-          <div className="rounded-xl border border-border bg-card/60 p-3.5 shadow-xs transition-colors hover:border-foreground/20">
-            <span className="text-[11px] font-medium text-muted-foreground block">
+          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
+            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
               Architecture Focus
             </span>
             <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
@@ -131,7 +131,7 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
       </div>
 
       {/* Action buttons and social links row */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 pt-2">
+      <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         {heroConfig.actions && heroConfig.actions.length > 0 && (
           <div className="flex flex-wrap items-center gap-2.5">
             {heroConfig.actions.map((act) => {

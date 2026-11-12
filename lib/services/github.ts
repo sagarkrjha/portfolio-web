@@ -221,22 +221,21 @@ export async function getPortfolioProjects(): Promise<MergedProject[]> {
     const lowerName = repo.name.toLowerCase();
     const configured = configuredMap.get(lowerName);
 
-    // Priority: 1) siteConfig curated stack, 2) pre-computed sync cache, 3) runtime normalizer
+    // Priority: 1) pre-computed sync cache (queries GitHub's /languages multi-language breakdown), 2) siteConfig curated stack, 3) runtime normalizer
     let techStack: string[];
 
-    if (configured?.techStack?.length) {
-      // Config is always authoritative — filter it through the normalizer
+    if (cachedBadgeMap.has(lowerName) && cachedBadgeMap.get(lowerName)!.length > 0) {
+      // Use verified multi-language breakdown from the Rust sync script
+      techStack = cachedBadgeMap.get(lowerName)!;
+    } else if (configured?.techStack?.length) {
       const raw: string[] = [];
       for (const t of configured.techStack) {
         const display = normalizeTechBadge(t);
         if (display && !raw.includes(display)) raw.push(display);
       }
       techStack = raw;
-    } else if (cachedBadgeMap.has(lowerName)) {
-      // Use pre-computed badges from the last workflow sync
-      techStack = cachedBadgeMap.get(lowerName)!;
     } else {
-      // Runtime fallback — only primary language, no topics
+      // Runtime fallback — primary language
       const rawTech = repo.language ? [repo.language] : [];
       techStack = [];
       for (const t of rawTech) {
