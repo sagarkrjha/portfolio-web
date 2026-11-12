@@ -1,6 +1,6 @@
 ---
 title: "Space-Time Complexity in Practice"
-subtitle: "Bridging Theoretical Big-O Bounds with Memory Hierarchy and Latency"
+subtitle: "Bridging Asymptotic Big-O Analysis with Hardware Latency and Cache Lines"
 description: "Why asymptotic analysis matters for real-world software engineering and practical heuristics for optimization."
 date: "2026-02-20"
 readTime: "6 min read"

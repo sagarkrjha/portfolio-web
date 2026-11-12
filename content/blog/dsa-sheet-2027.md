@@ -1,14 +1,14 @@
 ---
-title: "The 2027 DSA Mastery Blueprint: From Core Foundations to Advanced Problem Solving"
-subtitle: "A 30-Day Guided Practice Sheet and 8-Stage Theory Roadmap"
-description: "A comprehensive 8-stage roadmap and 30-day practice protocol for mastering data structures, algorithms, and competitive problem-solving patterns."
+title: "Data Structures & Algorithmic Patterns"
+subtitle: "A Systematic Framework for Problem-Solving and Technical Interviews"
+description: "A structured practice roadmap and algorithmic protocol covering monotonic stacks, dynamic programming, graph traversal, and time-space invariants."
 date: "2026-10-20"
 readTime: "12 min read"
-tags: ["DSA", "Competitive Programming", "Algorithms", "Career", "C++"]
+tags: ["DSA", "Competitive Programming", "Algorithms", "Systems", "C++"]
 author: "Sagar Kr Jha"
 ---
 
-# The 2027 DSA Mastery Blueprint: From Core Foundations to Advanced Problem Solving
+# Data Structures & Algorithmic Patterns
 
 By **Sagar Kr Jha**
 

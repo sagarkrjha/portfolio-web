@@ -1,6 +1,6 @@
 ---
-title: "Building a Config-Driven Portfolio"
-subtitle: "Decoupling Presentation from State with Type-Safe Schemas"
+title: "Config-Driven Web Architecture"
+subtitle: "Decoupling Presentation from State via Type-Safe Declarative Schemas"
 description: "How centralizing configuration and data streams transforms portfolio maintainability and performance."
 date: "2026-03-15"
 readTime: "4 min read"

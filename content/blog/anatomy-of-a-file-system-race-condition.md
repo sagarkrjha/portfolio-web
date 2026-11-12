@@ -1,6 +1,6 @@
 ---
-title: "Anatomy of a File-System Race Condition"
-subtitle: "Why In-Place Overwrites Corrupt Concurrent Readers and How to Achieve Zero-Downtime Persistence"
+title: "Filesystem Race Conditions in Concurrency"
+subtitle: "Mechanics of Torn Reads, Kernel Truncation, and Zero-Downtime Atomic Swaps"
 description: "Operating system mechanics behind torn file reads under concurrency, kernel O_TRUNC behavior, and implementing a reliable atomic sibling swap pattern."
 date: "2026-10-16"
 readTime: "9 min read"
