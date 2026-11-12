@@ -11,9 +11,5 @@ export const metadata: Metadata = {
 export default async function ProjectsPage() {
   const projects = await getPortfolioProjects();
 
-  return (
-    <div className="py-6 sm:py-10">
-      <ProjectsSection initialProjects={projects} featuredOnly={false} />
-    </div>
-  );
+  return <ProjectsSection initialProjects={projects} featuredOnly={false} />;
 }
