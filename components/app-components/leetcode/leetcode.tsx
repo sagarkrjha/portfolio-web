@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { FiArrowUpRight, FiCheckCircle, FiTarget, FiAward } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { MotionCard } from "@/components/ui/motion-card";
 import { siteConfig } from "@/lib/config";
 import type { LeetCodeStats } from "@/lib/services/leetcode";
 
@@ -46,18 +48,18 @@ export const LeetCodeSection = ({ stats }: LeetCodeSectionProps) => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <MotionCard className="p-4">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1 group-hover:text-primary transition-colors">
             <FiCheckCircle className="size-4" />
-            <span className="text-xs">Total Solved</span>
+            <span className="text-xs font-medium">Total Solved</span>
           </div>
           <p className="text-2xl font-bold tracking-tight">{stats?.totalSolved ?? "Active"}</p>
           <p className="text-[11px] text-muted-foreground mt-1">
             {stats ? `out of ${stats.totalQuestions}` : "Continuous practice"}
           </p>
-        </Card>
+        </MotionCard>
 
-        <Card className="p-4">
+        <MotionCard className="p-4">
           <div className="flex items-center gap-2 text-emerald-500 mb-1">
             <FiTarget className="size-4" />
             <span className="text-xs font-medium text-foreground">Easy</span>
@@ -66,9 +68,9 @@ export const LeetCodeSection = ({ stats }: LeetCodeSectionProps) => {
             {stats?.easySolved ?? "—"}
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">Fundamental patterns</p>
-        </Card>
+        </MotionCard>
 
-        <Card className="p-4">
+        <MotionCard className="p-4">
           <div className="flex items-center gap-2 text-amber-500 mb-1">
             <FiTarget className="size-4" />
             <span className="text-xs font-medium text-foreground">Medium</span>
@@ -77,9 +79,9 @@ export const LeetCodeSection = ({ stats }: LeetCodeSectionProps) => {
             {stats?.mediumSolved ?? "—"}
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">Core interview problems</p>
-        </Card>
+        </MotionCard>
 
-        <Card className="p-4">
+        <MotionCard className="p-4">
           <div className="flex items-center gap-2 text-red-500 mb-1">
             <FiAward className="size-4" />
             <span className="text-xs font-medium text-foreground">Hard</span>
@@ -88,7 +90,7 @@ export const LeetCodeSection = ({ stats }: LeetCodeSectionProps) => {
             {stats?.hardSolved ?? "—"}
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">Advanced algorithms</p>
-        </Card>
+        </MotionCard>
       </div>
     </section>
   );
