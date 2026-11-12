@@ -3,8 +3,8 @@ import { siteConfig } from "@/lib/config";
 
 export const Footer = () => {
   return (
-    <footer className="border-t py-8 mt-auto text-sm text-muted-foreground">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-0">
+    <footer className="border-t py-8 mt-auto text-sm text-muted-foreground w-full">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <p>
           &copy; {new Date().getFullYear()} {siteConfig.name}. Config-driven developer portfolio.
         </p>

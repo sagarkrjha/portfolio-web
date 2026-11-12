@@ -1,6 +1,6 @@
 ---
-title: "Inside the Myers Diff Algorithm"
-subtitle: "How Git and Modern Version Control Compare Files Under the Hood"
+title: "The Myers Diff Algorithm"
+subtitle: "Graph Traversal and Edit Script Optimization in Modern Version Control"
 description: "A deep dive into Eugene W. Myers' 1986 difference algorithm: edit graphs, diagonal progression, bidirectional divide-and-conquer, and production diff optimizations."
 date: "2026-10-15"
 readTime: "8 min read"

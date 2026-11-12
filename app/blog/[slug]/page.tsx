@@ -520,7 +520,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <article className="py-12 max-w-3xl mx-auto px-4 sm:px-0">
+    <article className="py-10 max-w-3xl mx-auto">
       <div className="mb-8">
         <Link
           href="/blog"

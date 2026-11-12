@@ -1,6 +1,9 @@
+"use client";
+
 import { FiCode, FiLayers, FiTool, FiCpu } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { MotionCard } from "@/components/ui/motion-card";
+import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { siteConfig } from "@/lib/config";
 
 const categoryIcons = [FiCode, FiLayers, FiTool, FiCpu];
@@ -36,25 +39,31 @@ export const SkillsSection = () => {
           const Icon = categoryIcons[idx % categoryIcons.length];
 
           return (
-            <Card key={category.title} className="p-5">
+            <MotionCard key={category.title} className="p-5">
               <CardHeader className="p-0 pb-3 flex flex-row items-center gap-2">
-                <div className="flex size-7 items-center justify-center rounded-md border bg-muted/30 text-foreground">
+                <div className="flex size-7 items-center justify-center rounded-md border bg-muted/30 text-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                   <Icon className="size-3.5" />
                 </div>
-                <CardTitle className="text-sm font-semibold">{category.title}</CardTitle>
+                <CardTitle className="text-sm font-semibold transition-colors group-hover:text-primary">
+                  {category.title}
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0 pt-2 flex flex-wrap gap-1.5">
                 {category.skills.map((skill) => (
                   <Badge
                     key={skill.name}
                     variant={skill.featured ? "secondary" : "outline"}
-                    className={`text-xs py-0.5 ${skill.featured ? "font-medium" : "text-muted-foreground"}`}
+                    className={`text-xs py-0.5 transition-colors ${
+                      skill.featured
+                        ? "font-medium bg-primary/10 text-primary border border-primary/20"
+                        : "text-muted-foreground group-hover:border-primary/20"
+                    }`}
                   >
                     {skill.name}
                   </Badge>
                 ))}
               </CardContent>
-            </Card>
+            </MotionCard>
           );
         })}
       </div>

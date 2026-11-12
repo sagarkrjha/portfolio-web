@@ -62,7 +62,7 @@ export const GitHubContributionsSection = ({
       </div>
 
       <div className="mt-8">
-        <Card className="p-6 overflow-hidden">
+        <Card className="p-4 sm:p-6 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-border/60">
             <div className="flex items-center gap-2.5">
               <div className="flex size-8 items-center justify-center rounded-lg border bg-muted/40">
@@ -84,31 +84,33 @@ export const GitHubContributionsSection = ({
             </div>
           </div>
 
-          <div className="w-full overflow-x-auto py-2 flex justify-center items-center">
+          <div className="w-full overflow-x-auto py-2 flex justify-start sm:justify-center items-center">
             {mounted ? (
-              <GitHubCalendar
-                username={username}
-                colorScheme={colorScheme}
-                theme={{
-                  light: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
-                  dark: ["#27272a", "#0e4429", "#006d32", "#26a641", "#39d353"],
-                }}
-                blockSize={12}
-                blockMargin={4}
-                fontSize={12}
-                showTotalCount={true}
-                renderBlock={(block, activity) =>
-                  cloneElement(block, {
-                    title: `${activity.count} contribution${activity.count === 1 ? "" : "s"} on ${activity.date}`,
-                    children: (
-                      <title>{`${activity.count} contribution${activity.count === 1 ? "" : "s"} on ${activity.date}`}</title>
-                    ),
-                  })
-                }
-                labels={{
-                  totalCount: "{{count}} contributions in the last year",
-                }}
-              />
+              <div className="min-w-fit">
+                <GitHubCalendar
+                  username={username}
+                  colorScheme={colorScheme}
+                  theme={{
+                    light: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
+                    dark: ["#27272a", "#0e4429", "#006d32", "#26a641", "#39d353"],
+                  }}
+                  blockSize={12}
+                  blockMargin={4}
+                  fontSize={12}
+                  showTotalCount={true}
+                  renderBlock={(block, activity) =>
+                    cloneElement(block, {
+                      title: `${activity.count} contribution${activity.count === 1 ? "" : "s"} on ${activity.date}`,
+                      children: (
+                        <title>{`${activity.count} contribution${activity.count === 1 ? "" : "s"} on ${activity.date}`}</title>
+                      ),
+                    })
+                  }
+                  labels={{
+                    totalCount: "{{count}} contributions in the last year",
+                  }}
+                />
+              </div>
             ) : (
               <div className="h-32 w-full animate-pulse rounded bg-muted/40 flex items-center justify-center text-xs text-muted-foreground">
                 Loading GitHub contributions calendar...

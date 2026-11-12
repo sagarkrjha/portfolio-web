@@ -50,8 +50,8 @@ export const siteConfig: SiteConfig = {
 
   github: {
     username: "sagarkrjha",
-    repositoryCount: 5,
-    pinnedRepos: ["minigit", "codeshelf"],
+    repositoryCount: 9,
+    pinnedRepos: ["minigit", "codeshelf", "level-db-cpp"],
     includeForks: false,
   },
 
@@ -72,31 +72,31 @@ export const siteConfig: SiteConfig = {
   sections: {
     projects: {
       number: "01",
-      badge: "Featured Work",
-      title: "Featured Engineering Projects",
+      badge: "Work",
+      title: "Featured Projects",
       description:
-        "First-principles systems programming, developer tooling, and highlighted projects built with high performance and clean architecture.",
+        "High-performance systems programming, developer tooling, and clean architecture applications.",
     },
     skills: {
       number: "02",
-      badge: "Core Competencies",
-      title: "Technical Stack & Architecture",
+      badge: "Stack",
+      title: "Technical Stack",
       description:
-        "Systems programming, frontend and desktop architectures, build pipelines, and DevOps automation tooling.",
+        "Systems programming, full-stack architectures, build pipelines, and DevOps automation.",
     },
     leetcode: {
       number: "03",
-      badge: "LeetCode Stats",
-      title: "Competitive Programming & Problem Solving",
+      badge: "Algorithms",
+      title: "Problem Solving",
       description:
-        "Live metrics, LeetCode Guardian rank (2382 contest rating, top 0.36% globally), and algorithmic mastery across data structures.",
+        "LeetCode Guardian (2382 rating, top 0.36% globally) with 720+ algorithmic challenges solved.",
     },
     contributions: {
       number: "04",
-      badge: "Open Source Activity",
-      title: "GitHub Contributions & Activity",
+      badge: "Activity",
+      title: "GitHub Contributions",
       description:
-        "Consistent daily contributions, open-source commits, and active project development across GitHub.",
+        "Continuous commits, open-source repositories, and code collaboration across GitHub.",
     },
   },
 
@@ -113,13 +113,14 @@ export const siteConfig: SiteConfig = {
       title: "Languages",
       skills: [
         { name: "C++20", featured: true },
-        { name: "C", featured: false },
+        { name: "Rust", featured: true },
         { name: "TypeScript", featured: true },
-        { name: "JavaScript", featured: true },
+        { name: "JavaScript", featured: false },
+        { name: "C", featured: false },
       ],
     },
     {
-      title: "Systems & Core Tooling",
+      title: "Systems & Tooling",
       skills: [
         { name: "CMake", featured: true },
         { name: "Content-Addressable Storage (CAS)", featured: true },
@@ -130,7 +131,7 @@ export const siteConfig: SiteConfig = {
       ],
     },
     {
-      title: "Frontend & Applications",
+      title: "Frontend & Apps",
       skills: [
         { name: "React", featured: true },
         { name: "Next.js", featured: true },
@@ -140,7 +141,7 @@ export const siteConfig: SiteConfig = {
       ],
     },
     {
-      title: "DevOps & Build Infrastructure",
+      title: "DevOps & Build",
       skills: [
         { name: "GitHub Actions", featured: true },
         { name: "Git & GitHub", featured: true },
@@ -150,7 +151,7 @@ export const siteConfig: SiteConfig = {
       ],
     },
     {
-      title: "Core CS & Algorithms",
+      title: "CS & Algorithms",
       skills: [
         { name: "Data Structures & Algorithms", featured: true },
         { name: "Dynamic Programming", featured: true },
@@ -169,7 +170,7 @@ export const siteConfig: SiteConfig = {
       techStack: ["C++", "C++20"],
       githubUrl: "https://github.com/sagarkrjha/minigit",
       featured: true,
-      stars: 14,
+      stars: 13,
       forks: 0,
     },
     {
@@ -180,7 +181,29 @@ export const siteConfig: SiteConfig = {
       techStack: ["TypeScript", "React", "Electron"],
       githubUrl: "https://github.com/sagarkrjha/codeshelf",
       featured: true,
+      stars: 0,
+      forks: 0,
+    },
+    {
+      repoName: "level-db-cpp",
+      title: "LevelDB C++20",
+      description:
+        "A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB with write-ahead logging (WAL), SSTables, and memtable architecture.",
+      techStack: ["C++", "C++20"],
+      githubUrl: "https://github.com/sagarkrjha/level-db-cpp",
+      featured: true,
       stars: 1,
+      forks: 0,
+    },
+    {
+      repoName: "cp-workspace",
+      title: "CP Workspace",
+      description:
+        "Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O.",
+      techStack: ["C++"],
+      githubUrl: "https://github.com/sagarkrjha/cp-workspace",
+      featured: false,
+      stars: 2,
       forks: 0,
     },
     {
@@ -210,8 +233,8 @@ export const siteConfig: SiteConfig = {
       repoName: "sagarkrjha",
       title: "Automated GitHub Profile System",
       description:
-        "Automated developer profile powered by GitHub Actions, showcasing projects, engineering interests, GitHub activity, and LeetCode metrics.",
-      techStack: ["JavaScript"],
+        "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Rust, and pure Markdown.",
+      techStack: ["Rust"],
       githubUrl: "https://github.com/sagarkrjha/sagarkrjha",
       featured: false,
       stars: 0,

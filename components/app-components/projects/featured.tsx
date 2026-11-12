@@ -85,11 +85,11 @@ export const ProjectsSection = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {featuredOnly && (
               <Link
                 href="/projects"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground hover:text-foreground/80 border border-primary/20 bg-muted/30 hover:bg-muted/60 px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap shadow-xs"
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-foreground hover:text-foreground/80 border border-primary/20 bg-muted/30 hover:bg-muted/60 px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap shadow-xs"
               >
                 <span>View All Repos</span>
                 <FiArrowUpRight className="size-3.5" />

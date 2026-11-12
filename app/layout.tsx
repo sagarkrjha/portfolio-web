@@ -39,10 +39,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         inter.variable,
       )}
     >
-      <body className="min-h-full max-w-4xl mx-auto flex flex-col bg-background text-foreground">
+      <body className="min-h-full max-w-4xl mx-auto flex flex-col bg-background text-foreground px-4 sm:px-6 lg:px-8">
         <ThemeProvider>
           <Header />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 w-full">{children}</div>
           <Footer />
           <Terminal />
           <Foxy />
