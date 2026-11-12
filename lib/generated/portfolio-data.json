@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-11-12T04:13:32.864951292+00:00",
+  "lastUpdated": "2026-11-12T04:53:36.772066952+00:00",
   "profile": {
     "role": "Systems & Full-Stack Developer",
-    "bio": "Engineer specializing in TypeScript, C++20, Rust, Python. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
+    "bio": "Engineer specializing in TypeScript, C++20, Rust, Java. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 7,
     "totalStars": 16,
     "primaryLanguages": [
       "TypeScript",
       "C++20",
       "Rust",
-      "Python"
+      "Java"
     ],
     "activeProjectsCount": 3
   },
