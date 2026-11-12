@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-11T12:21:15.508Z",
+  "lastUpdated": "2026-11-12T02:15:48.500Z",
   "profile": {
     "role": "Systems & Full-Stack Developer",
-    "bio": "Engineer specializing in TypeScript, C++, JavaScript. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
+    "bio": "Engineer specializing in TypeScript, C++, Rust. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 7,
     "totalStars": 16,
     "primaryLanguages": [
       "TypeScript",
       "C++",
-      "JavaScript"
+      "Rust"
     ],
     "activeProjectsCount": 3
   },
@@ -48,7 +48,7 @@
           "site_admin": false
         },
         "html_url": "https://github.com/sagarkrjha/sagarkrjha",
-        "description": "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Node.js, and pure Markdown",
+        "description": "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Rust, and pure Markdown",
         "fork": false,
         "url": "https://api.github.com/repos/sagarkrjha/sagarkrjha",
         "forks_url": "https://api.github.com/repos/sagarkrjha/sagarkrjha/forks",
@@ -88,17 +88,17 @@
         "releases_url": "https://api.github.com/repos/sagarkrjha/sagarkrjha/releases{/id}",
         "deployments_url": "https://api.github.com/repos/sagarkrjha/sagarkrjha/deployments",
         "created_at": "2026-09-16T04:23:53Z",
-        "updated_at": "2026-11-11T05:34:40Z",
-        "pushed_at": "2026-11-11T12:18:56Z",
+        "updated_at": "2026-11-11T14:21:20Z",
+        "pushed_at": "2026-11-11T14:03:52Z",
         "git_url": "git://github.com/sagarkrjha/sagarkrjha.git",
         "ssh_url": "git@github.com:sagarkrjha/sagarkrjha.git",
         "clone_url": "https://github.com/sagarkrjha/sagarkrjha.git",
         "svn_url": "https://github.com/sagarkrjha/sagarkrjha",
         "homepage": "https://sagarkrjha.vercel.app",
-        "size": 178,
+        "size": 217,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "language": "JavaScript",
+        "language": "Rust",
         "has_issues": true,
         "has_projects": true,
         "has_downloads": false,
@@ -211,14 +211,14 @@
         "releases_url": "https://api.github.com/repos/sagarkrjha/portfolio-web/releases{/id}",
         "deployments_url": "https://api.github.com/repos/sagarkrjha/portfolio-web/deployments",
         "created_at": "2026-10-01T09:47:41Z",
-        "updated_at": "2026-11-11T04:49:00Z",
-        "pushed_at": "2026-11-11T03:48:55Z",
+        "updated_at": "2026-11-11T13:21:47Z",
+        "pushed_at": "2026-11-11T12:21:44Z",
         "git_url": "git://github.com/sagarkrjha/portfolio-web.git",
         "ssh_url": "git@github.com:sagarkrjha/portfolio-web.git",
         "clone_url": "https://github.com/sagarkrjha/portfolio-web.git",
         "svn_url": "https://github.com/sagarkrjha/portfolio-web",
         "homepage": "https://sagarkrjha.vercel.app",
-        "size": 951,
+        "size": 952,
         "stargazers_count": 0,
         "watchers_count": 0,
         "language": "TypeScript",
@@ -1154,10 +1154,10 @@
   },
   "leetcode": {
     "username": "devsagarkrjha",
-    "totalSolved": 710,
-    "easySolved": 204,
-    "mediumSolved": 358,
-    "hardSolved": 148,
-    "totalQuestions": 4069
+    "totalSolved": 722,
+    "easySolved": 208,
+    "mediumSolved": 364,
+    "hardSolved": 150,
+    "totalQuestions": 4110
   }
 }
