@@ -59,7 +59,7 @@ export const ProjectsSection = ({
   }, [baseProjects, searchQuery, selectedTech]);
 
   return (
-    <section id="projects" className="border-t py-16 sm:py-20">
+    <section id="projects" className={featuredOnly ? "border-t py-16 sm:py-20" : "py-8 sm:py-10"}>
       <div>
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b">
           <div>
