@@ -6,4 +6,5 @@ export * from "./terminal";
 export * from "./leetcode";
 export * from "./skills";
 export * from "./activity";
+export * from "./resume";
 export * from "./foxy/foxy";

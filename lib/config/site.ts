@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
     { label: "About", href: "/about" },
     { label: "Projects", href: "/projects" },
     { label: "Blog", href: "/blog" },
-    { label: "Resume", href: "/sagar-resume.pdf", external: true, download: "sagar-resume.pdf" },
+    { label: "Resume", href: "/resume" },
   ],
 
   socialLinks: [
