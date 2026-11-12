@@ -1,1 +1,1 @@
-export * from "./resume-viewer";
+export * from "./resume-pdf-viewer";
