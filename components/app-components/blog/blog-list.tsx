@@ -13,44 +13,49 @@ interface BlogListProps {
 
 export const BlogList = ({ posts }: BlogListProps) => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const showViewToggle = posts.length > 2;
 
   return (
     <div className="mt-8 space-y-6">
-      {/* View Switcher Controls */}
-      <div className="flex items-center justify-between pb-4 border-b border-border/60">
-        <span className="text-xs text-muted-foreground font-mono">
-          Showing {posts.length} technical write-up{posts.length === 1 ? "" : "s"}
-        </span>
+      {/* Header controls — toggle is hidden when not needed or on small screens */}
+      {posts.length > 0 && (
+        <div className="flex items-center justify-between pb-4 border-b border-border/60">
+          <span className="text-xs text-muted-foreground font-mono">
+            Showing {posts.length} technical write-up{posts.length === 1 ? "" : "s"}
+          </span>
 
-        <div className="flex items-center gap-1 p-1 rounded-lg border border-border bg-muted/40 text-xs">
-          <button
-            type="button"
-            onClick={() => setViewMode("grid")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium ${
-              viewMode === "grid"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            aria-label="Grid view"
-          >
-            <FiGrid className="size-3.5" />
-            <span className="hidden sm:inline">Grid</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("list")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium ${
-              viewMode === "list"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            aria-label="List view"
-          >
-            <FiList className="size-3.5" />
-            <span className="hidden sm:inline">List</span>
-          </button>
+          {showViewToggle && (
+            <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg border border-border bg-muted/40 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium ${
+                  viewMode === "grid"
+                    ? "bg-background text-foreground shadow-xs font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                aria-label="Grid view"
+              >
+                <FiGrid className="size-3.5" />
+                <span>Grid</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer font-medium ${
+                  viewMode === "list"
+                    ? "bg-background text-foreground shadow-xs font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                aria-label="List view"
+              >
+                <FiList className="size-3.5" />
+                <span>List</span>
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Animated Blog Cards Container */}
       <motion.div
