@@ -1,49 +1,32 @@
 {
-  "lastUpdated": "2026-11-13T04:10:31.930018231+00:00",
+  "lastUpdated": "2026-11-13T18:41:24.848311169+00:00",
   "profile": {
     "role": "Systems & Full-Stack Developer",
-    "bio": "Engineer specializing in TypeScript, Rust, C++20, Java. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
+    "bio": "Engineer specializing in TypeScript, Rust, C++20, Python. Architect of cp-workspace (⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 7,
     "totalStars": 16,
     "primaryLanguages": [
       "TypeScript",
       "Rust",
       "C++20",
-      "Java"
+      "Python"
     ],
-    "activeProjectsCount": 3
+    "activeProjectsCount": 4
   },
   "github": {
     "username": "sagarkrjha",
     "pinnedRepos": [
       "minigit",
       "codeshelf",
-      "level-db-cpp"
+      "level-db-cpp",
+      "cp-workspace"
     ],
     "repos": [
-      {
-        "name": "portfolio-web",
-        "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
-        "html_url": "https://github.com/sagarkrjha/portfolio-web",
-        "homepage": "https://sagarkrjha.vercel.app",
-        "stargazers_count": 0,
-        "forks_count": 0,
-        "language": "TypeScript",
-        "topics": [
-          "developer-portfolio",
-          "nextjs",
-          "portfolio",
-          "react",
-          "typescript"
-        ],
-        "fork": false,
-        "updated_at": "2026-11-12T10:12:04Z"
-      },
       {
         "name": "sagarkrjha",
         "description": "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Rust, and pure Markdown",
         "html_url": "https://github.com/sagarkrjha/sagarkrjha",
-        "homepage": "https://sagarkrjha.vercel.app",
+        "homepage": "https://github.com/sagarkrjha",
         "stargazers_count": 0,
         "forks_count": 0,
         "language": "Rust",
@@ -62,7 +45,45 @@
           "systems-programming"
         ],
         "fork": false,
-        "updated_at": "2026-11-12T06:12:45Z"
+        "updated_at": "2026-11-13T15:25:34Z"
+      },
+      {
+        "name": "cp-workspace",
+        "description": "⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O",
+        "html_url": "https://github.com/sagarkrjha/cp-workspace",
+        "homepage": "",
+        "stargazers_count": 2,
+        "forks_count": 0,
+        "language": "C++",
+        "topics": [
+          "c-plus-plus",
+          "codeforces",
+          "competitive-programming",
+          "cpp",
+          "leetcode",
+          "vscode",
+          "workspace"
+        ],
+        "fork": false,
+        "updated_at": "2026-11-13T15:24:33Z"
+      },
+      {
+        "name": "portfolio-web",
+        "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
+        "html_url": "https://github.com/sagarkrjha/portfolio-web",
+        "homepage": "https://sagarkrjha.vercel.app",
+        "stargazers_count": 0,
+        "forks_count": 0,
+        "language": "TypeScript",
+        "topics": [
+          "developer-portfolio",
+          "nextjs",
+          "portfolio",
+          "react",
+          "typescript"
+        ],
+        "fork": false,
+        "updated_at": "2026-11-12T10:12:04Z"
       },
       {
         "name": "act",
@@ -144,26 +165,6 @@
         "updated_at": "2026-10-24T02:32:32Z"
       },
       {
-        "name": "cp-workspace",
-        "description": "⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O",
-        "html_url": "https://github.com/sagarkrjha/cp-workspace",
-        "homepage": "https://github.com/sagarkrjha/cp-workspace",
-        "stargazers_count": 2,
-        "forks_count": 0,
-        "language": "C++",
-        "topics": [
-          "c-plus-plus",
-          "codeforces",
-          "competitive-programming",
-          "cpp",
-          "leetcode",
-          "vscode",
-          "workspace"
-        ],
-        "fork": false,
-        "updated_at": "2026-10-20T05:31:37Z"
-      },
-      {
         "name": "next-mdx-starter",
         "description": "Reusable full-stack starter template with Next.js 16 (App Router), React 19, Tailwind CSS v4, Biome, shadcn/ui, and @next/mdx support",
         "html_url": "https://github.com/sagarkrjha/next-mdx-starter",
@@ -197,18 +198,24 @@
     ],
     "repoBadges": [
       {
+        "name": "sagarkrjha",
+        "techStack": [
+          "Rust"
+        ]
+      },
+      {
+        "name": "cp-workspace",
+        "techStack": [
+          "C++20"
+        ]
+      },
+      {
         "name": "portfolio-web",
         "techStack": [
           "TypeScript",
           "Rust",
           "Next.js",
           "Tailwind CSS"
-        ]
-      },
-      {
-        "name": "sagarkrjha",
-        "techStack": [
-          "Rust"
         ]
       },
       {
@@ -238,12 +245,6 @@
           "Java",
           "Go",
           "JavaScript"
-        ]
-      },
-      {
-        "name": "cp-workspace",
-        "techStack": [
-          "C++20"
         ]
       },
       {
