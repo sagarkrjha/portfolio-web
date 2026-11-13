@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { FiCode, FiBriefcase, FiMail, FiLinkedin, FiArrowUpRight } from "react-icons/fi";
+import {
+  FiCode,
+  FiBriefcase,
+  FiMail,
+  FiLinkedin,
+  FiCpu,
+  FiDatabase,
+  FiTerminal,
+  FiLayers,
+} from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 import { SiGithub, SiLeetcode, SiX, SiDiscord, SiInstagram } from "react-icons/si";
 import { motion } from "motion/react";
@@ -9,12 +18,43 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { MotionCard } from "@/components/ui/motion-card";
+import { ShowcaseCard } from "@/components/ui/showcase-card";
 import { siteConfig, aboutConfig } from "@/lib/config";
 import type { DynamicProfileMetrics } from "@/lib/services/github";
 
 interface AboutViewProps {
   metrics: DynamicProfileMetrics;
 }
+
+const getFocusArtwork = (title: string) => {
+  const lower = title.toLowerCase();
+  if (lower.includes("systems")) {
+    return {
+      icon: FiCpu,
+      tag: "SYSTEMS ARCHITECTURE",
+      gradient: "from-primary/15 via-card to-background",
+    };
+  }
+  if (lower.includes("storage") || lower.includes("tools")) {
+    return {
+      icon: FiDatabase,
+      tag: "STORAGE & CAS",
+      gradient: "from-emerald-500/10 via-card to-background",
+    };
+  }
+  if (lower.includes("stack") || lower.includes("architecture")) {
+    return {
+      icon: FiLayers,
+      tag: "FULL-STACK ECOSYSTEM",
+      gradient: "from-cyan-500/10 via-card to-background",
+    };
+  }
+  return {
+    icon: FiTerminal,
+    tag: "ALGORITHMS & CP",
+    gradient: "from-primary/10 via-card to-background",
+  };
+};
 
 export const AboutView = ({ metrics }: AboutViewProps) => {
   return (
@@ -26,7 +66,7 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
         transition={{ duration: 0.4 }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <Badge variant="outline">About</Badge>
+          <Badge variant="outline" className="rounded-none">About</Badge>
           <span className="text-xs text-muted-foreground font-mono">{metrics.role}</span>
         </div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{aboutConfig.title}</h1>
@@ -52,7 +92,7 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
                 asChild
                 size="sm"
                 variant="outline"
-                className="text-xs hover:border-primary/40 hover:text-primary transition-colors cursor-pointer"
+                className="text-xs rounded-none hover:border-primary/40 hover:text-primary transition-colors cursor-pointer"
               >
                 <Link
                   href={s.href}
@@ -70,7 +110,7 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
 
       <Separator />
 
-      {/* Focus & Engineering */}
+      {/* Focus & Engineering: Standardized ShowcaseCard */}
       <motion.section
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -78,22 +118,28 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
         transition={{ duration: 0.4 }}
       >
         <h2 className="text-xl font-semibold tracking-tight mb-6">Core Focus</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {aboutConfig.focus.map((item) => (
-            <MotionCard key={item.title} className="p-4.5">
-              <div className="mb-3 flex size-8 items-center justify-center rounded-lg border bg-muted/40 text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                <FiCode className="size-4" />
-              </div>
-              <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.description}</p>
-            </MotionCard>
-          ))}
+        <div className="grid gap-5 sm:grid-cols-2">
+          {aboutConfig.focus.map((item) => {
+            const artwork = getFocusArtwork(item.title);
+
+            return (
+              <ShowcaseCard
+                key={item.title}
+                title={item.title}
+                description={item.description}
+                icon={artwork.icon}
+                gradient={artwork.gradient}
+                headerBadge={{
+                  text: artwork.tag,
+                  variant: "neutral",
+                }}
+              />
+            );
+          })}
         </div>
       </motion.section>
 
-      {/* Skills & Technologies */}
+      {/* Technical Stack: Clean categorized layout */}
       <motion.section
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -103,7 +149,7 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
         <h2 className="text-xl font-semibold tracking-tight mb-6">Technical Stack</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {siteConfig.skills.map((category) => (
-            <MotionCard key={category.title} className="p-4.5">
+            <MotionCard key={category.title} className="p-5">
               <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 group-hover:text-primary transition-colors">
                 {category.title}
               </h3>
@@ -112,7 +158,7 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
                   <Badge
                     key={s.name}
                     variant={s.featured ? "secondary" : "outline"}
-                    className={`text-xs py-0.5 transition-colors ${
+                    className={`text-xs py-0.5 rounded-none transition-colors ${
                       s.featured
                         ? "font-medium bg-primary/10 text-primary border border-primary/20"
                         : "text-muted-foreground group-hover:border-primary/20"
@@ -147,17 +193,17 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
                 </span>
                 <span className="text-xs text-muted-foreground font-mono">{exp.period}</span>
               </div>
-              <ul className="mt-3 text-xs text-muted-foreground space-y-1.5 list-disc list-inside">
+              <ul className="mt-3 text-xs text-muted-foreground space-y-2 list-disc list-inside">
                 {exp.description.map((desc, i) => (
-                  <li key={i}>{desc}</li>
+                  <li key={i} className="leading-relaxed">{desc}</li>
                 ))}
               </ul>
               {exp.technologies && (
-                <div className="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-border/40">
+                <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-border/40">
                   {exp.technologies.map((t) => (
                     <span
                       key={t}
-                      className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded text-muted-foreground group-hover:border-primary/20 border border-transparent transition-colors"
+                      className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded-none text-muted-foreground group-hover:border-primary/20 border border-transparent transition-colors"
                     >
                       {t}
                     </span>

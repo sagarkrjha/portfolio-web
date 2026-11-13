@@ -13,17 +13,16 @@ export const heroConfig: HeroConfig = {
 
   actions: [
     {
-      label: "View Projects",
-      href: "#projects",
+      label: "Explore Work",
+      href: "/projects",
       variant: "default",
+      icon: "arrow",
     },
     {
-      label: "Download Resume",
-      href: "/sagar-resume.pdf",
+      label: "View Resume",
+      href: "/resume",
       variant: "outline",
       icon: "resume",
-      download: "sagar-resume.pdf",
-      external: true,
     },
   ],
 
@@ -35,11 +34,11 @@ export const heroConfig: HeroConfig = {
 
   media: {
     src: "/cover-image.jpg",
-    alt: "",
+    alt: "Workspace banner",
   },
 
   avatar: {
     src: "/avatar.jpg",
-    alt: "",
+    alt: "Sagar Kumar Jha",
   },
 };

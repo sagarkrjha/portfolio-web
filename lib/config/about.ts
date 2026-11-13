@@ -3,30 +3,30 @@ import type { AboutSectionConfig } from "@/lib/types";
 export const aboutConfig: AboutSectionConfig = {
   id: "about",
   eyebrow: "About",
-  title: "Systems & full-stack software engineer.",
+  title: "Systems & Full-Stack Software Engineer",
   description:
-    "I specialize in low-level systems programming, version control internals, developer tooling, and distributed systems. My engineering approach is driven by understanding complex abstractions from first principles—spanning high-performance C++20 storage engines, Rust-based tooling, and modern full-stack web and desktop architectures.",
+    "I engineer low-level systems, storage engines, and developer tooling from first principles with modern C++20, Rust, and TypeScript.",
 
   focus: [
     {
       title: "Systems Programming",
       description:
-        "Building reliable, memory-safe software in modern C++20 and Rust, focusing on cache-conscious data structures, POSIX system calls, and high-throughput I/O.",
+        "Building reliable, memory-safe software in modern C++20 and Rust with cache-conscious data structures and high-throughput POSIX I/O.",
     },
     {
-      title: "Developer Tools & Storage",
+      title: "Storage & Developer Tools",
       description:
-        "Designing content-addressable storage (CAS), Git-compatible engines, Myers O(ND) diff algorithms, packfile streaming, and cross-platform CMake build systems.",
+        "Designing content-addressable storage (CAS), LSM-trees, Eugene Myers diff engines, Git packfile protocols, and CMake build systems.",
     },
     {
       title: "Full-Stack Architecture",
       description:
-        "Developing offline-first desktop and web applications with TypeScript, React 19, Next.js, and Electron within optimized pnpm monorepo structures.",
+        "Engineering offline-first applications across web, desktop (Electron), and VS Code with TypeScript, React 19, and Next.js.",
     },
     {
-      title: "Competitive Programming",
+      title: "Algorithms & Problem Solving",
       description:
-        "LeetCode Guardian (2382 contest rating, top 0.36% globally) with 715+ algorithmic problems solved across graphs, trees, and dynamic programming.",
+        "LeetCode Guardian (2382 contest rating, top 0.36% globally) with 720+ algorithmic challenges solved across graphs, trees, and DP.",
     },
   ],
 };

@@ -14,7 +14,7 @@ interface MotionCardProps extends React.ComponentProps<typeof motion.div> {
 export const MotionCard = ({
   children,
   className,
-  enableTilt = true,
+  enableTilt = false,
   enableSpotlight = true,
   ...props
 }: MotionCardProps) => {
@@ -65,12 +65,11 @@ export const MotionCard = ({
       style={{
         rotateX: enableTilt ? rotateX : 0,
         rotateY: enableTilt ? rotateY : 0,
-        transformStyle: "preserve-3d",
       }}
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 350, damping: 25 }}
       className={cn(
-        "group relative flex flex-col justify-between rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs transition-colors hover:border-primary/50 overflow-hidden",
+        "group relative flex flex-col justify-between rounded-none border border-border/80 bg-card p-4 sm:p-5 shadow-xs transition-colors hover:border-primary/50 overflow-hidden",
         className,
       )}
       {...props}
@@ -78,7 +77,7 @@ export const MotionCard = ({
       {/* Dynamic Aurora Spotlight Glow on Cursor Hover */}
       {enableSpotlight && (
         <div
-          className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          className="pointer-events-none absolute -inset-px rounded-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background: `radial-gradient(350px circle at ${mouseX.get()}px ${mouseY.get()}px, var(--color-primary, #34d399) 0%, transparent 70%)`,
             opacity: isHovered ? 0.08 : 0,
