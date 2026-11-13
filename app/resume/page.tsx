@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ResumePdfViewer } from "@/components/app-components/resume/resume-pdf-viewer";
+import { ResumePdfViewer } from "@/components/app-components/resume";
 
 export const metadata: Metadata = {
   title: "Resume | Sagar Kumar Jha",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ResumePage() {
   return (
-    <div className="py-4 sm:py-6">
+    <div className="py-2 sm:py-4">
       <ResumePdfViewer />
     </div>
   );
