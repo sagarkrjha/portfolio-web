@@ -1,19 +1,22 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-
 import { SiGithub, SiLeetcode, SiX, SiDiscord, SiInstagram } from "react-icons/si";
 import {
   FiMail,
   FiLinkedin,
   FiGlobe,
   FiDownload,
-  FiExternalLink,
   FiArrowRight,
+  FiTerminal,
+  FiCpu,
+  FiLayers,
+  FiGitBranch,
 } from "react-icons/fi";
-
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { heroConfig, siteConfig } from "@/lib/config";
-import cachedData from "@/lib/generated/portfolio-data.json";
 import type { DynamicProfileMetrics } from "@/lib/services/github";
 import type { LeetCodeStats } from "@/lib/services/leetcode";
 
@@ -32,13 +35,15 @@ interface HeroComponentProps {
   leetCodeStats?: LeetCodeStats | null;
 }
 
-const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
+export const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
   const displayRole = metrics?.role || heroConfig.role;
   const displayBio = metrics?.bio || heroConfig.description;
+
   return (
-    <section className="py-6 sm:py-10">
-      <div className="relative mt-4">
-        <div className="relative aspect-16/5 overflow-hidden rounded-2xl border bg-muted/60 shadow-xs">
+    <section className="py-6 sm:py-10 space-y-8">
+      {/* ─── Architectural Cover & Avatar Canvas ─── */}
+      <div className="relative">
+        <div className="relative aspect-16/5 overflow-hidden rounded-none border border-border/80 bg-muted/60 shadow-xs">
           <Image
             src={heroConfig.media.src}
             alt={heroConfig.media.alt}
@@ -46,10 +51,12 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
             priority
             className="object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent pointer-events-none" />
         </div>
 
-        <div className="absolute -bottom-8 left-6">
-          <div className="relative size-20 overflow-hidden rounded-2xl border-4 border-background bg-muted shadow-md sm:size-24">
+        {/* Profile Avatar with Sharp Brutalist Border */}
+        <div className="absolute -bottom-7 sm:-bottom-8 left-5 sm:left-6">
+          <div className="relative size-20 sm:size-24 overflow-hidden rounded-none border-2 border-background bg-muted shadow-md">
             <Image
               src={heroConfig.avatar.src}
               alt={heroConfig.avatar.alt}
@@ -60,119 +67,119 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
         </div>
       </div>
 
-      <div className="mt-14 space-y-4">
+      {/* ─── Profile Details & Concise One-Liner Description ─── */}
+      <div className="pt-2 space-y-4">
+        {/* Availability Badge */}
         {heroConfig.availability && (
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <div className="inline-flex items-center gap-2 rounded-none border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-mono font-medium text-primary">
             <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-primary" />
             </span>
             <span>{heroConfig.availability}</span>
           </div>
         )}
 
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
-          {heroConfig.greeting}{" "}
-          <span className="text-foreground underline decoration-primary/30 decoration-wavy decoration-1 underline-offset-4">
+        {/* Name and Designation */}
+        <div className="space-y-1.5">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground font-sans">
             {heroConfig.name}
-          </span>
-        </h1>
+          </h1>
+          <p className="text-sm sm:text-base font-mono font-semibold text-primary">
+            {displayRole}
+          </p>
+        </div>
 
-        <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          <strong className="font-semibold text-foreground">{displayRole}</strong> — {displayBio}
+        {/* Crisp One-Liner Professional Description */}
+        <p className="max-w-3xl text-sm sm:text-base leading-relaxed text-muted-foreground font-sans">
+          {displayBio}
         </p>
 
-        {/* Live Dynamic Status Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
-          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
-            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
-              Active Repositories
+        {/* ─── Redesigned Metrics Grid (Rounded-none, Architectural) ─── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
+          <div className="group rounded-none border border-border/80 bg-card p-3.5 shadow-xs transition-all duration-200 hover:border-primary/50">
+            <div className="flex items-center justify-between text-muted-foreground mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider">Repositories</span>
+              <FiGitBranch className="size-3.5 text-primary" />
+            </div>
+            <div className="text-xl font-bold font-mono tracking-tight text-foreground">
+              {metrics ? metrics.totalRepos : (siteConfig.github.repositoryCount ?? 9)}
+            </div>
+            <span className="text-[10px] text-muted-foreground block mt-0.5 font-mono">
+              GitHub Sync
             </span>
-            <span className="text-lg font-bold tracking-tight text-foreground">
-              {metrics ? metrics.totalRepos : (siteConfig.github.repositoryCount ?? 4)}
-            </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">Live GitHub sync</span>
           </div>
 
-          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
-            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
-              Specialization
+          <div className="group rounded-none border border-border/80 bg-card p-3.5 shadow-xs transition-all duration-200 hover:border-primary/50">
+            <div className="flex items-center justify-between text-muted-foreground mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider">Systems</span>
+              <FiCpu className="size-3.5 text-primary" />
+            </div>
+            <div className="text-sm font-semibold tracking-tight text-foreground truncate">
+              C++20 &middot; Rust
+            </div>
+            <span className="text-[10px] text-muted-foreground block mt-0.5 font-mono">
+              Storage &amp; CAS
             </span>
-            <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
-              Systems &amp; CAS Tools
-            </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">Low-level &amp; Tools</span>
           </div>
 
-          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
-            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
-              Core Languages
+          <div className="group rounded-none border border-border/80 bg-card p-3.5 shadow-xs transition-all duration-200 hover:border-primary/50">
+            <div className="flex items-center justify-between text-muted-foreground mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider">Full-Stack</span>
+              <FiLayers className="size-3.5 text-primary" />
+            </div>
+            <div className="text-sm font-semibold tracking-tight text-foreground truncate">
+              TypeScript &middot; React
+            </div>
+            <span className="text-[10px] text-muted-foreground block mt-0.5 font-mono">
+              Web &amp; Electron
             </span>
-            <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
-              {metrics && metrics.primaryLanguages.length > 0
-                ? metrics.primaryLanguages.slice(0, 3).join(", ")
-                : (siteConfig.statusCards?.coreLanguagesFallback ?? "C++, TypeScript")}
-            </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">Systems &amp; Web</span>
           </div>
 
-          <div className="group rounded-xl border border-border/80 bg-card/60 p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-card hover:shadow-md">
-            <span className="text-[11px] font-medium text-muted-foreground block group-hover:text-primary/90 transition-colors">
-              Architecture Focus
-            </span>
-            <span className="text-sm font-semibold tracking-tight text-foreground truncate block">
-              {siteConfig.statusCards?.architectureFocus.title ?? "Distributed Tools"}
-            </span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">
-              {siteConfig.statusCards?.architectureFocus.subtitle ?? "Clean Architecture"}
+          <div className="group rounded-none border border-border/80 bg-card p-3.5 shadow-xs transition-all duration-200 hover:border-primary/50">
+            <div className="flex items-center justify-between text-muted-foreground mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider">LeetCode</span>
+              <SiLeetcode className="size-3.5 text-amber-500" />
+            </div>
+            <div className="text-xl font-bold font-mono tracking-tight text-foreground">
+              2382
+            </div>
+            <span className="text-[10px] text-muted-foreground block mt-0.5 font-mono">
+              Guardian &middot; Top 0.36%
             </span>
           </div>
         </div>
       </div>
 
-      {/* Action buttons and social links row */}
-      <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-        {heroConfig.actions && heroConfig.actions.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2.5">
-            {heroConfig.actions.map((act) => {
-              const Icon =
-                act.icon === "resume"
-                  ? FiDownload
-                  : act.icon === "arrow"
-                    ? FiArrowRight
-                    : act.external && !act.download
-                      ? FiExternalLink
-                      : null;
+      {/* ─── Actions & Social Links Row ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 border-t border-border/60">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            asChild
+            size="sm"
+            variant="default"
+            className="text-xs font-mono font-medium rounded-none cursor-pointer"
+          >
+            <Link href="/projects">
+              Explore Projects
+              <FiArrowRight className="ml-1.5 size-3.5" />
+            </Link>
+          </Button>
 
-              return (
-                <Button
-                  key={act.label}
-                  asChild
-                  size="sm"
-                  variant={act.variant ?? "default"}
-                  className="text-xs font-medium cursor-pointer"
-                >
-                  <Link
-                    href={act.href}
-                    target={act.external ? "_blank" : undefined}
-                    rel={act.external ? "noreferrer" : undefined}
-                    download={
-                      typeof act.download === "string"
-                        ? act.download
-                        : act.download
-                          ? true
-                          : undefined
-                    }
-                  >
-                    {Icon ? <Icon className="mr-1.5 size-3.5" /> : null}
-                    {act.label}
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
-        )}
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="text-xs font-mono font-medium rounded-none cursor-pointer hover:border-primary/40 hover:text-primary transition-colors"
+          >
+            <Link href="/resume">
+              <FiDownload className="mr-1.5 size-3.5" />
+              View Resume
+            </Link>
+          </Button>
+        </div>
 
+        {/* Social Icons */}
         <div className="flex items-center gap-1">
           {heroConfig.socials.map((social) => {
             const Icon = socialIcons[social.platform] ?? FiGlobe;
@@ -183,7 +190,7 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
                 asChild
                 size="icon"
                 variant="ghost"
-                className="text-muted-foreground hover:text-foreground size-8"
+                className="text-muted-foreground hover:text-foreground size-8 rounded-none"
               >
                 <Link
                   href={social.href}
@@ -192,7 +199,7 @@ const HeroComponent = ({ metrics, leetCodeStats }: HeroComponentProps) => {
                   aria-label={social.label}
                   title={social.label}
                 >
-                  {Icon ? <Icon className="size-4" /> : null}
+                  <Icon className="size-4" />
                 </Link>
               </Button>
             );

@@ -9,3 +9,4 @@ export {
   CardTitle,
 } from "./card";
 export { MotionCard } from "./motion-card";
+export { ShowcaseCard, type ShowcaseCardProps } from "./showcase-card";

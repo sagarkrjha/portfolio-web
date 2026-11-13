@@ -12,17 +12,17 @@ export default function Icon() {
     <div
       style={{
         fontSize: 18,
-        background: "#09090b",
+        background: "#0d1b17",
         width: "100%",
         height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "#f59e0b",
-        borderRadius: "8px",
-        fontWeight: 800,
+        color: "#34d399",
+        borderRadius: "0px",
+        fontWeight: 900,
         fontFamily: "monospace",
-        border: "1.5px solid rgba(245, 158, 11, 0.4)",
+        border: "1.5px solid rgba(52, 211, 153, 0.45)",
       }}
     >
       S

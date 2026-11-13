@@ -4,7 +4,7 @@ export const siteConfig: SiteConfig = {
   title: "Sagar Kumar Jha | Software Engineer",
   name: "Sagar Kumar Jha",
   role: "Systems & Full-Stack Engineer",
-  bio: "Building robust systems, developer tooling, and modern software from first principles with modern C++20 and TypeScript.",
+  bio: "Architecting high-throughput storage engines, version control internals, and developer tools across modern C++20, Rust, and TypeScript.",
   location: "Delhi, India",
   availability: "Open to engineering roles & collaborations",
 
@@ -61,11 +61,8 @@ export const siteConfig: SiteConfig = {
   },
 
   terminal: {
-    /** Shell username based on GitHub handle */
     unixUser: "sagarkrjha",
-    /** Machine / domain hostname */
     hostname: "github",
-    /** Virtual home directory path based on GitHub username */
     homePath: "~",
   },
 
@@ -115,48 +112,42 @@ export const siteConfig: SiteConfig = {
         { name: "C++20", featured: true },
         { name: "Rust", featured: true },
         { name: "TypeScript", featured: true },
-        { name: "JavaScript", featured: false },
-        { name: "C", featured: false },
+        { name: "C", featured: true },
+        { name: "Go", featured: false },
+        { name: "Python", featured: false },
+        { name: "SQL", featured: false },
       ],
     },
     {
-      title: "Systems & Tooling",
+      title: "Systems & Architecture",
       skills: [
-        { name: "CMake", featured: true },
-        { name: "Content-Addressable Storage (CAS)", featured: true },
-        { name: "Git Internals", featured: true },
-        { name: "OpenSSL / SHA-256", featured: false },
-        { name: "Linux / POSIX", featured: true },
-        { name: "Windows API", featured: false },
+        { name: "LSM-Trees & WAL", featured: true },
+        { name: "CAS (Content-Addressable Storage)", featured: true },
+        { name: "SSTables & Bloom Filters", featured: true },
+        { name: "Myers Diff Algorithm", featured: true },
+        { name: "Linux / POSIX APIs", featured: true },
+        { name: "Git Wire Protocol", featured: false },
       ],
     },
     {
-      title: "Frontend & Apps",
+      title: "Full-Stack & Apps",
       skills: [
-        { name: "React", featured: true },
+        { name: "React 19", featured: true },
         { name: "Next.js", featured: true },
         { name: "Tailwind CSS", featured: true },
-        { name: "Electron", featured: true },
         { name: "Node.js", featured: true },
+        { name: "Electron", featured: true },
+        { name: "PostgreSQL", featured: false },
       ],
     },
     {
-      title: "DevOps & Build",
+      title: "DevOps & Infrastructure",
       skills: [
-        { name: "GitHub Actions", featured: true },
-        { name: "Git & GitHub", featured: true },
-        { name: "Docker", featured: false },
-        { name: "pnpm", featured: false },
+        { name: "CMake", featured: true },
+        { name: "Docker", featured: true },
+        { name: "GitHub Actions CI/CD", featured: true },
+        { name: "pnpm Workspaces", featured: false },
         { name: "GCC / Clang / MSVC", featured: false },
-      ],
-    },
-    {
-      title: "CS & Algorithms",
-      skills: [
-        { name: "Data Structures & Algorithms", featured: true },
-        { name: "Dynamic Programming", featured: true },
-        { name: "Graph Algorithms (DAG)", featured: true },
-        { name: "System Design", featured: false },
       ],
     },
   ],
@@ -166,7 +157,7 @@ export const siteConfig: SiteConfig = {
       repoName: "minigit",
       title: "MiniGit",
       description:
-        "Git-compatible version control system implemented from first principles in modern C++20. Features SHA-256 content-addressable storage, two-phase staging index, dynamic programming diff calculation, and branch management.",
+        "Git-compatible version control system in C++20 with SHA-256 CAS, Myers diff, and Smart HTTP packfile networking.",
       techStack: ["C++", "C++20"],
       githubUrl: "https://github.com/sagarkrjha/minigit",
       featured: true,
@@ -177,7 +168,7 @@ export const siteConfig: SiteConfig = {
       repoName: "codeshelf",
       title: "CodeShelf",
       description:
-        "Developer-focused snippet knowledge system across desktop, VS Code, and web. Built with TypeScript, React 19, Electron, and a pnpm monorepo architecture with semantic search and Web Streams compression.",
+        "Local-first developer snippet knowledge system across web, desktop, and VS Code with weighted lexical search.",
       techStack: ["TypeScript", "React", "Electron"],
       githubUrl: "https://github.com/sagarkrjha/codeshelf",
       featured: true,
@@ -188,7 +179,7 @@ export const siteConfig: SiteConfig = {
       repoName: "level-db-cpp",
       title: "LevelDB C++20",
       description:
-        "A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB with write-ahead logging (WAL), SSTables, and memtable architecture.",
+        "Fast C++20 LSM-tree storage engine with chunked WAL, SkipList memtable, Bloom filters, and leveled compaction.",
       techStack: ["C++", "C++20"],
       githubUrl: "https://github.com/sagarkrjha/level-db-cpp",
       featured: true,
@@ -199,7 +190,7 @@ export const siteConfig: SiteConfig = {
       repoName: "cp-workspace",
       title: "CP Workspace",
       description:
-        "Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O.",
+        "Cross-platform competitive programming setup for C++ in VS Code with automated compiler detection and fast I/O.",
       techStack: ["C++"],
       githubUrl: "https://github.com/sagarkrjha/cp-workspace",
       featured: false,
@@ -210,7 +201,7 @@ export const siteConfig: SiteConfig = {
       repoName: "portfolio-web",
       title: "Portfolio Website",
       description:
-        "Modern developer portfolio featuring automated GitHub sync, LeetCode metrics integration, interactive modal terminal, and an MDX engineering blog.",
+        "Config-driven engineering portfolio built with Next.js 16, React 19, Tailwind CSS, and automated GitHub CI telemetry.",
       techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
       githubUrl: "https://github.com/sagarkrjha/portfolio-web",
       liveUrl: "https://sagarkrjha.vercel.app",
@@ -222,7 +213,7 @@ export const siteConfig: SiteConfig = {
       repoName: "next-mdx-starter",
       title: "Next.js MDX Starter",
       description:
-        "A modern, reusable starter template built with Next.js (App Router), Tailwind CSS v4, Biome, shadcn/ui, Radix UI, next-themes, and Hugeicons.",
+        "Modular developer blog and documentation starter with Next.js App Router, Tailwind CSS, Biome, and next-themes.",
       techStack: ["Next.js", "TypeScript", "Tailwind CSS"],
       githubUrl: "https://github.com/sagarkrjha/next-mdx-starter",
       featured: false,
@@ -233,7 +224,7 @@ export const siteConfig: SiteConfig = {
       repoName: "sagarkrjha",
       title: "Automated GitHub Profile System",
       description:
-        "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Rust, and pure Markdown.",
+        "Automated developer profile README engine dynamically compiled via GitHub Actions, native Rust, and Markdown.",
       techStack: ["Rust"],
       githubUrl: "https://github.com/sagarkrjha/sagarkrjha",
       featured: false,
@@ -244,19 +235,19 @@ export const siteConfig: SiteConfig = {
 
   hobbies: [
     {
-      title: "Low-Level Systems",
+      title: "Systems Programming",
       description:
-        "Exploring memory management, cache-conscious data structures, and POSIX system calls.",
+        "Designing custom memory allocators, cache-conscious data layouts, and high-throughput POSIX system calls.",
     },
     {
       title: "Competitive Programming",
       description:
-        "LeetCode Guardian (2382 rating) with 715+ algorithmic problems solved across data structures.",
+        "LeetCode Guardian (2382 rating, top 0.36% globally) with 720+ algorithmic challenges solved.",
     },
     {
       title: "Developer Infrastructure",
       description:
-        "Building cross-platform CI/CD automation, reproducible builds, and developer tooling.",
+        "Building cross-platform CI/CD automation matrix pipelines, CMake toolchains, and developer tooling.",
     },
   ],
 
@@ -267,24 +258,22 @@ export const siteConfig: SiteConfig = {
       company: "Independent Software & Systems Development",
       location: "Delhi, India",
       description: [
-        "Architecting distributed version control internals, storage engines, and developer infrastructure across modern C++20, Rust, and TypeScript.",
-        "MiniGit (C++20, 13+ stars, v1.12.0): Implemented Git-compatible storage engine using SHA-256 CAS, packfiles, Smart HTTP wire protocol, and Eugene Myers O(ND) diff with LCA 3-way merge reaching 1.29M+ ops/sec.",
-        "Selected as a verified contributor for the XERJ Corpus Hub (open reference memory for AI coding agents) for MiniGit's systems architecture.",
-        "LevelDB C++20 Storage Engine: Built high-concurrency LSM-tree engine with chunked Write-Ahead Log (WAL), lock-free SkipList MemTable with custom Arena allocators, Bloom filters, and multi-level compaction.",
-        "CodeShelf (TypeScript, React 19, Electron, v0.3.6): Engineered cross-platform local-first developer knowledge system with pnpm monorepo, technology taxonomy normalization, and visual Myers diff history.",
-        "High-Throughput Tooling: Authored native Rust CLI sync engines with Tokio and multi-threaded GitHub API telemetry monitoring.",
+        "Architecting distributed version control internals, storage engines, and developer tooling across modern C++20, Rust, and TypeScript.",
+        "MiniGit (C++20, v1.12.0): Built Git-compatible storage engine using SHA-256 CAS, packfiles, Smart HTTP wire protocol, and Myers diff with LCA 3-way merge reaching 1.29M+ ops/sec.",
+        "LevelDB C++20: Implemented high-concurrency LSM-tree engine with chunked Write-Ahead Log (WAL), lock-free SkipList MemTable, Bloom filters, and multi-level compaction.",
+        "CodeShelf (v0.3.6): Engineered cross-platform local-first knowledge manager across web, desktop (Electron), and VS Code in a shared TypeScript monorepo.",
       ],
       technologies: [
         "C++20",
         "Rust",
         "TypeScript",
         "React 19",
-        "Next.js 16",
+        "Next.js",
         "Electron",
         "CMake",
         "Docker",
         "GitHub Actions",
-        "POSIX / Linux",
+        "Linux",
       ],
     },
   ],
