@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { FiExternalLink, FiFolder, FiGlobe, type IconType } from "react-icons/fi";
+import type { IconType } from "react-icons";
+import { FiExternalLink, FiFolder, FiGlobe } from "react-icons/fi";
 import { MotionCard } from "@/components/ui/motion-card";
 import { Badge } from "@/components/ui/badge";
 
