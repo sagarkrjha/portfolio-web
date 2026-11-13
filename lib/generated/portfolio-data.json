@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-11-12T09:46:06.109074728+00:00",
+  "lastUpdated": "2026-11-13T04:10:31.930018231+00:00",
   "profile": {
     "role": "Systems & Full-Stack Developer",
-    "bio": "Engineer specializing in TypeScript, C++20, Rust, Java. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
+    "bio": "Engineer specializing in TypeScript, Rust, C++20, Java. Architect of level-db-cpp (A fast, lightweight C++20 LSM-tree storage engine inspired by Google's LevelDB). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 7,
     "totalStars": 16,
     "primaryLanguages": [
       "TypeScript",
-      "C++20",
       "Rust",
+      "C++20",
       "Java"
     ],
     "activeProjectsCount": 3
@@ -21,6 +21,24 @@
       "level-db-cpp"
     ],
     "repos": [
+      {
+        "name": "portfolio-web",
+        "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
+        "html_url": "https://github.com/sagarkrjha/portfolio-web",
+        "homepage": "https://sagarkrjha.vercel.app",
+        "stargazers_count": 0,
+        "forks_count": 0,
+        "language": "TypeScript",
+        "topics": [
+          "developer-portfolio",
+          "nextjs",
+          "portfolio",
+          "react",
+          "typescript"
+        ],
+        "fork": false,
+        "updated_at": "2026-11-12T10:12:04Z"
+      },
       {
         "name": "sagarkrjha",
         "description": "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Rust, and pure Markdown",
@@ -45,24 +63,6 @@
         ],
         "fork": false,
         "updated_at": "2026-11-12T06:12:45Z"
-      },
-      {
-        "name": "portfolio-web",
-        "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
-        "html_url": "https://github.com/sagarkrjha/portfolio-web",
-        "homepage": "https://sagarkrjha.vercel.app",
-        "stargazers_count": 0,
-        "forks_count": 0,
-        "language": "TypeScript",
-        "topics": [
-          "developer-portfolio",
-          "nextjs",
-          "portfolio",
-          "react",
-          "typescript"
-        ],
-        "fork": false,
-        "updated_at": "2026-11-12T05:42:41Z"
       },
       {
         "name": "act",
@@ -197,18 +197,18 @@
     ],
     "repoBadges": [
       {
-        "name": "sagarkrjha",
-        "techStack": [
-          "Rust"
-        ]
-      },
-      {
         "name": "portfolio-web",
         "techStack": [
           "TypeScript",
           "Rust",
           "Next.js",
           "Tailwind CSS"
+        ]
+      },
+      {
+        "name": "sagarkrjha",
+        "techStack": [
+          "Rust"
         ]
       },
       {
