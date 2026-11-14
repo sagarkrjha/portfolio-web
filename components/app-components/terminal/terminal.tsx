@@ -717,20 +717,22 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
 
   return (
     <>
-      {/* Floating Action Button (Shows dynamic OS-based VS Code terminal shortcut) */}
+      {/* Floating Action Button (rounded-none, icon only, shortcut on hover) */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
           aria-label={`Open terminal (${shortcutLabel})`}
-          className="group flex items-center gap-2 rounded-full border border-border bg-background/90 px-3.5 py-2.5 text-xs font-medium text-foreground shadow-lg backdrop-blur-md transition-all hover:scale-105 hover:bg-muted active:scale-95 cursor-pointer ring-1 ring-foreground/10"
+          className="group relative flex size-10 items-center justify-center rounded-none border border-border bg-card/90 text-foreground shadow-md backdrop-blur-md transition-all hover:bg-muted hover:border-primary/50 active:scale-95 cursor-pointer ring-1 ring-foreground/10"
         >
-          <div className="flex size-5 items-center justify-center rounded-full bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900">
-            <FiTerminal className="size-3" />
-          </div>
-          <span className="hidden sm:inline font-mono">Terminal</span>
-          <span className="text-[10px] text-muted-foreground font-mono font-medium hidden md:inline px-1 py-0.2 rounded bg-muted/60 border border-border/40">
-            {shortcutLabel}
+          <FiTerminal className="size-4.5 text-foreground transition-transform group-hover:scale-110" />
+
+          {/* Hover Shortcut Tooltip */}
+          <span className="absolute bottom-full right-0 mb-2 hidden group-hover:flex items-center gap-1.5 whitespace-nowrap rounded-none border border-border bg-card px-2 py-1 text-[11px] font-mono font-medium text-foreground shadow-lg animate-in fade-in zoom-in-95 duration-100 pointer-events-none">
+            <span>Terminal</span>
+            <kbd className="px-1 py-0.2 rounded-none bg-muted border border-border/60 text-[10px] text-muted-foreground">
+              {shortcutLabel}
+            </kbd>
           </span>
         </button>
       </div>
