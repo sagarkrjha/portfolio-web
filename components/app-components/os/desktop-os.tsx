@@ -46,6 +46,9 @@ import {
   FiVolume2,
   FiWifi,
   FiX,
+  FiPower,
+  FiCopy,
+  FiShare2,
 } from "react-icons/fi";
 import { AboutView } from "@/components/app-components/about";
 import { BlogReaderView } from "@/components/app-components/blog";
@@ -352,6 +355,10 @@ export const DesktopOs = () => {
     x: number;
     y: number;
     windowId: WindowId | null;
+    selectedText?: string;
+    contextType?: "app" | "window" | "blog" | "project" | "text";
+    metaTitle?: string;
+    metaSlug?: string;
   }>({
     visible: false,
     x: 0,
@@ -917,9 +924,27 @@ export const DesktopOs = () => {
     resizeRef.current.direction = null;
   }, []);
 
-  // Desktop Canvas Right Click Handler
+  // Desktop Canvas & Smart Context Menu Handler
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+
+    // Check if user has highlighted text
+    const selection = window.getSelection();
+    const selectedText = selection ? selection.toString().trim() : "";
+
+    if (selectedText) {
+      setContextMenu((prev) => ({ ...prev, visible: false }));
+      setAppContextMenu({
+        visible: true,
+        x: Math.min(window.innerWidth - 220, e.clientX),
+        y: Math.min(window.innerHeight - 240, e.clientY),
+        windowId: activeWindow,
+        selectedText,
+        contextType: "text",
+      });
+      return;
+    }
+
     setAppContextMenu((prev) => ({ ...prev, visible: false }));
     setContextMenu({
       visible: true,
@@ -928,16 +953,30 @@ export const DesktopOs = () => {
     });
   };
 
-  // Application Icon Right Click Handler
-  const handleAppContextMenu = (e: React.MouseEvent, id: WindowId) => {
+  // Application Icon, Window, Blog, or Project Item Right Click Handler
+  const handleAppContextMenu = (
+    e: React.MouseEvent,
+    id: WindowId,
+    type: "app" | "window" | "blog" | "project" = "app",
+    meta?: { title?: string; slug?: string },
+  ) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Check if right-clicking while text is selected inside a window
+    const selection = window.getSelection();
+    const selectedText = selection ? selection.toString().trim() : "";
+
     setContextMenu((prev) => ({ ...prev, visible: false }));
     setAppContextMenu({
       visible: true,
       x: Math.min(window.innerWidth - 220, e.clientX),
-      y: Math.min(window.innerHeight - 240, e.clientY),
+      y: Math.min(window.innerHeight - 260, e.clientY),
       windowId: id,
+      selectedText: selectedText || undefined,
+      contextType: selectedText ? "text" : type,
+      metaTitle: meta?.title,
+      metaSlug: meta?.slug,
     });
   };
 
@@ -1032,7 +1071,7 @@ export const DesktopOs = () => {
       {renderResizeHandles(id)}
       <div
         onMouseDown={(e) => handleMouseDownHeader(e, id)}
-        onContextMenu={(e) => handleAppContextMenu(e, id)}
+        onContextMenu={(e) => handleAppContextMenu(e, id, "window", { title })}
         onDoubleClick={() => toggleMaximize(id)}
         className="flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0"
         style={{
@@ -1302,8 +1341,11 @@ export const DesktopOs = () => {
                   }}
                   className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-500 transition-colors flex items-center justify-between cursor-pointer"
                 >
-                  <span>Shut Down / Exit OS</span>
-                  <FiExternalLink className="size-3" />
+                  <div className="flex items-center gap-2">
+                    <FiPower className="size-3 text-red-500" />
+                    <span>Shut Down Carbon OS...</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-400">⌘Q</span>
                 </button>
               </div>
             )}
@@ -1529,15 +1571,15 @@ export const DesktopOs = () => {
             {time}
           </span>
 
-          {/* Exit OS Button */}
+          {/* Shutdown Carbon OS Button */}
           <button
             type="button"
             onClick={handleExitOs}
-            className="ml-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 border border-red-500/30 text-red-400 hover:bg-red-500/10 active:scale-95"
-            title="Exit Desktop OS & Return to Web Mode"
+            className="ml-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 border border-red-500/30 text-red-400 hover:bg-red-500/20 active:scale-95 shadow-xs"
+            title="Shut Down Carbon OS & Return to Web Mode"
           >
-            <span>Exit</span>
-            <FiExternalLink className="size-3" />
+            <FiPower className="size-3 text-red-400" />
+            <span>Shut Down</span>
           </button>
         </div>
       </header>
@@ -1725,6 +1767,9 @@ export const DesktopOs = () => {
               {siteConfig.featuredProjects.map((p) => (
                 <div
                   key={p.title}
+                  onContextMenu={(e) =>
+                    handleAppContextMenu(e, "projects", "project", { title: p.title })
+                  }
                   className="p-3.5 rounded-lg border space-y-2 hover:border-primary/50 transition-colors"
                   style={{
                     backgroundColor: isDark ? `${currentTheme.card}CC` : "rgba(255, 255, 255, 0.9)",
@@ -1850,6 +1895,12 @@ export const DesktopOs = () => {
                 <div
                   key={article.slug}
                   onClick={() => openInReader(article.slug, article.title)}
+                  onContextMenu={(e) =>
+                    handleAppContextMenu(e, "blog", "blog", {
+                      title: article.title,
+                      slug: article.slug,
+                    })
+                  }
                   className="block p-3.5 rounded-lg border hover:border-primary/50 transition-colors group cursor-pointer"
                   style={{
                     backgroundColor: isDark ? `${currentTheme.card}CC` : "rgba(255, 255, 255, 0.9)",
@@ -2571,16 +2622,16 @@ export const DesktopOs = () => {
                 handleExitOs();
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 text-red-400 cursor-pointer"
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/10 text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <FiExternalLink className="size-3.5" />
-              <span>Exit Desktop OS</span>
+              <FiPower className="size-3.5 text-red-400" />
+              <span>Shut Down Carbon OS</span>
             </button>
           </div>
         )}
 
-        {/* Application Specific Context Menu (Right Click on App Icon or Dock) */}
-        {appContextMenu.visible && appContextMenu.windowId && (
+        {/* Application & Smart Context Menu (Right Click on App Icon, Dock, Window, or Highlighted Text) */}
+        {appContextMenu.visible && (
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -2589,124 +2640,205 @@ export const DesktopOs = () => {
               backgroundColor: isDark ? `${currentTheme.card}F5` : "rgba(255, 255, 255, 0.98)",
               borderColor: currentTheme.border,
             }}
-            className={`fixed z-[10020] w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
+            className={`fixed z-[10020] w-56 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
+            {/* Context Header */}
             <div
-              className={`flex items-center gap-2 px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}
+              className={`flex items-center justify-between px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}
             >
-              <span>{windows[appContextMenu.windowId].title}</span>
+              <span className="truncate max-w-[150px]">
+                {appContextMenu.selectedText
+                  ? "Selection"
+                  : appContextMenu.metaTitle
+                  ? appContextMenu.metaTitle
+                  : appContextMenu.windowId
+                  ? windows[appContextMenu.windowId].title
+                  : "Context Actions"}
+              </span>
+              <span className="text-[9px] px-1 rounded bg-primary/20 text-primary font-mono lowercase">
+                {appContextMenu.contextType || "action"}
+              </span>
             </div>
 
-            {/* Open / Focus */}
-            <button
-              type="button"
-              onClick={() => {
-                if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
-                setAppContextMenu((prev) => ({ ...prev, visible: false }));
-              }}
-              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
-            >
-              <FiEye className="size-3.5 text-primary" />
-              <span>
-                {windows[appContextMenu.windowId].isOpen &&
-                !windows[appContextMenu.windowId].isMinimized
-                  ? "Focus Window"
-                  : "Open Application"}
-              </span>
-            </button>
-
-            {/* Minimize / Restore if running */}
-            {windows[appContextMenu.windowId].isOpen && (
+            {/* 1. Selected Text Actions */}
+            {appContextMenu.selectedText && (
               <>
                 <button
                   type="button"
                   onClick={() => {
-                    if (appContextMenu.windowId) {
-                      if (windows[appContextMenu.windowId].isMinimized) {
-                        focusWindow(appContextMenu.windowId);
-                      } else {
-                        minimizeWindow(appContextMenu.windowId);
-                      }
-                    }
+                    navigator.clipboard.writeText(appContextMenu.selectedText || "");
                     setAppContextMenu((prev) => ({ ...prev, visible: false }));
                   }}
                   className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
                 >
-                  <FiMinimize className="size-3.5 text-yellow-400" />
-                  <span>
-                    {windows[appContextMenu.windowId].isMinimized ? "Restore" : "Minimize"}
-                  </span>
+                  <FiCopy className="size-3.5 text-primary" />
+                  <span>Copy Selection</span>
                 </button>
-
                 <button
                   type="button"
                   onClick={() => {
-                    if (appContextMenu.windowId) toggleMaximize(appContextMenu.windowId);
+                    openInBrowser(
+                      `https://www.google.com/search?q=${encodeURIComponent(appContextMenu.selectedText || "")}`,
+                      `Search: ${appContextMenu.selectedText?.slice(0, 20)}`,
+                    );
                     setAppContextMenu((prev) => ({ ...prev, visible: false }));
                   }}
                   className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
                 >
-                  <FiMaximize2 className="size-3.5 text-emerald-400" />
-                  <span>
-                    {windows[appContextMenu.windowId].isMaximized ? "Restore Size" : "Maximize"}
-                  </span>
+                  <FiSearch className="size-3.5 text-cyan-400" />
+                  <span>Search in Web Browser</span>
                 </button>
+                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
               </>
             )}
 
-            {/* Remove / Add Desktop Shortcut */}
-            <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
-            {desktopApps.includes(appContextMenu.windowId) ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (appContextMenu.windowId) removeDesktopShortcut(appContextMenu.windowId);
-                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700"}`}
-              >
-                <FiTrash2 className="size-3.5 text-zinc-400" />
-                <span>Remove Shortcut</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  if (appContextMenu.windowId) addDesktopShortcut(appContextMenu.windowId);
-                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-primary transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <FiPlus className="size-3.5" />
-                <span>Add to Desktop</span>
-              </button>
+            {/* 2. Blog Specific Context Actions */}
+            {appContextMenu.contextType === "blog" && appContextMenu.metaSlug && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openInReader(
+                      appContextMenu.metaSlug || "",
+                      appContextMenu.metaTitle || "Article Reader",
+                    );
+                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                >
+                  <FiBookOpen className="size-3.5 text-primary" />
+                  <span>Read in Reader Mode</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/blog/${appContextMenu.metaSlug}`,
+                    );
+                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                >
+                  <FiShare2 className="size-3.5 text-zinc-400" />
+                  <span>Copy Article URL</span>
+                </button>
+                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
+              </>
             )}
 
-            {/* Close / Quit Application */}
-            {windows[appContextMenu.windowId].isOpen ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  if (appContextMenu.windowId) closeWindow(appContextMenu.windowId, e);
-                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <FiX className="size-3.5" />
-                <span>Quit / Close</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
-                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <FiPlay className="size-3.5" />
-                <span>Launch Process</span>
-              </button>
+            {/* 3. Window & Application Context Actions */}
+            {appContextMenu.windowId && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
+                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                >
+                  <FiEye className="size-3.5 text-primary" />
+                  <span>
+                    {windows[appContextMenu.windowId].isOpen &&
+                    !windows[appContextMenu.windowId].isMinimized
+                      ? "Focus Window"
+                      : "Open Application"}
+                  </span>
+                </button>
+
+                {windows[appContextMenu.windowId].isOpen && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (appContextMenu.windowId) {
+                          if (windows[appContextMenu.windowId].isMinimized) {
+                            focusWindow(appContextMenu.windowId);
+                          } else {
+                            minimizeWindow(appContextMenu.windowId);
+                          }
+                        }
+                        setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                    >
+                      <FiMinimize className="size-3.5 text-yellow-400" />
+                      <span>
+                        {windows[appContextMenu.windowId].isMinimized ? "Restore" : "Minimize"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (appContextMenu.windowId) toggleMaximize(appContextMenu.windowId);
+                        setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+                    >
+                      <FiMaximize2 className="size-3.5 text-emerald-400" />
+                      <span>
+                        {windows[appContextMenu.windowId].isMaximized ? "Restore Size" : "Maximize"}
+                      </span>
+                    </button>
+                  </>
+                )}
+
+                {/* Remove / Add Desktop Shortcut */}
+                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
+                {desktopApps.includes(appContextMenu.windowId) ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (appContextMenu.windowId) removeDesktopShortcut(appContextMenu.windowId);
+                      setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700"}`}
+                  >
+                    <FiTrash2 className="size-3.5 text-zinc-400" />
+                    <span>Remove from Desktop</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (appContextMenu.windowId) addDesktopShortcut(appContextMenu.windowId);
+                      setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-primary transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <FiPlus className="size-3.5" />
+                    <span>Add to Desktop</span>
+                  </button>
+                )}
+
+                {/* Close / Quit Application */}
+                {windows[appContextMenu.windowId].isOpen ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      if (appContextMenu.windowId) closeWindow(appContextMenu.windowId, e);
+                      setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <FiX className="size-3.5" />
+                    <span>Quit Application</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
+                      setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <FiPlay className="size-3.5" />
+                    <span>Launch Process</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}
