@@ -74,62 +74,121 @@ interface WindowState {
   size: { width: number; height: number };
 }
 
-const OS_THEMES: Record<
-  OsThemeKey,
-  {
-    name: string;
+interface OsThemeColors {
+  name: string;
+  primary: string;
+  accent: string;
+  dark: {
     bg: string;
     card: string;
-    primary: string;
     border: string;
     text: string;
-    accent: string;
-  }
-> = {
+    muted: string;
+  };
+  light: {
+    bg: string;
+    card: string;
+    border: string;
+    text: string;
+    muted: string;
+  };
+}
+
+const OS_THEMES: Record<OsThemeKey, OsThemeColors> = {
   carbon: {
     name: "Carbon Obsidian (Default)",
-    bg: "#1c1917",
-    card: "#272220",
     primary: "#33b1ff",
-    border: "rgba(255, 255, 255, 0.1)",
-    text: "#f4f4f4",
     accent: "#0f62fe",
+    dark: {
+      bg: "#1c1917",
+      card: "#272220",
+      border: "rgba(255, 255, 255, 0.12)",
+      text: "#f4f4f4",
+      muted: "#a1a1aa",
+    },
+    light: {
+      bg: "#ffffff",
+      card: "#f4f4f5",
+      border: "rgba(0, 0, 0, 0.12)",
+      text: "#18181b",
+      muted: "#52525b",
+    },
   },
   nord: {
     name: "Nordic Frost",
-    bg: "#242933",
-    card: "#2e3440",
     primary: "#88c0d0",
-    border: "rgba(136, 192, 208, 0.2)",
-    text: "#eceff4",
     accent: "#81a1c1",
+    dark: {
+      bg: "#242933",
+      card: "#2e3440",
+      border: "rgba(136, 192, 208, 0.2)",
+      text: "#eceff4",
+      muted: "#d8dee9",
+    },
+    light: {
+      bg: "#f0f4f8",
+      card: "#ffffff",
+      border: "rgba(136, 192, 208, 0.35)",
+      text: "#2e3440",
+      muted: "#4c566a",
+    },
   },
   matrix: {
     name: "Cyber Emerald",
-    bg: "#0d1117",
-    card: "#161b22",
     primary: "#2ea043",
-    border: "rgba(46, 160, 67, 0.3)",
-    text: "#56d364",
     accent: "#3fb950",
+    dark: {
+      bg: "#0d1117",
+      card: "#161b22",
+      border: "rgba(46, 160, 67, 0.3)",
+      text: "#56d364",
+      muted: "#3fb950",
+    },
+    light: {
+      bg: "#f0fdf4",
+      card: "#ffffff",
+      border: "rgba(46, 160, 67, 0.25)",
+      text: "#14532d",
+      muted: "#166534",
+    },
   },
   dracula: {
     name: "Dracula Twilight",
-    bg: "#1e1f29",
-    card: "#282a36",
     primary: "#bd93f9",
-    border: "rgba(189, 147, 249, 0.25)",
-    text: "#f8f8f2",
     accent: "#ff79c6",
+    dark: {
+      bg: "#1e1f29",
+      card: "#282a36",
+      border: "rgba(189, 147, 249, 0.25)",
+      text: "#f8f8f2",
+      muted: "#6272a4",
+    },
+    light: {
+      bg: "#faf5ff",
+      card: "#ffffff",
+      border: "rgba(189, 147, 249, 0.3)",
+      text: "#2e1065",
+      muted: "#6b21a8",
+    },
   },
   paper: {
     name: "Paper Titanium (Clean)",
-    bg: "#f4f4f4",
-    card: "#ffffff",
     primary: "#0f62fe",
-    border: "rgba(0, 0, 0, 0.12)",
-    text: "#161616",
     accent: "#33b1ff",
+    dark: {
+      bg: "#161616",
+      card: "#262626",
+      border: "rgba(255, 255, 255, 0.15)",
+      text: "#f4f4f4",
+      muted: "#a1a1aa",
+    },
+    light: {
+      bg: "#f4f4f5",
+      card: "#ffffff",
+      border: "rgba(0, 0, 0, 0.12)",
+      text: "#18181b",
+      muted: "#52525b",
+    },
   },
 };
 
@@ -757,7 +816,13 @@ export const DesktopOs = () => {
     };
   };
 
-  const currentTheme = OS_THEMES[osTheme];
+  const selectedTheme = OS_THEMES[osTheme] || OS_THEMES.carbon;
+  const currentTheme = {
+    name: selectedTheme.name,
+    primary: selectedTheme.primary,
+    accent: selectedTheme.accent,
+    ...(isDark ? selectedTheme.dark : selectedTheme.light),
+  };
 
   // Helper renderer for Window Titlebar with fixed stop-propagation close button
   const renderTitleBar = (id: WindowId, title: string) => (
@@ -1626,7 +1691,10 @@ export const DesktopOs = () => {
                         className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex flex-col gap-1.5 ${
                           active ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-white/10"
                         }`}
-                        style={{ backgroundColor: t.card }}
+                        style={{
+                          backgroundColor: isDark ? t.dark.card : t.light.card,
+                          borderColor: active ? t.primary : (isDark ? t.dark.border : t.light.border),
+                        }}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-[11px] font-bold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{t.name}</span>
@@ -1634,16 +1702,19 @@ export const DesktopOs = () => {
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span
-                            className="size-3.5 rounded-full border border-white/20"
-                            style={{ backgroundColor: t.bg }}
+                            className="size-3.5 rounded-full border border-black/10 dark:border-white/20"
+                            style={{ backgroundColor: isDark ? t.dark.bg : t.light.bg }}
+                            title="Background"
                           />
                           <span
-                            className="size-3.5 rounded-full border border-white/20"
+                            className="size-3.5 rounded-full border border-black/10 dark:border-white/20"
                             style={{ backgroundColor: t.primary }}
+                            title="Primary Color"
                           />
                           <span
-                            className="size-3.5 rounded-full border border-white/20"
+                            className="size-3.5 rounded-full border border-black/10 dark:border-white/20"
                             style={{ backgroundColor: t.accent }}
+                            title="Accent Color"
                           />
                         </div>
                       </button>
@@ -1861,8 +1932,8 @@ export const DesktopOs = () => {
             style={{
               left: `${contextMenu.x}px`,
               top: `${contextMenu.y}px`,
-              backgroundColor: currentTheme.card,
-              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
+              backgroundColor: isDark ? `${currentTheme.card}F5` : "rgba(255, 255, 255, 0.98)",
+              borderColor: currentTheme.border,
             }}
             className={`fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
@@ -1973,8 +2044,8 @@ export const DesktopOs = () => {
             style={{
               left: `${appContextMenu.x}px`,
               top: `${appContextMenu.y}px`,
-              backgroundColor: currentTheme.card,
-              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
+              backgroundColor: isDark ? `${currentTheme.card}F5` : "rgba(255, 255, 255, 0.98)",
+              borderColor: currentTheme.border,
             }}
             className={`fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
@@ -2105,8 +2176,8 @@ export const DesktopOs = () => {
             <div
               className="w-full max-w-lg rounded-2xl border shadow-2xl p-4 font-mono overflow-hidden flex flex-col gap-3"
               style={{
-                backgroundColor: currentTheme.card,
-                borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
+                backgroundColor: isDark ? `${currentTheme.card}F8` : "rgba(255, 255, 255, 0.98)",
+                borderColor: currentTheme.border,
               }}
             >
               {/* Launcher Header & Live Search Bar */}
@@ -2300,6 +2371,33 @@ export const DesktopOs = () => {
             borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
           }}
         >
+          {/* Dedicated "All Apps" / Launchpad button at start of dock */}
+          <button
+            type="button"
+            onClick={() => setShowLauncher((prev) => !prev)}
+            className={`group relative flex flex-col items-center justify-center size-11 rounded-xl transition-all hover:scale-115 active:scale-95 cursor-pointer ${
+              showLauncher
+                ? "border"
+                : (isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700")
+            }`}
+            style={{
+              backgroundColor: showLauncher ? `${currentTheme.primary}25` : undefined,
+              borderColor: showLauncher ? currentTheme.primary : "transparent",
+              color: showLauncher ? currentTheme.primary : undefined,
+            }}
+            title="All Apps / Launchpad (Alt+Space)"
+          >
+            <FiGrid className="size-5 transition-transform group-hover:-translate-y-0.5" />
+            <span
+              className={`size-1 rounded-full absolute bottom-1 transition-colors ${
+                showLauncher ? "bg-primary" : "opacity-0"
+              }`}
+            />
+          </button>
+
+          {/* Separator */}
+          <div className={`h-6 w-px ${isDark ? "bg-white/10" : "bg-black/10"}`} />
+
           {(
             [
               { id: "about", label: "About", icon: FiUser },
