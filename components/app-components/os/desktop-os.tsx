@@ -45,7 +45,7 @@ import {
 } from "react-icons/fi";
 import { useTheme } from "next-themes";
 import { useOsMode } from "@/components/providers";
-import { siteConfig, heroConfig, aboutConfig } from "@/lib/config";
+import { siteConfig, heroConfig, aboutConfig, blogConfig } from "@/lib/config";
 import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import cachedData from "@/lib/generated/portfolio-data.json";
@@ -1539,43 +1539,7 @@ export const DesktopOs = () => {
             {renderTitleBar("blog", "Engineering Notes & Articles")}
 
             <div className="p-4 sm:p-6 overflow-y-auto space-y-3">
-              {[
-                {
-                  title: "Anatomy of a File System Race Condition",
-                  slug: "anatomy-of-a-file-system-race-condition",
-                  date: "Nov 10, 2026",
-                  readTime: "8 min read",
-                  tags: ["Systems", "Linux", "Concurrency"],
-                },
-                {
-                  title: "Myers Diff Algorithm in Deep Dive",
-                  slug: "myers-diff-algorithm",
-                  date: "Oct 24, 2026",
-                  readTime: "12 min read",
-                  tags: ["Algorithms", "Git", "Graph Theory"],
-                },
-                {
-                  title: "DSA Sheet 2027: Systems & Algorithmic Patterns",
-                  slug: "dsa-sheet-2027",
-                  date: "Sep 15, 2026",
-                  readTime: "15 min read",
-                  tags: ["LeetCode", "Data Structures", "C++20"],
-                },
-                {
-                  title: "Building a Config-Driven Developer Portfolio",
-                  slug: "building-a-config-driven-portfolio",
-                  date: "Aug 20, 2026",
-                  readTime: "6 min read",
-                  tags: ["Architecture", "Next.js", "TypeScript"],
-                },
-                {
-                  title: "Understanding Algorithms in Production Systems",
-                  slug: "understanding-algorithms-in-practice",
-                  date: "Jul 12, 2026",
-                  readTime: "7 min read",
-                  tags: ["Optimization", "Storage", "Performance"],
-                },
-              ].map((article) => (
+              {blogConfig.posts.map((article) => (
                 <Link
                   key={article.slug}
                   href={`/blog/${article.slug}`}
@@ -1595,10 +1559,15 @@ export const DesktopOs = () => {
                       {article.readTime}
                     </span>
                   </div>
+                  {article.subtitle && (
+                    <p className={`text-[11px] mt-1 line-clamp-1 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
+                      {article.subtitle}
+                    </p>
+                  )}
                   <div className="flex items-center gap-2 mt-2 font-mono text-[10px]">
                     <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{article.date}</span>
                     <span className="text-zinc-400">•</span>
-                    <div className="flex gap-1">
+                    <div className="flex flex-wrap gap-1">
                       {article.tags.map((t) => (
                         <span
                           key={t}
