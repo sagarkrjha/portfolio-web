@@ -7,8 +7,6 @@ readTime: "6 min read"
 tags: ["Algorithms", "Performance", "Computer Science", "Systems"]
 ---
 
-# Understanding Algorithms: Space-Time Complexity in Practice
-
 Big-O notation is often treated purely as an interview topic, but understanding algorithmic complexity is critical when designing high-throughput backend pipelines, real-time databases, and responsive UI application states.
 
 ## Why Complexity Matters

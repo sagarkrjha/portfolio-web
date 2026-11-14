@@ -8,8 +8,6 @@ tags: ["DSA", "Competitive Programming", "Algorithms", "Systems", "C++"]
 author: "Sagar Kr Jha"
 ---
 
-# Data Structures & Algorithmic Patterns
-
 By **Sagar Kr Jha**
 
 > ### ⚠️ Disclaimer & Ground Reality Check

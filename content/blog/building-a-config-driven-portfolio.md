@@ -7,8 +7,6 @@ readTime: "4 min read"
 tags: ["Architecture", "SystemDesign", "SoftwareEngineering"]
 ---
 
-# Building a Config-Driven Developer Portfolio
-
 Developer portfolios and content-driven websites often become brittle and unmaintained because updating personal details, career timelines, or featured projects requires hunting through deeply nested presentation components.
 
 By designing a **centralized, schema-driven configuration architecture**, we cleanly decouple content and business data from visual layout layers.

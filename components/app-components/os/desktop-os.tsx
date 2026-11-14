@@ -50,6 +50,7 @@ import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import { AboutView } from "@/components/app-components/about";
 import { BlogReaderView } from "@/components/app-components/blog";
+import { formatBlogDate } from "@/lib/utils";
 import cachedData from "@/lib/generated/portfolio-data.json";
 
 export type WindowId =
@@ -501,6 +502,9 @@ export const DesktopOs = () => {
   const [activeArticleSlug, setActiveArticleSlug] = useState<string>("dsa-sheet-2027");
   const [activeArticleTitle, setActiveArticleTitle] = useState<string>("Data Structures & Algorithmic Patterns");
 
+  // Track if user is actively dragging or resizing a window (to disable transition smoothing during gestures)
+  const [isInteracting, setIsInteracting] = useState(false);
+
 
   // Clock & system metrics jitter
   useEffect(() => {
@@ -754,6 +758,7 @@ export const DesktopOs = () => {
   const handleMouseDownHeader = (e: React.MouseEvent, id: WindowId) => {
     if (layoutMode !== "floating" || windows[id].isMaximized) return;
     focusWindow(id);
+    setIsInteracting(true);
     dragRef.current = {
       windowId: id,
       startX: e.clientX,
@@ -773,6 +778,7 @@ export const DesktopOs = () => {
     e.preventDefault();
     if (layoutMode !== "floating" || windows[id].isMaximized) return;
     focusWindow(id);
+    setIsInteracting(true);
     resizeRef.current = {
       windowId: id,
       direction,
@@ -858,6 +864,7 @@ export const DesktopOs = () => {
   }, []);
 
   const handleMouseUp = useCallback(() => {
+    setIsInteracting(false);
     dragRef.current.windowId = null;
     resizeRef.current.windowId = null;
     resizeRef.current.direction = null;
@@ -909,6 +916,9 @@ export const DesktopOs = () => {
         width: "100%",
         height: "100%",
         zIndex: computedZ,
+        transition: isInteracting
+          ? "none"
+          : "top 240ms cubic-bezier(0.16, 1, 0.3, 1), left 240ms cubic-bezier(0.16, 1, 0.3, 1), width 240ms cubic-bezier(0.16, 1, 0.3, 1), height 240ms cubic-bezier(0.16, 1, 0.3, 1)",
       };
     }
     return {
@@ -920,6 +930,9 @@ export const DesktopOs = () => {
       maxWidth: "96vw",
       maxHeight: "84vh",
       zIndex: computedZ,
+      transition: isInteracting
+        ? "none"
+        : "left 200ms cubic-bezier(0.16, 1, 0.3, 1), top 200ms cubic-bezier(0.16, 1, 0.3, 1), width 200ms cubic-bezier(0.16, 1, 0.3, 1), height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
     };
   };
 
@@ -1486,7 +1499,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("about")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.about.isMinimized ? "hidden" : ""
             }`}
           >
@@ -1509,7 +1522,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.15)",
             }}
             onClick={() => focusWindow("terminal")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.terminal.isMinimized ? "hidden" : ""
             }`}
           >
@@ -1530,7 +1543,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("projects")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.projects.isMinimized ? "hidden" : ""
             }`}
           >
@@ -1647,7 +1660,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("blog")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.blog.isMinimized ? "hidden" : ""
             }`}
           >
@@ -1681,7 +1694,7 @@ export const DesktopOs = () => {
                   )}
                   <div className="flex items-center justify-between mt-2 font-mono text-[10px]">
                     <div className="flex items-center gap-2">
-                      <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{article.date}</span>
+                      <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{formatBlogDate(article.date)}</span>
                       <span className="text-zinc-400">•</span>
                       <div className="flex flex-wrap gap-1">
                         {article.tags.map((t) => (
@@ -1717,14 +1730,21 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.15)",
             }}
             onClick={() => focusWindow("reader")}
-            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.reader.isMinimized ? "hidden" : ""
             }`}
           >
             {renderTitleBar("reader", `${activeArticleTitle} — Markdown Reader`)}
 
             <div className="flex-1 overflow-hidden">
-              <BlogReaderView slug={activeArticleSlug} isDark={isDark} />
+              <BlogReaderView
+                slug={activeArticleSlug}
+                isDark={isDark}
+                onSelectArticle={(slug, title) => {
+                  setActiveArticleSlug(slug);
+                  setActiveArticleTitle(title);
+                }}
+              />
             </div>
           </div>
         )}
@@ -1738,7 +1758,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("resume")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.resume.isMinimized ? "hidden" : ""
             }`}
           >
@@ -1759,7 +1779,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("settings")}
-            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.9)] backdrop-blur-xl overflow-hidden transition-all ${
+            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.9)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out transition-all ${
               activeWindow === "settings" ? "ring-1 ring-primary/40" : ""
             } ${windows.settings.isMinimized ? "hidden" : ""}`}
           >
@@ -1888,7 +1908,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("taskmanager")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.taskmanager.isMinimized ? "hidden" : ""
             }`}
           >
@@ -1995,7 +2015,7 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.15)",
             }}
             onClick={() => focusWindow("browser")}
-            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
               windows.browser.isMinimized ? "hidden" : ""
             }`}
           >

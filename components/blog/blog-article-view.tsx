@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { MarkdownRenderer, extractHeadings } from "@/components/blog/markdown-renderer";
 import { TableOfContents } from "@/components/blog/table-of-contents";
+import { formatBlogDate } from "@/lib/utils";
 
 export interface BlogPostMeta {
   slug?: string;
@@ -48,7 +49,7 @@ export function BlogArticleView({
                 </Link>
               )}
               <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3 font-mono">
-                <time dateTime={post.meta.date}>{post.meta.date}</time>
+                <time dateTime={post.meta.date}>{formatBlogDate(post.meta.date)}</time>
                 <span>•</span>
                 <span>{post.meta.readTime}</span>
               </div>
@@ -93,7 +94,7 @@ export function BlogArticleView({
       {/* Article Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3 font-mono">
-          <time dateTime={post.meta.date}>{post.meta.date}</time>
+          <time dateTime={post.meta.date}>{formatBlogDate(post.meta.date)}</time>
           <span>•</span>
           <span>{post.meta.readTime}</span>
         </div>

@@ -170,13 +170,7 @@ export const TerminalModal = ({
       output: (
         <div className="space-y-1.5 font-mono text-xs">
           <p className="text-[#33b1ff] font-semibold">
-            Last login:{" "}
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-            })}{" "}
-            on ttys001 (Carbon theme)
+            Last login: on ttys001 (Carbon theme)
           </p>
           <p className="text-zinc-300">Welcome to {siteConfig.name}&apos;s terminal</p>
           <p className="text-zinc-400">

@@ -5,6 +5,7 @@ import { FiArrowRight, FiCode, FiCpu, FiDatabase } from "react-icons/fi";
 import { SiCplusplus, SiRust } from "react-icons/si";
 import { ShowcaseCard } from "@/components/ui/showcase-card";
 import type { BlogPostMeta } from "@/lib/services/blog";
+import { formatBlogDate } from "@/lib/utils";
 
 interface BlogListProps {
   posts: (BlogPostMeta & { slug: string })[];
@@ -68,7 +69,7 @@ export const BlogList = ({ posts }: BlogListProps) => {
 
           const meta = (
             <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
-              <time dateTime={post.date}>{post.date}</time>
+              <time dateTime={post.date}>{formatBlogDate(post.date)}</time>
               <span>•</span>
               <span>{post.readTime}</span>
             </div>
