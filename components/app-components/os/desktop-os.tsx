@@ -217,7 +217,7 @@ export const DesktopOs = () => {
   const isDark = resolvedTheme === "dark";
 
   const [time, setTime] = useState("");
-  const [activeWindow, setActiveWindow] = useState<WindowId | null>("about");
+  const [activeWindow, setActiveWindow] = useState<WindowId | null>(null);
   const [topZ, setTopZ] = useState(100);
   const [layoutMode, setLayoutModeState] = useState<LayoutMode>("floating");
   const [osTheme, setOsThemeState] = useState<OsThemeKey>("carbon");
@@ -420,7 +420,7 @@ export const DesktopOs = () => {
       id: "about",
       title: "About Sagar",
       icon: FiUser,
-      isOpen: true,
+      isOpen: false,
       isMinimized: false,
       isMaximized: false,
       zIndex: 10,
@@ -1039,6 +1039,7 @@ export const DesktopOs = () => {
       {renderResizeHandles(id)}
       <div
         onMouseDown={(e) => handleMouseDownHeader(e, id)}
+        onContextMenu={(e) => handleAppContextMenu(e, id)}
         onDoubleClick={() => toggleMaximize(id)}
         className="flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0"
         style={{
@@ -1183,34 +1184,42 @@ export const DesktopOs = () => {
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             className="fixed inset-0 z-[10050] bg-black flex flex-col items-center justify-center select-none"
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col items-center gap-5"
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col items-center gap-6"
             >
-              <div className="size-16 rounded-3xl bg-zinc-900 border border-zinc-700/50 flex items-center justify-center text-primary shadow-2xl">
-                <FiTerminal className="size-8" />
+              {/* Apple / Carbon Boot Logo with glow */}
+              <div className="relative">
+                <div className="absolute -inset-4 rounded-full bg-white/5 blur-xl pointer-events-none" />
+                <span className="text-white text-6xl font-light tracking-tighter drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]">
+                  
+                </span>
               </div>
-              <div className="space-y-1.5 text-center">
-                <h2 className="text-white font-mono font-bold text-sm tracking-widest uppercase">
-                  Carbon OS
-                </h2>
-                <p className="text-zinc-500 font-mono text-[10px]">
-                  Initializing Sequoia Desktop Environment...
-                </p>
-              </div>
-              {/* Progress bar */}
-              <div className="w-48 h-1 bg-zinc-800 rounded-full overflow-hidden mt-2">
-                <motion.div
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 0.85, ease: "easeInOut" }}
-                  className="h-full bg-primary"
-                />
+
+              {/* Progress bar and subtitle */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-52 h-1 bg-zinc-800/80 rounded-full overflow-hidden border border-white/5">
+                  <motion.div
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 0.9, ease: "easeInOut" }}
+                    className="h-full bg-zinc-100 rounded-full"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-zinc-500 font-mono text-[10px] tracking-wider uppercase">
+                    Carbon OS 15.1
+                  </span>
+                  <span className="size-1 rounded-full bg-zinc-600" />
+                  <span className="text-zinc-600 font-mono text-[10px]">
+                    Apple Silicon
+                  </span>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -2233,6 +2242,7 @@ export const DesktopOs = () => {
             {/* Titlebar with address bar */}
             <div
               onMouseDown={(e) => handleMouseDownHeader(e, "browser")}
+              onContextMenu={(e) => handleAppContextMenu(e, "browser")}
               onDoubleClick={() => toggleMaximize("browser")}
               className={`flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0 ${
                 isDark ? "bg-[#272220] border-white/10" : "bg-[#f4f4f4] border-black/10"
