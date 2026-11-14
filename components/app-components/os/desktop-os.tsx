@@ -36,6 +36,10 @@ import {
   FiPlay,
   FiSquare,
   FiDroplet,
+  FiSearch,
+  FiEye,
+  FiMinimize,
+  FiRotateCcw,
 } from "react-icons/fi";
 import { useTheme } from "next-themes";
 import { useOsMode } from "@/components/providers";
@@ -183,8 +187,9 @@ export const DesktopOs = () => {
   const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
+  const [launcherSearch, setLauncherSearch] = useState("");
 
-  // Context Menu state (Right Click)
+  // Context Menu state (Right Click on Desktop Canvas)
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
     x: number;
@@ -193,6 +198,19 @@ export const DesktopOs = () => {
     visible: false,
     x: 0,
     y: 0,
+  });
+
+  // Application Right Click Menu state (Right Click on Desktop Icons or Dock items)
+  const [appContextMenu, setAppContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    windowId: WindowId | null;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    windowId: null,
   });
 
   // Simulated system task metrics
@@ -400,23 +418,23 @@ export const DesktopOs = () => {
     focusWindow(nextId);
   }, [openWindows, activeWindow, focusWindow]);
 
-  // Global Keyboard Navigation
+  // Global Keyboard Navigation (Carefully scoped with Alt/Option to avoid browser shortcuts)
   useEffect(() => {
     if (!isOsMode) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+      const isInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
 
-      // Super/Alt + Space: Spotlight App Launcher
-      if ((e.altKey || e.metaKey) && e.code === "Space") {
-        e.preventDefault();
-        setShowLauncher((prev) => !prev);
-        return;
-      }
-
-      // Escape key behavior
+      // 1. Escape key behavior: close topmost overlays/context menus or active window
       if (e.key === "Escape") {
+        if (appContextMenu.visible) {
+          setAppContextMenu((prev) => ({ ...prev, visible: false }));
+          return;
+        }
         if (contextMenu.visible) {
           setContextMenu((prev) => ({ ...prev, visible: false }));
           return;
@@ -431,18 +449,30 @@ export const DesktopOs = () => {
         }
         if (activeWindow && !isInput) {
           closeWindow(activeWindow);
+          return;
         }
       }
 
-      // Alt+Tab window cycling
-      if (e.altKey && e.key === "Tab") {
+      // 2. Alt+Space: Toggle Application Launcher (Spotlight style)
+      if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.code === "Space" || e.key === " ")) {
+        e.preventDefault();
+        setShowLauncher((prev) => !prev);
+        return;
+      }
+
+      // 3. Alt+Tab: Cycle Next Open Window
+      if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === "Tab") {
         e.preventDefault();
         setShowSwitcher(true);
         cycleNextWindow();
+        return;
       }
 
-      // App Launch shortcuts (Alt + 1..7)
-      if ((e.altKey || e.metaKey) && !isInput) {
+      // Only check non-input shortcuts below
+      if (isInput) return;
+
+      // 4. Alt + 1..7: Quick App Launcher shortcuts
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
         const appKeys: Record<string, WindowId> = {
           "1": "about",
           "2": "terminal",
@@ -459,14 +489,15 @@ export const DesktopOs = () => {
         }
       }
 
-      // Super/Alt + M: toggle maximize
-      if ((e.altKey || e.metaKey) && (e.key === "m" || e.key === "M") && !isInput) {
+      // 5. Alt + M: Toggle Window Maximize / Restore
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "m" || e.key === "M")) {
         e.preventDefault();
         if (activeWindow) toggleMaximize(activeWindow);
+        return;
       }
 
-      // Hyprland Tiling shortcuts: Alt+H (cols), Alt+V (rows), Alt+G (grid), Alt+F (float)
-      if ((e.altKey || e.metaKey) && !isInput) {
+      // 6. Hyprland Tiling shortcuts: Alt+H (cols), Alt+V (rows), Alt+G (grid), Alt+F (float)
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
         if (e.key === "h" || e.key === "H") {
           e.preventDefault();
           setLayoutMode((prev) =>
@@ -501,6 +532,7 @@ export const DesktopOs = () => {
     isOsMode,
     activeWindow,
     contextMenu.visible,
+    appContextMenu.visible,
     showLauncher,
     showWallpaperMenu,
     closeWindow,
@@ -544,13 +576,27 @@ export const DesktopOs = () => {
     dragRef.current.windowId = null;
   }, []);
 
-  // Desktop Right Click Handler
+  // Desktop Canvas Right Click Handler
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    setAppContextMenu((prev) => ({ ...prev, visible: false }));
     setContextMenu({
       visible: true,
-      x: Math.min(window.innerWidth - 200, e.clientX),
-      y: Math.min(window.innerHeight - 250, e.clientY),
+      x: Math.min(window.innerWidth - 220, e.clientX),
+      y: Math.min(window.innerHeight - 270, e.clientY),
+    });
+  };
+
+  // Application Icon Right Click Handler
+  const handleAppContextMenu = (e: React.MouseEvent, id: WindowId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu((prev) => ({ ...prev, visible: false }));
+    setAppContextMenu({
+      visible: true,
+      x: Math.min(window.innerWidth - 220, e.clientX),
+      y: Math.min(window.innerHeight - 240, e.clientY),
+      windowId: id,
     });
   };
 
@@ -907,6 +953,7 @@ export const DesktopOs = () => {
           setShowWallpaperMenu(false);
           setShowLauncher(false);
           setContextMenu((prev) => ({ ...prev, visible: false }));
+          setAppContextMenu((prev) => ({ ...prev, visible: false }));
         }}
       >
         {/* Desktop Application Icons */}
@@ -926,6 +973,7 @@ export const DesktopOs = () => {
               key={item.id}
               type="button"
               onClick={() => focusWindow(item.id)}
+              onContextMenu={(e) => handleAppContextMenu(e, item.id)}
               className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group w-20 text-center"
             >
               <div
@@ -1383,7 +1431,7 @@ export const DesktopOs = () => {
                 <span className="text-zinc-200 font-semibold block">Quick Keyboard Shortcuts:</span>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div>
-                    <kbd className="text-zinc-200">Alt + Space</kbd>: Spotlight Launcher
+                    <kbd className="text-zinc-200">Alt + Space</kbd>: Spotlight App Launcher
                   </div>
                   <div>
                     <kbd className="text-zinc-200">Alt + Tab</kbd>: Cycle Open Windows
@@ -1392,13 +1440,13 @@ export const DesktopOs = () => {
                     <kbd className="text-zinc-200">Alt + M</kbd>: Toggle Maximize
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">ESC</kbd>: Close Active Window
+                    <kbd className="text-zinc-200">ESC</kbd>: Close Active Window / Menus
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + 1..7</kbd>: Quick Launch Apps
+                    <kbd className="text-zinc-200">Alt + 1..7</kbd>: Direct App Launchers
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + H/V/G</kbd>: Hyprland Tiling
+                    <kbd className="text-zinc-200">Alt + H/V/G/F</kbd>: Hyprland Tiling
                   </div>
                 </div>
               </div>
@@ -1513,7 +1561,7 @@ export const DesktopOs = () => {
           </div>
         )}
 
-        {/* Desktop Context Menu (Right Click) */}
+        {/* Desktop Context Menu (Right Click on Empty Desktop) */}
         {contextMenu.visible && (
           <div
             onClick={(e) => e.stopPropagation()}
@@ -1523,8 +1571,11 @@ export const DesktopOs = () => {
               backgroundColor: currentTheme.card,
               borderColor: currentTheme.border,
             }}
-            className="fixed z-50 w-48 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs text-zinc-200"
+            className="fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs text-zinc-200"
           >
+            <div className="px-2.5 py-1 text-[10px] text-zinc-400 uppercase font-semibold border-b border-white/5 mb-1">
+              Desktop
+            </div>
             <button
               type="button"
               onClick={() => {
@@ -1535,6 +1586,17 @@ export const DesktopOs = () => {
             >
               <FiTerminal className="size-3.5 text-primary" />
               <span>Open Terminal</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowLauncher(true);
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiCommand className="size-3.5 text-primary" />
+              <span>Launch Application</span>
             </button>
             <button
               type="button"
@@ -1584,50 +1646,236 @@ export const DesktopOs = () => {
           </div>
         )}
 
-        {/* Quick App Launcher Modal (Alt+Space / Spotlight style) */}
+        {/* Application Specific Context Menu (Right Click on App Icon or Dock) */}
+        {appContextMenu.visible && appContextMenu.windowId && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              left: `${appContextMenu.x}px`,
+              top: `${appContextMenu.y}px`,
+              backgroundColor: currentTheme.card,
+              borderColor: currentTheme.border,
+            }}
+            className="fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs text-zinc-200"
+          >
+            <div className="flex items-center gap-2 px-2.5 py-1 text-[10px] text-zinc-400 uppercase font-semibold border-b border-white/5 mb-1">
+              <span>{windows[appContextMenu.windowId].title}</span>
+            </div>
+
+            {/* Open / Focus */}
+            <button
+              type="button"
+              onClick={() => {
+                if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
+                setAppContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiEye className="size-3.5 text-primary" />
+              <span>
+                {windows[appContextMenu.windowId].isOpen &&
+                !windows[appContextMenu.windowId].isMinimized
+                  ? "Focus Window"
+                  : "Open Application"}
+              </span>
+            </button>
+
+            {/* Minimize / Restore if running */}
+            {windows[appContextMenu.windowId].isOpen && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (appContextMenu.windowId) {
+                      if (windows[appContextMenu.windowId].isMinimized) {
+                        focusWindow(appContextMenu.windowId);
+                      } else {
+                        minimizeWindow(appContextMenu.windowId);
+                      }
+                    }
+                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <FiMinimize className="size-3.5 text-yellow-400" />
+                  <span>
+                    {windows[appContextMenu.windowId].isMinimized ? "Restore" : "Minimize"}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (appContextMenu.windowId) toggleMaximize(appContextMenu.windowId);
+                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <FiMaximize2 className="size-3.5 text-emerald-400" />
+                  <span>
+                    {windows[appContextMenu.windowId].isMaximized ? "Restore Size" : "Maximize"}
+                  </span>
+                </button>
+
+                <div className="my-1 border-t border-white/10" />
+
+                {/* Close / Quit Application */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    if (appContextMenu.windowId) closeWindow(appContextMenu.windowId, e);
+                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <FiX className="size-3.5" />
+                  <span>Quit / Close</span>
+                </button>
+              </>
+            )}
+
+            {!windows[appContextMenu.windowId].isOpen && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
+                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                }}
+                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-emerald-500/20 text-emerald-400 transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <FiPlay className="size-3.5" />
+                <span>Launch Process</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Quick App Launcher Modal (Spotlight / Raycast style) */}
         {showLauncher && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/40 backdrop-blur-xs animate-in fade-in duration-100"
+            className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-100 p-4"
           >
             <div
-              className="w-full max-w-md rounded-2xl border shadow-2xl p-3 font-mono"
+              className="w-full max-w-lg rounded-2xl border shadow-2xl p-4 font-mono overflow-hidden flex flex-col gap-3"
               style={{
                 backgroundColor: currentTheme.card,
                 borderColor: currentTheme.border,
               }}
             >
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10 text-xs text-zinc-400">
-                <FiCommand className="size-4 text-primary" />
-                <span className="font-semibold text-zinc-200">Carbon App Launcher</span>
-                <span className="ml-auto text-[10px] text-zinc-500">ESC to close</span>
+              {/* Launcher Header & Live Search Bar */}
+              <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs">
+                <FiSearch className="size-4 text-primary shrink-0" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={launcherSearch}
+                  onChange={(e) => setLauncherSearch(e.target.value)}
+                  placeholder="Search applications, tools, system specs (Alt+Space)..."
+                  className="w-full bg-transparent border-0 outline-none text-zinc-100 placeholder:text-zinc-500 font-mono text-xs focus:ring-0 p-0"
+                />
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-zinc-400 shrink-0">
+                  ESC
+                </kbd>
               </div>
-              <div className="grid grid-cols-3 gap-2 p-2 mt-1">
+
+              {/* Grid of Applications filtered by search */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-[360px] overflow-y-auto p-1">
                 {(
                   [
-                    { id: "about", label: "About", icon: FiUser, key: "1" },
-                    { id: "terminal", label: "Terminal", icon: FiTerminal, key: "2" },
-                    { id: "projects", label: "Projects", icon: FiFolder, key: "3" },
-                    { id: "blog", label: "Notes", icon: FiBookOpen, key: "4" },
-                    { id: "resume", label: "Resume", icon: FiFileText, key: "5" },
-                    { id: "settings", label: "Settings", icon: FiSettings, key: "6" },
-                    { id: "taskmanager", label: "Tasks", icon: FiActivity, key: "7" },
+                    {
+                      id: "about",
+                      label: "About Me",
+                      sub: "Profile & Skills",
+                      icon: FiUser,
+                      key: "1",
+                    },
+                    {
+                      id: "terminal",
+                      label: "Terminal",
+                      sub: "Interactive Shell",
+                      icon: FiTerminal,
+                      key: "2",
+                    },
+                    {
+                      id: "projects",
+                      label: "Projects",
+                      sub: "Featured Repos",
+                      icon: FiFolder,
+                      key: "3",
+                    },
+                    {
+                      id: "blog",
+                      label: "Articles",
+                      sub: "Technical Notes",
+                      icon: FiBookOpen,
+                      key: "4",
+                    },
+                    {
+                      id: "resume",
+                      label: "Resume",
+                      sub: "PDF Previewer",
+                      icon: FiFileText,
+                      key: "5",
+                    },
+                    {
+                      id: "settings",
+                      label: "Settings",
+                      sub: "Themes & Layout",
+                      icon: FiSettings,
+                      key: "6",
+                    },
+                    {
+                      id: "taskmanager",
+                      label: "Tasks",
+                      sub: "Process Monitor",
+                      icon: FiActivity,
+                      key: "7",
+                    },
                   ] as const
-                ).map((app) => (
-                  <button
-                    key={app.id}
-                    type="button"
-                    onClick={() => {
-                      focusWindow(app.id);
-                      setShowLauncher(false);
-                    }}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group text-center"
-                  >
-                    <app.icon className="size-6 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-[11px] text-zinc-200">{app.label}</span>
-                    <span className="text-[9px] text-zinc-500">⌥{app.key}</span>
-                  </button>
-                ))}
+                )
+                  .filter((app) => {
+                    const q = launcherSearch.toLowerCase().trim();
+                    if (!q) return true;
+                    return (
+                      app.label.toLowerCase().includes(q) ||
+                      app.sub.toLowerCase().includes(q) ||
+                      app.id.toLowerCase().includes(q)
+                    );
+                  })
+                  .map((app) => (
+                    <button
+                      key={app.id}
+                      type="button"
+                      onClick={() => {
+                        focusWindow(app.id);
+                        setShowLauncher(false);
+                        setLauncherSearch("");
+                      }}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10 transition-all cursor-pointer group text-center"
+                    >
+                      <div
+                        className="size-11 rounded-xl flex items-center justify-center border shadow-sm group-hover:scale-105 transition-transform"
+                        style={{
+                          backgroundColor: `${currentTheme.bg}CC`,
+                          borderColor: currentTheme.border,
+                          color: currentTheme.primary,
+                        }}
+                      >
+                        <app.icon className="size-5" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-zinc-200 truncate w-full">
+                        {app.label}
+                      </span>
+                      <span className="text-[9px] text-zinc-400 font-mono">Alt+{app.key}</span>
+                    </button>
+                  ))}
+              </div>
+
+              {/* Launcher Footer Info */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] text-zinc-500 font-mono px-1">
+                <span>Select app or press Alt+1..7</span>
+                <span>Carbon OS v2.0</span>
               </div>
             </div>
           </div>
@@ -1697,6 +1945,7 @@ export const DesktopOs = () => {
                 key={item.id}
                 type="button"
                 onClick={() => toggleWindow(item.id)}
+                onContextMenu={(e) => handleAppContextMenu(e, item.id)}
                 className={`group relative flex flex-col items-center justify-center size-11 rounded-xl transition-all hover:scale-115 active:scale-95 cursor-pointer ${
                   isFocused ? "border" : "hover:bg-white/10 text-zinc-300"
                 }`}
