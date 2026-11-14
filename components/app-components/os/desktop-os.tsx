@@ -40,6 +40,8 @@ import {
   FiEye,
   FiMinimize,
   FiRotateCcw,
+  FiTrash2,
+  FiPlus,
 } from "react-icons/fi";
 import { useTheme } from "next-themes";
 import { useOsMode } from "@/components/providers";
@@ -188,6 +190,65 @@ export const DesktopOs = () => {
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
   const [launcherSearch, setLauncherSearch] = useState("");
+
+  // Customizable Desktop Shortcuts list (supports removing/restoring desktop shortcuts)
+  const [desktopApps, setDesktopApps] = useState<WindowId[]>([
+    "about",
+    "terminal",
+    "projects",
+    "blog",
+    "resume",
+    "settings",
+    "taskmanager",
+  ]);
+
+  // Load custom desktop icons preference from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("portfolio_desktop_apps");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDesktopApps(parsed);
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  const saveDesktopApps = (apps: WindowId[]) => {
+    setDesktopApps(apps);
+    try {
+      localStorage.setItem("portfolio_desktop_apps", JSON.stringify(apps));
+    } catch {
+      // Ignore
+    }
+  };
+
+  const removeDesktopShortcut = (id: WindowId) => {
+    const updated = desktopApps.filter((appId) => appId !== id);
+    saveDesktopApps(updated);
+  };
+
+  const addDesktopShortcut = (id: WindowId) => {
+    if (!desktopApps.includes(id)) {
+      const updated = [...desktopApps, id];
+      saveDesktopApps(updated);
+    }
+  };
+
+  const resetDesktopShortcuts = () => {
+    saveDesktopApps([
+      "about",
+      "terminal",
+      "projects",
+      "blog",
+      "resume",
+      "settings",
+      "taskmanager",
+    ]);
+  };
 
   // Context Menu state (Right Click on Desktop Canvas)
   const [contextMenu, setContextMenu] = useState<{
@@ -793,6 +854,17 @@ export const DesktopOs = () => {
 
           {/* Hyprland Tiling Mode Pills */}
           <div className="flex items-center gap-1 bg-black/40 p-0.5 rounded border border-white/5 text-[10px] font-mono">
+            {/* All Apps Launcher Button */}
+            <button
+              type="button"
+              onClick={() => setShowLauncher((prev) => !prev)}
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors text-zinc-300 hover:text-zinc-100 hover:bg-white/10"
+              title="All Apps Launcher (Alt+Space)"
+            >
+              <FiGrid className="size-2.5 text-primary" />
+              <span>All Apps</span>
+            </button>
+            <span className="text-white/20">|</span>
             {(
               [
                 { mode: "floating", label: "Float", icon: FiLayers },
@@ -956,7 +1028,7 @@ export const DesktopOs = () => {
           setAppContextMenu((prev) => ({ ...prev, visible: false }));
         }}
       >
-        {/* Desktop Application Icons */}
+        {/* Desktop Application Icons (Filtered by desktopApps state with remove capability) */}
         <div className="grid grid-flow-col grid-rows-4 sm:grid-rows-6 gap-4 sm:gap-6 w-max">
           {(
             [
@@ -968,32 +1040,65 @@ export const DesktopOs = () => {
               { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
               { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "7" },
             ] as const
-          ).map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => focusWindow(item.id)}
-              onContextMenu={(e) => handleAppContextMenu(e, item.id)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group w-20 text-center"
-            >
-              <div
-                className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
-                style={{
-                  backgroundColor: `${currentTheme.card}E6`,
-                  borderColor: currentTheme.border,
-                  color: currentTheme.primary,
-                }}
-              >
-                <item.icon className="size-6" />
-                <span className="absolute bottom-0.5 right-1 text-[8px] font-mono text-zinc-400 opacity-60 group-hover:opacity-100">
-                  ⌥{item.key}
-                </span>
+          )
+            .filter((item) => desktopApps.includes(item.id))
+            .map((item) => (
+              <div key={item.id} className="relative group w-20">
+                <button
+                  type="button"
+                  onClick={() => focusWindow(item.id)}
+                  onContextMenu={(e) => handleAppContextMenu(e, item.id)}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer w-full text-center"
+                >
+                  <div
+                    className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
+                    style={{
+                      backgroundColor: `${currentTheme.card}E6`,
+                      borderColor: currentTheme.border,
+                      color: currentTheme.primary,
+                    }}
+                  >
+                    <item.icon className="size-6" />
+                    <span className="absolute bottom-0.5 right-1 text-[8px] font-mono text-zinc-400 opacity-60 group-hover:opacity-100">
+                      ⌥{item.key}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-mono text-zinc-200 drop-shadow-md truncate max-w-[76px]">
+                    {item.label}
+                  </span>
+                </button>
+
+                {/* Subtle Hover Remove Shortcut Button on Desktop Icon */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeDesktopShortcut(item.id);
+                  }}
+                  className="absolute -top-1 -right-1 size-4 rounded-full bg-red-500/80 hover:bg-red-600 text-white text-[9px] font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-pointer border border-white/20"
+                  title={`Remove ${item.label} shortcut from desktop`}
+                >
+                  ✕
+                </button>
               </div>
-              <span className="text-[11px] font-mono text-zinc-200 drop-shadow-md truncate max-w-[76px]">
-                {item.label}
+            ))}
+
+          {/* Quick "Add App" Desktop Tile if any shortcuts are removed */}
+          {desktopApps.length < 7 && (
+            <button
+              type="button"
+              onClick={() => setShowLauncher(true)}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/5 border border-dashed border-white/20 hover:border-primary/50 transition-colors cursor-pointer group w-20 text-center"
+              title="Add Application Shortcut to Desktop"
+            >
+              <div className="size-12 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-primary transition-colors">
+                <FiPlus className="size-5" />
+              </div>
+              <span className="text-[10px] font-mono text-zinc-400 group-hover:text-zinc-200">
+                + Add App
               </span>
             </button>
-          ))}
+          )}
         </div>
 
         {/* Windows Rendering Layer */}
@@ -1620,6 +1725,17 @@ export const DesktopOs = () => {
               <FiActivity className="size-3.5 text-emerald-400" />
               <span>Task Manager</span>
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                resetDesktopShortcuts();
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiRotateCcw className="size-3.5 text-zinc-400" />
+              <span>Reset Desktop Icons</span>
+            </button>
             <div className="my-1 border-t border-white/10" />
             <button
               type="button"
@@ -1716,25 +1832,51 @@ export const DesktopOs = () => {
                     {windows[appContextMenu.windowId].isMaximized ? "Restore Size" : "Maximize"}
                   </span>
                 </button>
-
-                <div className="my-1 border-t border-white/10" />
-
-                {/* Close / Quit Application */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    if (appContextMenu.windowId) closeWindow(appContextMenu.windowId, e);
-                    setAppContextMenu((prev) => ({ ...prev, visible: false }));
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
-                >
-                  <FiX className="size-3.5" />
-                  <span>Quit / Close</span>
-                </button>
               </>
             )}
 
-            {!windows[appContextMenu.windowId].isOpen && (
+            {/* Remove / Add Desktop Shortcut */}
+            <div className="my-1 border-t border-white/10" />
+            {desktopApps.includes(appContextMenu.windowId) ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (appContextMenu.windowId) removeDesktopShortcut(appContextMenu.windowId);
+                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                }}
+                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-zinc-300 transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <FiTrash2 className="size-3.5 text-zinc-400" />
+                <span>Remove Shortcut</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  if (appContextMenu.windowId) addDesktopShortcut(appContextMenu.windowId);
+                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                }}
+                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-primary transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <FiPlus className="size-3.5" />
+                <span>Add to Desktop</span>
+              </button>
+            )}
+
+            {/* Close / Quit Application */}
+            {windows[appContextMenu.windowId].isOpen ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  if (appContextMenu.windowId) closeWindow(appContextMenu.windowId, e);
+                  setAppContextMenu((prev) => ({ ...prev, visible: false }));
+                }}
+                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <FiX className="size-3.5" />
+                <span>Quit / Close</span>
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => {
@@ -1844,31 +1986,60 @@ export const DesktopOs = () => {
                     );
                   })
                   .map((app) => (
-                    <button
+                    <div
                       key={app.id}
-                      type="button"
-                      onClick={() => {
-                        focusWindow(app.id);
-                        setShowLauncher(false);
-                        setLauncherSearch("");
-                      }}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10 transition-all cursor-pointer group text-center"
+                      className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10 transition-all group relative text-center"
                     >
-                      <div
-                        className="size-11 rounded-xl flex items-center justify-center border shadow-sm group-hover:scale-105 transition-transform"
-                        style={{
-                          backgroundColor: `${currentTheme.bg}CC`,
-                          borderColor: currentTheme.border,
-                          color: currentTheme.primary,
+                      <button
+                        type="button"
+                        onClick={() => {
+                          focusWindow(app.id);
+                          setShowLauncher(false);
+                          setLauncherSearch("");
                         }}
+                        className="flex flex-col items-center gap-1.5 w-full cursor-pointer"
                       >
-                        <app.icon className="size-5" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-zinc-200 truncate w-full">
-                        {app.label}
-                      </span>
-                      <span className="text-[9px] text-zinc-400 font-mono">Alt+{app.key}</span>
-                    </button>
+                        <div
+                          className="size-11 rounded-xl flex items-center justify-center border shadow-sm group-hover:scale-105 transition-transform"
+                          style={{
+                            backgroundColor: `${currentTheme.bg}CC`,
+                            borderColor: currentTheme.border,
+                            color: currentTheme.primary,
+                          }}
+                        >
+                          <app.icon className="size-5" />
+                        </div>
+                        <span className="text-[11px] font-semibold text-zinc-200 truncate w-full">
+                          {app.label}
+                        </span>
+                        <span className="text-[9px] text-zinc-400 font-mono">Alt+{app.key}</span>
+                      </button>
+
+                      {/* Desktop shortcut pin toggle */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (desktopApps.includes(app.id)) {
+                            removeDesktopShortcut(app.id);
+                          } else {
+                            addDesktopShortcut(app.id);
+                          }
+                        }}
+                        className={`text-[9px] px-1.5 py-0.5 rounded transition-colors cursor-pointer border ${
+                          desktopApps.includes(app.id)
+                            ? "bg-white/5 border-white/10 text-zinc-400 hover:text-red-400 hover:border-red-400/40"
+                            : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+                        }`}
+                        title={
+                          desktopApps.includes(app.id)
+                            ? "Remove from desktop"
+                            : "Add shortcut to desktop"
+                        }
+                      >
+                        {desktopApps.includes(app.id) ? "On Desktop (✕)" : "+ Desktop"}
+                      </button>
+                    </div>
                   ))}
               </div>
 
