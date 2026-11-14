@@ -1629,10 +1629,10 @@ export const DesktopOs = () => {
 
             <div className="p-4 sm:p-6 overflow-y-auto space-y-3">
               {blogConfig.posts.map((article) => (
-                <Link
+                <div
                   key={article.slug}
-                  href={`/blog/${article.slug}`}
-                  className="block p-3.5 rounded-lg border hover:border-primary/50 transition-colors group"
+                  onClick={() => openInBrowser(`/blog/${article.slug}`, `${article.title} — Reader`)}
+                  className="block p-3.5 rounded-lg border hover:border-primary/50 transition-colors group cursor-pointer"
                   style={{
                     backgroundColor: isDark ? `${currentTheme.card}CC` : "rgba(255, 255, 255, 0.9)",
                     borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.08)",
@@ -1653,25 +1653,30 @@ export const DesktopOs = () => {
                       {article.subtitle}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 mt-2 font-mono text-[10px]">
-                    <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{article.date}</span>
-                    <span className="text-zinc-400">•</span>
-                    <div className="flex flex-wrap gap-1">
-                      {article.tags.map((t) => (
-                        <span
-                          key={t}
-                          className={`px-1 py-0.2 rounded border ${
-                            isDark
-                              ? "bg-black/40 text-primary border-primary/20"
-                              : "bg-primary/10 text-primary border-primary/30"
-                          }`}
-                        >
-                          {t}
-                        </span>
-                      ))}
+                  <div className="flex items-center justify-between mt-2 font-mono text-[10px]">
+                    <div className="flex items-center gap-2">
+                      <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{article.date}</span>
+                      <span className="text-zinc-400">•</span>
+                      <div className="flex flex-wrap gap-1">
+                        {article.tags.map((t) => (
+                          <span
+                            key={t}
+                            className={`px-1 py-0.2 rounded border ${
+                              isDark
+                                ? "bg-black/40 text-primary border-primary/20"
+                                : "bg-primary/10 text-primary border-primary/30"
+                            }`}
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+                    <span className="text-[10px] text-primary group-hover:underline flex items-center gap-1 font-medium">
+                      Open in Browser <FiExternalLink className="size-2.5" />
+                    </span>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
