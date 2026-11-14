@@ -41,6 +41,24 @@ export const OsProvider = ({ children }: { children: React.ReactNode }) => {
     setOsMode(!isOsMode);
   };
 
+  useEffect(() => {
+    if (isOsMode) {
+      document.documentElement.classList.add("os-mode-active");
+      document.body.classList.add("os-mode-active");
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.documentElement.classList.remove("os-mode-active");
+        document.body.classList.remove("os-mode-active");
+        document.body.style.overflow = prevOverflow;
+      };
+    } else {
+      document.documentElement.classList.remove("os-mode-active");
+      document.body.classList.remove("os-mode-active");
+      document.body.style.overflow = "";
+    }
+  }, [isOsMode]);
+
   return (
     <OsContext.Provider value={{ isOsMode, toggleOsMode, setOsMode }}>
       {children}

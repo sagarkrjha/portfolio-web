@@ -36,6 +36,7 @@ import {
   FiSquare,
   FiDroplet,
   FiSearch,
+  FiGlobe,
   FiEye,
   FiMinimize,
   FiRotateCcw,
@@ -56,7 +57,8 @@ export type WindowId =
   | "blog"
   | "resume"
   | "settings"
-  | "taskmanager";
+  | "taskmanager"
+  | "browser";
 
 export type LayoutMode = "floating" | "tiling-horizontal" | "tiling-vertical" | "tiling-grid";
 export type WallpaperKey = "hero";
@@ -443,7 +445,24 @@ export const DesktopOs = () => {
       position: { x: 150, y: 70 },
       size: { width: 640, height: 460 },
     },
+    browser: {
+      id: "browser",
+      title: "Safari Preview (Interactive)",
+      icon: FiGlobe,
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      zIndex: 80,
+      position: { x: 70, y: 35 },
+      size: { width: 840, height: 600 },
+    },
   });
+
+  // Browser state for interactive iframes
+  const [browserUrl, setBrowserUrl] = useState("https://sagarkrjha.vercel.app");
+  const [browserTitle, setBrowserTitle] = useState("Live Project Demo");
+  const [inputUrl, setInputUrl] = useState("https://sagarkrjha.vercel.app");
+
 
   // Clock & system metrics jitter
   useEffect(() => {
@@ -491,6 +510,13 @@ export const DesktopOs = () => {
     });
     setActiveWindow(id);
   }, []);
+
+  const openInBrowser = useCallback((url: string, title?: string) => {
+    setBrowserUrl(url);
+    setInputUrl(url);
+    if (title) setBrowserTitle(title);
+    focusWindow("browser");
+  }, [focusWindow]);
 
   const toggleMaximize = useCallback((id: WindowId) => {
     setWindows((prev) => ({
@@ -647,23 +673,10 @@ export const DesktopOs = () => {
         return;
       }
 
-      // 6. Hyprland Tiling shortcuts: Alt+H (cols), Alt+V (rows), Alt+G (grid), Alt+F (float)
-      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-        if (e.key === "h" || e.key === "H") {
-          e.preventDefault();
-          setLayoutMode((prev) =>
-            prev === "tiling-horizontal" ? "floating" : "tiling-horizontal",
-          );
-        } else if (e.key === "v" || e.key === "V") {
-          e.preventDefault();
-          setLayoutMode((prev) => (prev === "tiling-vertical" ? "floating" : "tiling-vertical"));
-        } else if (e.key === "g" || e.key === "G") {
-          e.preventDefault();
-          setLayoutMode((prev) => (prev === "tiling-grid" ? "floating" : "tiling-grid"));
-        } else if (e.key === "f" || e.key === "F") {
-          e.preventDefault();
-          setLayoutMode("floating");
-        }
+      // Floating window shortcut: Alt+F (center/restore)
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "f" || e.key === "F")) {
+        e.preventDefault();
+        if (activeWindow) focusWindow(activeWindow);
       }
     };
 
@@ -753,84 +766,35 @@ export const DesktopOs = () => {
   if (!isOsMode) return null;
 
   // Compute Tiling Styles if Tiling Layout is active
-  const visibleTilingWindows = openWindows.filter((w) => !w.isMinimized);
-  const getTilingStyle = (id: WindowId): React.CSSProperties => {
-    if (layoutMode === "floating") {
-      const w = windows[id];
-      // Active window or system settings receives elevated zIndex in floating mode
-      const computedZ = id === "settings" && activeWindow === "settings" 
-        ? Math.max(w.zIndex, 500) 
-        : (activeWindow === id ? Math.max(w.zIndex, 200) : w.zIndex);
+  const getWindowStyle = (id: WindowId): React.CSSProperties => {
+    const w = windows[id];
+    const computedZ =
+      id === "settings" && activeWindow === "settings"
+        ? Math.max(w.zIndex, 500)
+        : activeWindow === id
+        ? Math.max(w.zIndex, 200)
+        : w.zIndex;
 
-      if (w.isMaximized) {
-        return {
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: computedZ,
-        };
-      }
+    if (w.isMaximized) {
       return {
         position: "absolute",
-        left: `${w.position.x}px`,
-        top: `${w.position.y}px`,
-        width: `${w.size.width}px`,
-        maxWidth: "96vw",
-        maxHeight: "84vh",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100%",
+        height: "100%",
         zIndex: computedZ,
       };
     }
-
-    const index = visibleTilingWindows.findIndex((w) => w.id === id);
-    const count = visibleTilingWindows.length || 1;
-    const pad = 8;
-
-    if (layoutMode === "tiling-horizontal") {
-      const widthPct = 100 / count;
-      return {
-        position: "absolute",
-        top: `${pad}px`,
-        bottom: `${pad}px`,
-        left: `calc(${index * widthPct}% + ${pad}px)`,
-        width: `calc(${widthPct}% - ${pad * 2}px)`,
-        height: `calc(100% - ${pad * 2}px)`,
-        zIndex: windows[id].zIndex,
-      };
-    }
-
-    if (layoutMode === "tiling-vertical") {
-      const heightPct = 100 / count;
-      return {
-        position: "absolute",
-        left: `${pad}px`,
-        right: `${pad}px`,
-        top: `calc(${index * heightPct}% + ${pad}px)`,
-        height: `calc(${heightPct}% - ${pad * 2}px)`,
-        width: `calc(100% - ${pad * 2}px)`,
-        zIndex: windows[id].zIndex,
-      };
-    }
-
-    // Grid (2x2 or 1x2)
-    const cols = count > 2 ? 2 : count;
-    const rows = Math.ceil(count / 2);
-    const colIdx = index % 2;
-    const rowIdx = Math.floor(index / 2);
-
-    const wPct = 100 / cols;
-    const hPct = 100 / rows;
-
     return {
       position: "absolute",
-      left: `calc(${colIdx * wPct}% + ${pad}px)`,
-      top: `calc(${rowIdx * hPct}% + ${pad}px)`,
-      width: `calc(${wPct}% - ${pad * 2}px)`,
-      height: `calc(${hPct}% - ${pad * 2}px)`,
-      zIndex: windows[id].zIndex,
+      left: `${w.position.x}px`,
+      top: `${w.position.y}px`,
+      width: `${w.size.width}px`,
+      maxWidth: "96vw",
+      maxHeight: "84vh",
+      zIndex: computedZ,
     };
   };
 
@@ -1189,35 +1153,7 @@ export const DesktopOs = () => {
                   </button>
                 </div>
 
-                {/* Window Layout Mode Picker */}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between text-[11px] font-medium mb-1.5">
-                    <span>Window Arrangement</span>
-                    <span className="text-[10px] text-primary font-mono">{layoutMode}</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1">
-                    {[
-                      { mode: "floating", label: "Float", icon: FiLayers },
-                      { mode: "tiling-horizontal", label: "Cols", icon: FiColumns },
-                      { mode: "tiling-vertical", label: "Rows", icon: FiMinus },
-                      { mode: "tiling-grid", label: "Grid", icon: FiGrid },
-                    ].map((l) => (
-                      <button
-                        key={l.mode}
-                        type="button"
-                        onClick={() => setLayoutMode(l.mode as LayoutMode)}
-                        className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-1 cursor-pointer transition-all ${
-                          layoutMode === l.mode
-                            ? "bg-primary text-black border-primary font-bold shadow-sm"
-                            : (isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/10 hover:bg-black/10")
-                        }`}
-                      >
-                        <l.icon className="size-3" />
-                        <span className="text-[9px]">{l.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+
 
                 {/* Quick Link to Full System Settings */}
                 <button
@@ -1277,6 +1213,7 @@ export const DesktopOs = () => {
                 { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "5" },
                 { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
                 { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "7" },
+                { id: "browser", label: "Browser.app", icon: FiGlobe, key: "8" },
               ] as const
             )
               .filter((item) => desktopApps.includes(item.id))
@@ -1328,7 +1265,7 @@ export const DesktopOs = () => {
               ))}
 
             {/* Quick "Add App" Desktop Tile if any shortcuts are removed */}
-            {desktopApps.length < 7 && (
+            {desktopApps.length < 8 && (
               <button
                 type="button"
                 onClick={() => setShowLauncher(true)}
@@ -1358,7 +1295,7 @@ export const DesktopOs = () => {
         {windows.about.isOpen && (
           <div
             style={{
-              ...getTilingStyle("about"),
+              ...getWindowStyle("about"),
               backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
@@ -1452,7 +1389,7 @@ export const DesktopOs = () => {
         {windows.terminal.isOpen && (
           <div
             style={{
-              ...getTilingStyle("terminal"),
+              ...getWindowStyle("terminal"),
               backgroundColor: isDark ? "#1c1917" : "#24292e",
               borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.15)",
             }}
@@ -1473,7 +1410,7 @@ export const DesktopOs = () => {
         {windows.projects.isOpen && (
           <div
             style={{
-              ...getTilingStyle("projects"),
+              ...getWindowStyle("projects"),
               backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
@@ -1513,25 +1450,38 @@ export const DesktopOs = () => {
                         </span>
                       )}
                       {p.githubUrl && (
-                        <a
-                          href={p.githubUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`p-1 transition-colors ${isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-950"}`}
-                          title="View on GitHub"
+                        <button
+                          type="button"
+                          onClick={() => openInBrowser(p.githubUrl!, `${p.title} Source (GitHub)`)}
+                          className={`p-1 transition-colors flex items-center gap-1 rounded hover:bg-white/10 cursor-pointer ${
+                            isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-950"
+                          }`}
+                          title="Open GitHub Source in Interactive Window"
                         >
                           <FiGithub className="size-3.5" />
-                        </a>
+                          <span className="text-[10px] font-mono hidden sm:inline">Source</span>
+                        </button>
+                      )}
+                      {p.liveUrl && (
+                        <button
+                          type="button"
+                          onClick={() => openInBrowser(p.liveUrl!, `${p.title} (Live Interactive)`)}
+                          className="text-primary hover:opacity-80 p-1 flex items-center gap-1 rounded hover:bg-primary/10 cursor-pointer"
+                          title="Launch Live Hosted App in Interactive Window"
+                        >
+                          <FiGlobe className="size-3.5" />
+                          <span className="text-[10px] font-mono font-bold hidden sm:inline">Demo</span>
+                        </button>
                       )}
                       {p.liveUrl && (
                         <a
                           href={p.liveUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-primary hover:opacity-80 p-1"
-                          title="Live Demo"
+                          className="text-zinc-500 hover:text-primary p-0.5"
+                          title="Open in new external tab"
                         >
-                          <FiExternalLink className="size-3.5" />
+                          <FiExternalLink className="size-3" />
                         </a>
                       )}
                     </div>
@@ -1561,7 +1511,7 @@ export const DesktopOs = () => {
         {windows.blog.isOpen && (
           <div
             style={{
-              ...getTilingStyle("blog"),
+              ...getWindowStyle("blog"),
               backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
@@ -1657,7 +1607,7 @@ export const DesktopOs = () => {
         {windows.resume.isOpen && (
           <div
             style={{
-              ...getTilingStyle("resume"),
+              ...getWindowStyle("resume"),
               backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
@@ -1678,7 +1628,7 @@ export const DesktopOs = () => {
         {windows.settings.isOpen && (
           <div
             style={{
-              ...getTilingStyle("settings"),
+              ...getWindowStyle("settings"),
               backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
@@ -1773,40 +1723,7 @@ export const DesktopOs = () => {
                 </div>
               </div>
 
-              {/* Tiling mode preference */}
-              <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
-                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
-                  <FiSliders className="text-primary size-4" />
-                  <span>Window Manager Layout (Hyprland / i3)</span>
-                </h4>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  {[
-                    { mode: "floating", label: "Floating Mode (Free Drag)", key: "Alt+F" },
-                    { mode: "tiling-horizontal", label: "Horizontal Columns", key: "Alt+H" },
-                    { mode: "tiling-vertical", label: "Vertical Rows", key: "Alt+V" },
-                    { mode: "tiling-grid", label: "2x2 Tiling Grid", key: "Alt+G" },
-                  ].map((l) => (
-                    <button
-                      key={l.mode}
-                      type="button"
-                      onClick={() => setLayoutMode(l.mode as LayoutMode)}
-                      className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between ${
-                        layoutMode === l.mode
-                          ? "bg-primary/20 border-primary text-primary"
-                          : (isDark ? "border-white/10 text-zinc-300 hover:bg-white/5" : "border-black/10 text-zinc-700 hover:bg-black/5")
-                      }`}
-                      style={{
-                        backgroundColor: layoutMode === l.mode ? `${currentTheme.primary}20` : undefined,
-                      }}
-                    >
-                      <span>{l.label}</span>
-                      <kbd className={`px-1 py-0.5 rounded text-[9px] ${isDark ? "bg-black/40 text-zinc-400" : "bg-black/5 text-zinc-600"}`}>
-                        {l.key}
-                      </kbd>
-                    </button>
-                  ))}
-                </div>
-              </div>
+
 
               {/* Keyboard Shortcuts Reference */}
               <div className={`border-t pt-4 text-[11px] space-y-1.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}>
@@ -1828,7 +1745,7 @@ export const DesktopOs = () => {
                     <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + 1..7</kbd>: Direct App Launchers
                   </div>
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + H/V/G/F</kbd>: Hyprland Tiling
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + F</kbd>: Center Active Window
                   </div>
                 </div>
               </div>
@@ -1840,7 +1757,7 @@ export const DesktopOs = () => {
         {windows.taskmanager.isOpen && (
           <div
             style={{
-              ...getTilingStyle("taskmanager"),
+              ...getWindowStyle("taskmanager"),
               backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
@@ -1943,6 +1860,123 @@ export const DesktopOs = () => {
           </div>
         )}
 
+                {/* 8. Interactive Hosted Projects & GitHub iframe Window */}
+        {windows.browser.isOpen && (
+          <div
+            style={{
+              ...getWindowStyle("browser"),
+              backgroundColor: isDark ? `${currentTheme.bg}FA` : "#ffffffFA",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.15)",
+            }}
+            onClick={() => focusWindow("browser")}
+            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden ${
+              windows.browser.isMinimized ? "hidden" : ""
+            }`}
+          >
+            {/* Titlebar with address bar */}
+            <div
+              onMouseDown={(e) => handleMouseDownHeader(e, "browser")}
+              onDoubleClick={() => toggleMaximize("browser")}
+              className={`flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0 ${
+                isDark ? "bg-[#272220] border-white/10" : "bg-[#f4f4f4] border-black/10"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => closeWindow("browser", e)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="size-3.5 rounded-full bg-[#ff5f56] hover:brightness-125 border border-[#e0443e] cursor-pointer flex items-center justify-center group"
+                  title="Close (ESC)"
+                >
+                  <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
+                    ✕
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => minimizeWindow("browser", e)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="size-3.5 rounded-full bg-[#ffbd2e] hover:brightness-125 border border-[#dea123] cursor-pointer flex items-center justify-center group"
+                  title="Minimize"
+                >
+                  <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
+                    −
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMaximize("browser");
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="size-3.5 rounded-full bg-[#27c93f] hover:brightness-125 border border-[#1aab29] cursor-pointer flex items-center justify-center group"
+                  title="Maximize / Restore"
+                >
+                  <span className="opacity-0 group-hover:opacity-100 text-[7px] font-bold text-black/80 leading-none">
+                    {windows.browser.isMaximized ? "⤓" : "⤢"}
+                  </span>
+                </button>
+              </div>
+
+              {/* Interactive Address URL Bar */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (inputUrl) setBrowserUrl(inputUrl);
+                }}
+                className={`flex-1 max-w-md mx-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
+                  isDark ? "bg-black/40 border-white/10 text-zinc-200" : "bg-white border-black/10 text-zinc-900"
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FiGlobe className="size-3.5 text-primary shrink-0" />
+                <input
+                  type="text"
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                  className="w-full bg-transparent border-0 outline-none p-0 text-xs font-mono"
+                  placeholder="Enter URL to preview..."
+                />
+                <a
+                  href={browserUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-zinc-400 hover:text-primary transition-colors p-0.5"
+                  title="Open externally in new tab"
+                >
+                  <FiExternalLink className="size-3" />
+                </a>
+              </form>
+
+              <div className="flex items-center gap-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => toggleMaximize("browser")}
+                  className={`cursor-pointer p-0.5 transition-colors ${
+                    isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                >
+                  {windows.browser.isMaximized ? <FiMinimize2 className="size-3.5" /> : <FiMaximize2 className="size-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Embedded Live IFrame */}
+            <div className="flex-1 w-full h-full min-h-[350px] relative bg-white">
+              <iframe
+                key={browserUrl}
+                src={browserUrl}
+                title={browserTitle}
+                className="w-full h-full border-0 absolute inset-0"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Desktop Context Menu (Right Click on Empty Desktop) */}
         {contextMenu.visible && (
           <div
@@ -2030,17 +2064,7 @@ export const DesktopOs = () => {
               <span>Reset Desktop Icons</span>
             </button>
             <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
-            <button
-              type="button"
-              onClick={() => {
-                setLayoutMode((prev) => (prev === "tiling-grid" ? "floating" : "tiling-grid"));
-                setContextMenu((prev) => ({ ...prev, visible: false }));
-              }}
-              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
-            >
-              <FiGrid className="size-3.5 text-primary" />
-              <span>Toggle Tile Grid</span>
-            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -2425,6 +2449,7 @@ export const DesktopOs = () => {
               { id: "resume", label: "Resume", icon: FiFileText },
               { id: "settings", label: "Settings", icon: FiSettings },
               { id: "taskmanager", label: "Tasks", icon: FiActivity },
+              { id: "browser", label: "Web", icon: FiGlobe },
             ] as const
           ).map((item) => {
             const w = windows[item.id];
