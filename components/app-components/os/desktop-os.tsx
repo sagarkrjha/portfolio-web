@@ -226,7 +226,6 @@ export const DesktopOs = () => {
   const [layoutMode, setLayoutModeState] = useState<LayoutMode>("floating");
   const [osTheme, setOsThemeState] = useState<OsThemeKey>("carbon");
   const [showDesktopIcons, setShowDesktopIconsState] = useState<boolean>(true);
-  const [showAppleMenu, setShowAppleMenu] = useState(false);
   const [showControlCenter, setShowControlCenter] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
@@ -689,10 +688,6 @@ export const DesktopOs = () => {
           setContextMenu((prev) => ({ ...prev, visible: false }));
           return;
         }
-        if (showAppleMenu) {
-          setShowAppleMenu(false);
-          return;
-        }
         if (showControlCenter) {
           setShowControlCenter(false);
           return;
@@ -727,10 +722,24 @@ export const DesktopOs = () => {
         return;
       }
 
+      // 4. Alt+Q: Clean Shut Down Carbon OS & Return to Web Mode (avoiding browser Cmd/Ctrl+Q conflicts)
+      if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "q" || e.key === "Q")) {
+        e.preventDefault();
+        handleExitOs();
+        return;
+      }
+
+      // 5. Alt+W: Close active window
+      if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "w" || e.key === "W")) {
+        e.preventDefault();
+        if (activeWindow) closeWindow(activeWindow);
+        return;
+      }
+
       // Only check non-input shortcuts below
       if (isInput) return;
 
-      // 4. Alt + 1..9: Quick App Launcher shortcuts
+      // 6. Alt + 1..0: Quick App Launcher shortcuts
       if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
         const appKeys: Record<string, WindowId> = {
           "1": "about",
@@ -751,21 +760,21 @@ export const DesktopOs = () => {
         }
       }
 
-      // 5. Alt + M: Toggle Window Maximize / Restore
+      // 7. Alt + M: Toggle Window Maximize / Restore
       if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "m" || e.key === "M")) {
         e.preventDefault();
         if (activeWindow) toggleMaximize(activeWindow);
         return;
       }
 
-      // 6. Ctrl + Up / Alt + Up: Mission Control
+      // 8. Ctrl + Up / Alt + Up: Mission Control
       if ((e.ctrlKey || e.altKey) && e.key === "ArrowUp") {
         e.preventDefault();
         setIsMissionControl((prev) => !prev);
         return;
       }
 
-      // 7. Ctrl + Left / Right: Switch Spaces
+      // 9. Ctrl + Left / Right: Switch Spaces
       if ((e.ctrlKey || e.altKey) && e.key === "ArrowLeft") {
         e.preventDefault();
         setActiveSpace((prev) => (prev > 0 ? prev - 1 : 2));
@@ -777,7 +786,7 @@ export const DesktopOs = () => {
         return;
       }
 
-      // Floating window shortcut: Alt+F (center/restore)
+      // 10. Floating window shortcut: Alt+F (center/focus)
       if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "f" || e.key === "F")) {
         e.preventDefault();
         if (activeWindow) focusWindow(activeWindow);
@@ -1222,143 +1231,16 @@ export const DesktopOs = () => {
           borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.1)",
         }}
       >
-        {/* Left Side: Apple Menu, App Name, macOS Menu Items */}
+        {/* Left Side: Active Window App Name & Menus */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Apple Logo Icon with Dropdown Menu */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowAppleMenu((prev) => !prev);
-                setShowControlCenter(false);
-              }}
-              className={`px-1.5 py-0.5 rounded transition-colors cursor-pointer flex items-center justify-center font-semibold text-sm ${
-                showAppleMenu
-                  ? "bg-primary text-black"
-                  : isDark
-                    ? "hover:bg-white/10 text-zinc-100"
-                    : "hover:bg-black/5 text-zinc-900"
-              }`}
-              title="Apple Menu"
-            >
-              
-            </button>
-
-            {/* Apple Dropdown Menu */}
-            {showAppleMenu && (
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className={`absolute left-0 top-full mt-1 w-56 rounded-xl border p-1 shadow-2xl backdrop-blur-xl z-[10010] animate-in fade-in zoom-in-95 duration-100 text-xs font-sans ${
-                  isDark ? "text-zinc-200" : "text-zinc-800"
-                }`}
-                style={{
-                  backgroundColor: isDark ? `${currentTheme.card}FB` : "rgba(255, 255, 255, 0.98)",
-                  borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    focusWindow("about");
-                    setShowAppleMenu(false);
-                  }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
-                  }`}
-                >
-                  <span className="font-medium">About This Portfolio</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">⌥1</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    focusWindow("settings");
-                    setShowAppleMenu(false);
-                  }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
-                  }`}
-                >
-                  <span>System Settings...</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">⌥6</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    focusWindow("taskmanager");
-                    setShowAppleMenu(false);
-                  }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
-                  }`}
-                >
-                  <span>Activity Monitor</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">⌥7</span>
-                </button>
-
-                <div
-                  className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDesktopIcons((prev) => !prev);
-                    setShowAppleMenu(false);
-                  }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
-                  }`}
-                >
-                  <span>{showDesktopIcons ? "Hide Desktop Icons" : "Show Desktop Icons"}</span>
-                  {showDesktopIcons && <FiCheck className="size-3 text-primary" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowLauncher(true);
-                    setShowAppleMenu(false);
-                  }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
-                  }`}
-                >
-                  <span>App Launcher (Spotlight)</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">⌥Space</span>
-                </button>
-
-                <div
-                  className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleExitOs();
-                    setShowAppleMenu(false);
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-500 transition-colors flex items-center justify-between cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <FiPower className="size-3 text-red-500" />
-                    <span>Shut Down Carbon OS...</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-400">⌘Q</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Active Application Name in bold macOS typography */}
+          {/* Active Application Name */}
           <span
             className={`font-bold px-1.5 py-0.5 rounded text-xs ${isDark ? "text-zinc-100" : "text-zinc-950"}`}
           >
             {activeWindow ? windows[activeWindow].title.split(" ")[0] : "Finder"}
           </span>
 
-          {/* Classic macOS Top App Menus */}
+          {/* Top App Menus */}
           <div className="hidden md:flex items-center gap-0.5 text-xs">
             <button
               type="button"
@@ -1407,45 +1289,10 @@ export const DesktopOs = () => {
           </div>
         </div>
 
-        {/* Right Status Tray (macOS Control Center, Battery, Clock, Exit) */}
+        {/* Right Status Tray (Control Center, Battery, Clock) */}
         <div
           className={`flex items-center gap-1.5 sm:gap-2.5 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
         >
-          {/* Spaces / Virtual Desktops Indicator */}
-          <div className="hidden sm:flex items-center gap-1 bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-[10px] font-mono">
-            {[0, 1, 2].map((sIndex) => (
-              <button
-                key={sIndex}
-                type="button"
-                onClick={() => setActiveSpace(sIndex)}
-                className={`px-1.5 py-0.2 rounded transition-all cursor-pointer ${
-                  activeSpace === sIndex
-                    ? "bg-primary text-black font-bold shadow-xs scale-105"
-                    : "opacity-60 hover:opacity-100"
-                }`}
-                title={`Switch to Desktop Space ${sIndex + 1} (Ctrl+Arrow)`}
-              >
-                Space {sIndex + 1}
-              </button>
-            ))}
-          </div>
-
-          {/* Mission Control Button */}
-          <button
-            type="button"
-            onClick={() => setIsMissionControl((prev) => !prev)}
-            className={`p-1 rounded cursor-pointer transition-colors ${
-              isMissionControl
-                ? "bg-primary text-black"
-                : isDark
-                  ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
-                  : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
-            }`}
-            title="Mission Control / Spaces Overview (Ctrl+Up)"
-          >
-            <FiLayers className="size-3.5" />
-          </button>
-
           {/* Spotlight Search Icon */}
           <button
             type="button"
@@ -1460,14 +1307,13 @@ export const DesktopOs = () => {
             <FiSearch className="size-3.5" />
           </button>
 
-          {/* macOS Control Center Button */}
+          {/* Control Center Button */}
           <div className="relative">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowControlCenter((prev) => !prev);
-                setShowAppleMenu(false);
               }}
               className={`p-1 rounded cursor-pointer transition-colors flex items-center gap-1 ${
                 showControlCenter
@@ -1576,7 +1422,7 @@ export const DesktopOs = () => {
                     <FiPower className="size-3.5 text-red-400" />
                     <span className="font-semibold text-xs">Shut Down Carbon OS</span>
                   </div>
-                  <span className="text-[10px] font-mono opacity-70">⌘Q</span>
+                  <span className="text-[10px] font-mono opacity-70">Alt+Q / ⌘Q</span>
                 </button>
               </div>
             )}
@@ -1594,7 +1440,6 @@ export const DesktopOs = () => {
       <main
         className="relative flex-1 p-4 sm:p-6 overflow-hidden"
         onClick={() => {
-          setShowAppleMenu(false);
           setShowControlCenter(false);
           setShowLauncher(false);
           setContextMenu((prev) => ({ ...prev, visible: false }));
@@ -2177,37 +2022,62 @@ export const DesktopOs = () => {
 
               {/* Keyboard Shortcuts Reference */}
               <div
-                className={`border-t pt-4 text-[11px] space-y-1.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}
+                className={`border-t pt-4 text-[11px] space-y-2.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}
               >
-                <span
-                  className={`font-semibold block ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
-                >
-                  Quick Keyboard Shortcuts:
-                </span>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
-                  <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Space</kbd>:
-                    Spotlight App Launcher
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                  >
+                    Conflict-Free Keyboard Shortcuts
+                  </span>
+                  <span className="text-[10px] font-mono opacity-60">
+                    Works across macOS, Windows & Linux
+                  </span>
+                </div>
+                <p className="text-[10px] leading-relaxed opacity-75">
+                  Scoped with <kbd className="font-semibold text-primary">Alt / ⌥</kbd> modifiers to guarantee zero collisions with browser native shortcuts (such as browser back/refresh, address bar, or system tab switching).
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px]">
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Spotlight App Launcher</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Space</kbd>
                   </div>
-                  <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Tab</kbd>:
-                    Cycle Open Windows
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Cycle Open Windows</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Tab</kbd>
                   </div>
-                  <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + M</kbd>:
-                    Toggle Maximize
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Shut Down Carbon OS</span>
+                    <kbd className="font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">Alt + Q</kbd>
                   </div>
-                  <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>ESC</kbd>: Close
-                    Active Window / Menus
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Close Active Window</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + W / ESC</kbd>
                   </div>
-                  <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + 1..7</kbd>:
-                    Direct App Launchers
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Toggle Maximize / Restore</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + M</kbd>
                   </div>
-                  <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + F</kbd>:
-                    Center Active Window
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Center Active Window</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + F</kbd>
+                  </div>
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Launch Apps by Number</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + 1..0</kbd>
+                  </div>
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Mission Control</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl/Alt + ↑</kbd>
+                  </div>
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Integrated Terminal Toggle</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl + ` / ⌃`</kbd>
+                  </div>
+                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                    <span className="text-zinc-400">Switch Virtual Space</span>
+                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl/Alt + ← / →</kbd>
                   </div>
                 </div>
               </div>
