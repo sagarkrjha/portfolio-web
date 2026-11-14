@@ -77,54 +77,54 @@ const NeofetchOutput = () => {
 
       <div className="space-y-1 text-xs font-mono">
         <div className="font-bold">
-          <span className="text-amber-400">{unixUser}</span>
+          <span className="text-[#33b1ff]">{unixUser}</span>
           <span className="text-zinc-400">@</span>
-          <span className="text-emerald-400">{hostname}</span>
+          <span className="text-[#39c5bb]">{hostname}</span>
         </div>
         <div className="text-zinc-600">------------------------------</div>
         <div className="grid grid-cols-[85px_1fr] sm:grid-cols-[100px_1fr] gap-x-2 gap-y-0.5 text-zinc-300 min-w-0">
-          <span className="text-amber-400 font-semibold">OS:</span>
+          <span className="text-[#33b1ff] font-semibold">OS:</span>
           <span className="break-all sm:break-normal">
             GitHub Cloud Shell ({siteConfig.github.username})
           </span>
-          <span className="text-amber-400 font-semibold">Host:</span>
+          <span className="text-[#33b1ff] font-semibold">Host:</span>
           <span className="text-zinc-100 font-medium break-all sm:break-normal">
             github.com/{siteConfig.github.username}
           </span>
-          <span className="text-amber-400 font-semibold">Role:</span>
+          <span className="text-[#33b1ff] font-semibold">Role:</span>
           <span className="text-zinc-200">{siteConfig.role}</span>
-          <span className="text-amber-400 font-semibold">Kernel:</span>
+          <span className="text-[#33b1ff] font-semibold">Kernel:</span>
           <span>github-vfs 2.0.0-x86_64</span>
-          <span className="text-amber-400 font-semibold">Uptime:</span>
-          <span className="text-emerald-400">24/7 (Always building &amp; learning)</span>
-          <span className="text-amber-400 font-semibold">Packages:</span>
+          <span className="text-[#33b1ff] font-semibold">Uptime:</span>
+          <span className="text-[#39c5bb]">24/7 (Always building &amp; learning)</span>
+          <span className="text-[#33b1ff] font-semibold">Packages:</span>
           <span>
             {siteConfig.github.repositoryCount ?? 4} (repos), 12 (skills)
           </span>
-          <span className="text-amber-400 font-semibold">Shell:</span>
+          <span className="text-[#33b1ff] font-semibold">Shell:</span>
           <span>bash 5.2.0 (github-workspace)</span>
-          <span className="text-amber-400 font-semibold">Terminal:</span>
-          <span>xterm-256color</span>
-          <span className="text-amber-400 font-semibold">Primary:</span>
-          <span className="text-cyan-400">{primaryLangs}</span>
-          <span className="text-amber-400 font-semibold">Featured:</span>
-          <span className="text-emerald-400 break-words">{featuredLabel}</span>
-          <span className="text-amber-400 font-semibold">Status:</span>
+          <span className="text-[#33b1ff] font-semibold">Terminal:</span>
+          <span>xterm-256color (Carbon theme)</span>
+          <span className="text-[#33b1ff] font-semibold">Primary:</span>
+          <span className="text-[#39c5bb]">{primaryLangs}</span>
+          <span className="text-[#33b1ff] font-semibold">Featured:</span>
+          <span className="text-[#33b1ff] break-words">{featuredLabel}</span>
+          <span className="text-[#33b1ff] font-semibold">Status:</span>
           <span className="text-zinc-100">{siteConfig.availability}</span>
-          <span className="text-amber-400 font-semibold">Location:</span>
+          <span className="text-[#33b1ff] font-semibold">Location:</span>
           <span>{siteConfig.location}</span>
         </div>
 
         {/* Neofetch 8-color terminal palette blocks */}
         <div className="flex items-center gap-1 pt-2.5">
-          <span className="inline-block size-3 rounded-xs bg-zinc-800" />
-          <span className="inline-block size-3 rounded-xs bg-red-500" />
-          <span className="inline-block size-3 rounded-xs bg-emerald-500" />
-          <span className="inline-block size-3 rounded-xs bg-yellow-400" />
-          <span className="inline-block size-3 rounded-xs bg-blue-500" />
-          <span className="inline-block size-3 rounded-xs bg-purple-500" />
-          <span className="inline-block size-3 rounded-xs bg-cyan-400" />
-          <span className="inline-block size-3 rounded-xs bg-zinc-200" />
+          <span className="inline-block size-3 rounded-xs bg-[#282828]" />
+          <span className="inline-block size-3 rounded-xs bg-[#ee5396]" />
+          <span className="inline-block size-3 rounded-xs bg-[#42be65]" />
+          <span className="inline-block size-3 rounded-xs bg-[#dfb15b]" />
+          <span className="inline-block size-3 rounded-xs bg-[#33b1ff]" />
+          <span className="inline-block size-3 rounded-xs bg-[#be95ff]" />
+          <span className="inline-block size-3 rounded-xs bg-[#39c5bb]" />
+          <span className="inline-block size-3 rounded-xs bg-[#dfdfdf]" />
         </div>
       </div>
     </div>
@@ -152,19 +152,19 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
       command: "welcome",
       output: (
         <div className="space-y-1.5 font-mono text-xs">
-          <p className="text-emerald-400 font-semibold">
+          <p className="text-[#33b1ff] font-semibold">
             Last login:{" "}
             {new Date().toLocaleDateString(undefined, {
               weekday: "short",
               month: "short",
               day: "numeric",
             })}{" "}
-            on ttys001
+            on ttys001 (Carbon theme)
           </p>
           <p className="text-zinc-300">Welcome to {siteConfig.name}&apos;s terminal</p>
           <p className="text-zinc-400">
-            Type <span className="text-amber-400 font-medium">neofetch</span> to view system specs
-            with the fox mascot, or <span className="text-yellow-400">help</span> for all commands.
+            Type <span className="text-[#33b1ff] font-medium">neofetch</span> to view system specs
+            with the mascot, or <span className="text-[#39c5bb]">help</span> for all commands.
           </p>
           <p className="text-zinc-500 text-[11px]">
             Shortcuts: <kbd className="text-zinc-400 font-mono">Tab</kbd> autocomplete •{" "}
@@ -321,7 +321,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
 
       case "whoami":
         outputNode = (
-          <p className="text-xs text-emerald-400 font-mono">
+          <p className="text-xs text-[#33b1ff] font-mono">
             {siteConfig.terminal.unixUser} (github: {siteConfig.github.username})
           </p>
         );
@@ -346,13 +346,13 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
       case "dir":
         outputNode = (
           <div className="flex flex-wrap gap-4 text-xs font-mono">
-            <span className="text-blue-400 font-medium">projects/</span>
-            <span className="text-blue-400 font-medium">blog/</span>
-            <span className="text-emerald-400">about.md</span>
+            <span className="text-[#33b1ff] font-medium">projects/</span>
+            <span className="text-[#33b1ff] font-medium">blog/</span>
+            <span className="text-[#39c5bb]">about.md</span>
             <span className="text-yellow-400">skills.json</span>
-            <span className="text-purple-400">leetcode.stats</span>
+            <span className="text-[#be95ff]">leetcode.stats</span>
             <span className="text-red-400 font-semibold">sagar-resume.pdf</span>
-            <span className="text-amber-400">mascot.fox</span>
+            <span className="text-[#33b1ff]">mascot.fox</span>
           </div>
         );
         break;
@@ -403,7 +403,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
               <a
                 href="/sagar-resume.pdf"
                 download="sagar-resume.pdf"
-                className="text-emerald-400 underline hover:opacity-80"
+                className="text-[#33b1ff] underline hover:opacity-80"
               >
                 /sagar-resume.pdf
               </a>
@@ -490,7 +490,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             <p className="font-semibold text-zinc-100">Projects & Repositories:</p>
             <div className="space-y-1.5">
               {displayProjects.map((p) => (
-                <div key={p.title} className="border-l-2 border-emerald-500/60 pl-2">
+                <div key={p.title} className="border-l-2 border-[#33b1ff]/60 pl-2">
                   <p className="font-medium text-zinc-100">{p.title}</p>
                   <p className="text-zinc-400 line-clamp-1">{p.description}</p>
                   <p className="text-[11px] text-zinc-500">Stack: {p.techStack.join(", ")}</p>
@@ -515,7 +515,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
                 href={siteConfig.leetcode.profileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-emerald-400 underline hover:opacity-80"
+                className="text-[#33b1ff] underline hover:opacity-80"
               >
                 {siteConfig.leetcode.profileUrl}
               </a>
@@ -537,7 +537,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
                 href={`https://github.com/${siteConfig.github.username}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-emerald-400 underline hover:opacity-80"
+                className="text-[#33b1ff] underline hover:opacity-80"
               >
                 https://github.com/{siteConfig.github.username}
               </a>
@@ -560,7 +560,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
                     href={s.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-emerald-400 underline hover:opacity-80"
+                    className="text-[#33b1ff] underline hover:opacity-80"
                   >
                     {s.href}
                   </a>
@@ -580,7 +580,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             </p>
             <p className="text-zinc-400">
               Route:{" "}
-              <a href="/blog" className="text-emerald-400 underline">
+              <a href="/blog" className="text-[#33b1ff] underline">
                 /blog
               </a>
             </p>
@@ -599,7 +599,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
               <a
                 href="/sagar-resume.pdf"
                 download="sagar-resume.pdf"
-                className="text-emerald-400 underline hover:opacity-80 font-medium"
+                className="text-[#33b1ff] underline hover:opacity-80 font-medium"
               >
                 /sagar-resume.pdf (Click to Download)
               </a>
@@ -745,12 +745,12 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
               isFullScreen
                 ? "max-w-5xl h-[92vh] sm:h-[88vh]"
                 : "max-w-2xl h-[80vh] sm:h-[520px] max-h-[580px]"
-            } rounded-xl border border-white/10 bg-[#1e1e1e]/95 text-zinc-100 font-mono shadow-2xl overflow-hidden flex flex-col backdrop-blur-md animate-in zoom-in-95 duration-150 transition-[max-width,height]`}
+            } rounded-xl border border-white/10 bg-[#161616]/95 text-[#f4f4f4] font-mono shadow-2xl overflow-hidden flex flex-col backdrop-blur-md animate-in zoom-in-95 duration-150 transition-[max-width,height]`}
           >
             {/* Authentic macOS Terminal Window Titlebar */}
             <div
               onDoubleClick={() => setIsFullScreen((prev) => !prev)}
-              className="relative flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-[#252526]/90 select-none cursor-default shrink-0"
+              className="relative flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-[#262626]/90 select-none cursor-default shrink-0"
             >
               {/* macOS Traffic Light Buttons */}
               <div className="flex items-center gap-2 z-10">
@@ -801,7 +801,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
               {/* Centered Terminal Title */}
               <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs text-zinc-400 font-medium select-none pointer-events-none max-w-[55%] truncate">
                 <FiFolder className="size-3 text-zinc-400 shrink-0" />
-                <span className="truncate">{siteConfig.github.username}@github — bash</span>
+                <span className="truncate">{siteConfig.github.username}@carbon-shell — bash</span>
               </div>
 
               <div className="text-[11px] text-zinc-500 font-mono select-none hidden sm:inline">
@@ -810,7 +810,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             </div>
 
             {/* Quick Command Action Chips */}
-            <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/5 bg-[#18181b]/50 text-[11px] overflow-x-auto shrink-0">
+            <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/5 bg-[#161616]/70 text-[11px] overflow-x-auto shrink-0">
               <span className="text-zinc-500 shrink-0">Quick run:</span>
               {["neofetch", "about", "skills", "projects", "leetcode", "help", "clear"].map(
                 (cmd) => (
@@ -821,7 +821,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
                       e.stopPropagation();
                       handleCommand(cmd);
                     }}
-                    className="px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 transition-colors cursor-pointer font-mono shrink-0 border border-white/5"
+                    className="px-2 py-0.5 rounded bg-[#262626] hover:bg-[#33b1ff]/20 hover:text-[#33b1ff] text-zinc-300 transition-colors cursor-pointer font-mono shrink-0 border border-white/5"
                   >
                     {cmd}
                   </button>
@@ -830,12 +830,12 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             </div>
 
             {/* Terminal Body Output (macOS zsh prompt style) */}
-            <div className="flex-1 p-4 space-y-3 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#1e1e1e]">
+            <div className="flex-1 p-4 space-y-3 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#161616]">
               {history.map((item, index) => (
                 <div key={index} className="space-y-1">
                   {item.command && (
                     <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-400">
-                      <span className="text-emerald-400 font-semibold select-none shrink-0">
+                      <span className="text-[#33b1ff] font-semibold select-none shrink-0">
                         <span className="hidden sm:inline">
                           {siteConfig.terminal.unixUser}@{siteConfig.terminal.hostname}{" "}
                         </span>
@@ -853,9 +853,9 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             {/* Terminal Prompt Input Bar */}
             <form
               onSubmit={onSubmit}
-              className="flex items-center px-4 py-3 border-t border-white/5 bg-[#18181b]/70 shrink-0"
+              className="flex items-center px-4 py-3 border-t border-white/5 bg-[#161616]/90 shrink-0"
             >
-              <span className="text-emerald-400 font-semibold mr-1.5 sm:mr-2 text-xs select-none shrink-0">
+              <span className="text-[#33b1ff] font-semibold mr-1.5 sm:mr-2 text-xs select-none shrink-0">
                 <span className="hidden sm:inline">
                   {siteConfig.terminal.unixUser}@{siteConfig.terminal.hostname}{" "}
                 </span>
