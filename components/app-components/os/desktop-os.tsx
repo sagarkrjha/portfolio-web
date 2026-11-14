@@ -56,7 +56,8 @@ import { MessagesApp } from "@/components/app-components/messages";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import TerminalModal from "@/components/app-components/terminal/terminal";
 import { useOsMode } from "@/components/providers";
-import { aboutConfig, blogConfig, heroConfig, siteConfig } from "@/lib/config";
+import { aboutConfig, blogConfig, heroConfig, siteConfig, themeConfig } from "@/lib/config";
+import type { OsThemeColors, OsThemeKey } from "@/lib/config";
 import cachedData from "@/lib/generated/portfolio-data.json";
 import { formatBlogDate } from "@/lib/utils";
 
@@ -74,7 +75,7 @@ export type WindowId =
 
 export type LayoutMode = "floating" | "tiling-horizontal" | "tiling-vertical" | "tiling-grid";
 export type WallpaperKey = "hero";
-export type OsThemeKey = "carbon" | "nord" | "matrix" | "dracula" | "paper";
+export type { OsThemeKey };
 
 interface WindowState {
   id: WindowId;
@@ -88,123 +89,7 @@ interface WindowState {
   size: { width: number; height: number };
 }
 
-interface OsThemeColors {
-  name: string;
-  primary: string;
-  accent: string;
-  dark: {
-    bg: string;
-    card: string;
-    border: string;
-    text: string;
-    muted: string;
-  };
-  light: {
-    bg: string;
-    card: string;
-    border: string;
-    text: string;
-    muted: string;
-  };
-}
-
-const OS_THEMES: Record<OsThemeKey, OsThemeColors> = {
-  carbon: {
-    name: "Carbon Obsidian (Default)",
-    primary: "#33b1ff",
-    accent: "#0f62fe",
-    dark: {
-      bg: "#1c1917",
-      card: "#272220",
-      border: "rgba(255, 255, 255, 0.12)",
-      text: "#f4f4f4",
-      muted: "#a1a1aa",
-    },
-    light: {
-      bg: "#ffffff",
-      card: "#f4f4f5",
-      border: "rgba(0, 0, 0, 0.12)",
-      text: "#18181b",
-      muted: "#52525b",
-    },
-  },
-  nord: {
-    name: "Nordic Frost",
-    primary: "#88c0d0",
-    accent: "#81a1c1",
-    dark: {
-      bg: "#242933",
-      card: "#2e3440",
-      border: "rgba(136, 192, 208, 0.2)",
-      text: "#eceff4",
-      muted: "#d8dee9",
-    },
-    light: {
-      bg: "#f0f4f8",
-      card: "#ffffff",
-      border: "rgba(136, 192, 208, 0.35)",
-      text: "#2e3440",
-      muted: "#4c566a",
-    },
-  },
-  matrix: {
-    name: "Cyber Emerald",
-    primary: "#2ea043",
-    accent: "#3fb950",
-    dark: {
-      bg: "#0d1117",
-      card: "#161b22",
-      border: "rgba(46, 160, 67, 0.3)",
-      text: "#56d364",
-      muted: "#3fb950",
-    },
-    light: {
-      bg: "#f0fdf4",
-      card: "#ffffff",
-      border: "rgba(46, 160, 67, 0.25)",
-      text: "#14532d",
-      muted: "#166534",
-    },
-  },
-  dracula: {
-    name: "Dracula Twilight",
-    primary: "#bd93f9",
-    accent: "#ff79c6",
-    dark: {
-      bg: "#1e1f29",
-      card: "#282a36",
-      border: "rgba(189, 147, 249, 0.25)",
-      text: "#f8f8f2",
-      muted: "#6272a4",
-    },
-    light: {
-      bg: "#faf5ff",
-      card: "#ffffff",
-      border: "rgba(189, 147, 249, 0.3)",
-      text: "#2e1065",
-      muted: "#6b21a8",
-    },
-  },
-  paper: {
-    name: "Paper Titanium (Clean)",
-    primary: "#0f62fe",
-    accent: "#33b1ff",
-    dark: {
-      bg: "#161616",
-      card: "#262626",
-      border: "rgba(255, 255, 255, 0.15)",
-      text: "#f4f4f4",
-      muted: "#a1a1aa",
-    },
-    light: {
-      bg: "#f4f4f5",
-      card: "#ffffff",
-      border: "rgba(0, 0, 0, 0.12)",
-      text: "#18181b",
-      muted: "#52525b",
-    },
-  },
-};
+const OS_THEMES = themeConfig.osThemes;
 
 const getHeroWallpaperStyle = (isDark: boolean): React.CSSProperties => ({
   backgroundImage: isDark
@@ -224,11 +109,12 @@ export const DesktopOs = () => {
   const [activeWindow, setActiveWindow] = useState<WindowId | null>(null);
   const [topZ, setTopZ] = useState(100);
   const [layoutMode, setLayoutModeState] = useState<LayoutMode>("floating");
-  const [osTheme, setOsThemeState] = useState<OsThemeKey>("carbon");
+  const [osTheme, setOsThemeState] = useState<OsThemeKey>(themeConfig.defaultOsTheme);
   const [showDesktopIcons, setShowDesktopIconsState] = useState<boolean>(true);
   const [showControlCenter, setShowControlCenter] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
+  const [showAddAppPicker, setShowAddAppPicker] = useState(false);
   const [launcherSearch, setLauncherSearch] = useState("");
   const [activeSpace, setActiveSpace] = useState<number>(0);
   const [isMissionControl, setIsMissionControl] = useState(false);
@@ -238,16 +124,10 @@ export const DesktopOs = () => {
     toggleOsMode();
   };
 
-  // Customizable Desktop Shortcuts list (supports removing/restoring desktop shortcuts)
-  const [desktopApps, setDesktopApps] = useState<WindowId[]>([
-    "about",
-    "terminal",
-    "projects",
-    "blog",
-    "resume",
-    "settings",
-    "taskmanager",
-  ]);
+  // Customizable Desktop Shortcuts list from central config
+  const [desktopApps, setDesktopApps] = useState<WindowId[]>(
+    themeConfig.defaultDesktopApps as WindowId[],
+  );
 
   // Load persistent preferences from localStorage
   useEffect(() => {
@@ -334,7 +214,7 @@ export const DesktopOs = () => {
   };
 
   const resetDesktopShortcuts = () => {
-    saveDesktopApps(["about", "terminal", "projects", "blog", "resume", "settings", "taskmanager"]);
+    saveDesktopApps(themeConfig.defaultDesktopApps as WindowId[]);
   };
 
   // Context Menu state (Right Click on Desktop Canvas)
@@ -694,6 +574,10 @@ export const DesktopOs = () => {
         }
         if (showLauncher) {
           setShowLauncher(false);
+          return;
+        }
+        if (showAddAppPicker) {
+          setShowAddAppPicker(false);
           return;
         }
         if (isMissionControl) {
@@ -1442,6 +1326,7 @@ export const DesktopOs = () => {
         onClick={() => {
           setShowControlCenter(false);
           setShowLauncher(false);
+          setShowAddAppPicker(false);
           setContextMenu((prev) => ({ ...prev, visible: false }));
           setAppContextMenu((prev) => ({ ...prev, visible: false }));
         }}
@@ -1517,33 +1402,108 @@ export const DesktopOs = () => {
                 </div>
               ))}
 
-            {/* Quick "Add App" Desktop Tile if any shortcuts are removed */}
-            {desktopApps.length < 8 && (
-              <button
-                type="button"
-                onClick={() => setShowLauncher(true)}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border border-dashed hover:border-primary/50 transition-colors cursor-pointer group w-20 text-center ${
-                  isDark ? "hover:bg-white/5 border-white/20" : "hover:bg-black/5 border-black/20"
-                }`}
-                title="Add Application Shortcut to Desktop"
-              >
-                <div
-                  className={`size-12 rounded-xl flex items-center justify-center group-hover:text-primary transition-colors ${
-                    isDark ? "text-zinc-400" : "text-zinc-500"
+            {/* Quick "Add App" Desktop Tile if any shortcuts are missing */}
+            {desktopApps.length < 10 && (
+              <div className="relative group w-20">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAddAppPicker((prev) => !prev);
+                  }}
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border border-dashed transition-all cursor-pointer w-full text-center ${
+                    showAddAppPicker
+                      ? "border-primary bg-primary/10 text-primary"
+                      : isDark
+                        ? "hover:bg-white/5 border-white/20 hover:border-primary/50"
+                        : "hover:bg-black/5 border-black/20 hover:border-primary/50"
                   }`}
+                  title="Add Application Shortcut to Desktop"
                 >
-                  <FiPlus className="size-5" />
-                </div>
-                <span
-                  className={`text-[10px] font-mono ${
-                    isDark
-                      ? "text-zinc-400 group-hover:text-zinc-200"
-                      : "text-zinc-600 group-hover:text-zinc-900"
-                  }`}
-                >
-                  + Add App
-                </span>
-              </button>
+                  <div
+                    className={`size-12 rounded-xl flex items-center justify-center transition-colors ${
+                      showAddAppPicker
+                        ? "text-primary"
+                        : isDark
+                          ? "text-zinc-400 group-hover:text-primary"
+                          : "text-zinc-500 group-hover:text-primary"
+                    }`}
+                  >
+                    <FiPlus className="size-5" />
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono ${
+                      showAddAppPicker
+                        ? "text-primary font-bold"
+                        : isDark
+                          ? "text-zinc-400 group-hover:text-zinc-200"
+                          : "text-zinc-600 group-hover:text-zinc-900"
+                    }`}
+                  >
+                    + Add App
+                  </span>
+                </button>
+
+                {/* Direct Inline Add App Picker Dropdown */}
+                {showAddAppPicker && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className={`absolute left-0 top-full mt-2 w-56 rounded-xl border p-1.5 shadow-2xl backdrop-blur-xl z-[10020] animate-in fade-in zoom-in-95 duration-100 font-sans text-xs ${
+                      isDark ? "text-zinc-200" : "text-zinc-800"
+                    }`}
+                    style={{
+                      backgroundColor: isDark ? `${currentTheme.card}F8` : "rgba(255, 255, 255, 0.98)",
+                      borderColor: currentTheme.border,
+                    }}
+                  >
+                    <div className="flex items-center justify-between px-2 py-1 mb-1 border-b border-white/10 text-[10px] font-mono font-semibold text-zinc-400">
+                      <span>Add to Desktop</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddAppPicker(false)}
+                        className="hover:text-zinc-100 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="max-h-60 overflow-y-auto space-y-0.5">
+                      {[
+                        { id: "about", label: "About.app", icon: FiUser },
+                        { id: "terminal", label: "Terminal.app", icon: FiTerminal },
+                        { id: "projects", label: "Projects.app", icon: FiFolder },
+                        { id: "blog", label: "Notes.app", icon: FiBookOpen },
+                        { id: "reader", label: "Reader.app", icon: FiFileText },
+                        { id: "resume", label: "Resume.pdf", icon: FiFileText },
+                        { id: "settings", label: "Settings.app", icon: FiSettings },
+                        { id: "taskmanager", label: "Tasks.app", icon: FiActivity },
+                        { id: "browser", label: "Browser.app", icon: FiGlobe },
+                        { id: "messages", label: "Messages.app", icon: FiMessageSquare },
+                      ]
+                        .filter((app) => !desktopApps.includes(app.id as WindowId))
+                        .map((app) => (
+                          <button
+                            key={app.id}
+                            type="button"
+                            onClick={() => {
+                              addDesktopShortcut(app.id as WindowId);
+                              setShowAddAppPicker(false);
+                            }}
+                            className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between transition-colors cursor-pointer ${
+                              isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <app.icon className="size-3.5 text-primary" />
+                              <span className="font-medium text-xs">{app.label}</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-primary font-bold">+ Add</span>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -2429,6 +2389,17 @@ export const DesktopOs = () => {
             >
               <FiTerminal className="size-3.5 text-primary" />
               <span>Open Terminal</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddAppPicker(true);
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+            >
+              <FiPlus className="size-3.5 text-primary" />
+              <span>Add App Shortcut...</span>
             </button>
             <button
               type="button"
