@@ -1552,14 +1552,31 @@ export const DesktopOs = () => {
                     focusWindow("settings");
                     setShowControlCenter(false);
                   }}
-                  className={`w-full py-1.5 px-2.5 rounded-xl border text-center font-medium cursor-pointer transition-colors flex items-center justify-center gap-1.5 ${
+                  className={`w-full py-1.5 px-2.5 rounded-xl border text-center font-medium cursor-pointer transition-colors flex items-center justify-center gap-1.5 mb-2.5 ${
                     isDark
-                      ? "bg-white/5 border-white/10 hover:bg-white/10"
-                      : "bg-black/5 border-black/10 hover:bg-black/10"
+                      ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300"
+                      : "bg-black/5 border-black/10 hover:bg-black/10 text-zinc-700"
                   }`}
                 >
                   <FiSettings className="size-3 text-primary" />
                   <span>Open System Settings...</span>
+                </button>
+
+                {/* Integrated Shut Down Action in Control Center */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowControlCenter(false);
+                    handleExitOs();
+                  }}
+                  className="w-full py-2 px-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium cursor-pointer transition-all flex items-center justify-between active:scale-98 shadow-sm"
+                  title="Shut Down Carbon OS & Return to Web Mode"
+                >
+                  <div className="flex items-center gap-2">
+                    <FiPower className="size-3.5 text-red-400" />
+                    <span className="font-semibold text-xs">Shut Down Carbon OS</span>
+                  </div>
+                  <span className="text-[10px] font-mono opacity-70">⌘Q</span>
                 </button>
               </div>
             )}
@@ -1570,17 +1587,6 @@ export const DesktopOs = () => {
           <span className={`font-mono text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
             {time}
           </span>
-
-          {/* Shutdown Carbon OS Button */}
-          <button
-            type="button"
-            onClick={handleExitOs}
-            className="ml-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 border border-red-500/30 text-red-400 hover:bg-red-500/20 active:scale-95 shadow-xs"
-            title="Shut Down Carbon OS & Return to Web Mode"
-          >
-            <FiPower className="size-3 text-red-400" />
-            <span>Shut Down</span>
-          </button>
         </div>
       </header>
 
