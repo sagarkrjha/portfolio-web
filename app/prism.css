@@ -60,6 +60,12 @@ pre[class*="language-"],
   color: #0d9488; /* teal-600 */
 }
 
+.token.macro,
+.token.directive-hash,
+.token.directive {
+  color: #0284c7; /* sky-600 */
+}
+
 .token.atrule,
 .token.attr-value,
 .token.keyword {
@@ -140,6 +146,12 @@ pre[class*="language-"],
 .dark .token.entity,
 .dark .token.url {
   color: #2dd4bf; /* teal-400 */
+}
+
+.dark .token.macro,
+.dark .token.directive-hash,
+.dark .token.directive {
+  color: #38bdf8; /* sky-400 */
 }
 
 .dark .token.atrule,

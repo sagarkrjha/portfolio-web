@@ -492,6 +492,20 @@ function renderMarkdownContent(content: string, postTitle?: string) {
               </div>
             );
           }
+
+          if (trimmed.includes("\n")) {
+            const lines = trimmed.split("\n");
+            return (
+              <p key={pIdx} className="text-sm sm:text-base leading-7 opacity-90">
+                {lines.map((line, lIdx) => (
+                  <React.Fragment key={lIdx}>
+                    {lIdx > 0 && <br />}
+                    {renderInlineFormatted(line.trim())}
+                  </React.Fragment>
+                ))}
+              </p>
+            );
+          }
         })}
       </div>
     );
