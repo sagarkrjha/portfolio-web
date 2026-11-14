@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-14T11:05:48.474470967+00:00",
+  "lastUpdated": "2026-11-14T11:35:00.463261169+00:00",
   "profile": {
     "role": "Systems & Full-Stack Developer",
     "bio": "Engineer specializing in TypeScript, C++20, Rust, JavaScript. Architect of cp-workspace (⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O). Passionate about building high-performance, clean-architecture software and developer tools.",
@@ -22,6 +22,24 @@
       "cp-workspace"
     ],
     "repos": [
+      {
+        "name": "portfolio-web",
+        "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
+        "html_url": "https://github.com/sagarkrjha/portfolio-web",
+        "homepage": "https://sagarkrjha.vercel.app",
+        "stargazers_count": 0,
+        "forks_count": 0,
+        "language": "JavaScript",
+        "topics": [
+          "developer-portfolio",
+          "nextjs",
+          "portfolio",
+          "react",
+          "typescript"
+        ],
+        "fork": false,
+        "updated_at": "2026-11-14T11:13:36Z"
+      },
       {
         "name": "sagarkrjha",
         "description": "Automated resume-styled developer profile README generated dynamically via GitHub Actions, Rust, and pure Markdown",
@@ -66,24 +84,6 @@
         ],
         "fork": false,
         "updated_at": "2026-11-13T15:24:33Z"
-      },
-      {
-        "name": "portfolio-web",
-        "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
-        "html_url": "https://github.com/sagarkrjha/portfolio-web",
-        "homepage": "https://sagarkrjha.vercel.app",
-        "stargazers_count": 0,
-        "forks_count": 0,
-        "language": "TypeScript",
-        "topics": [
-          "developer-portfolio",
-          "nextjs",
-          "portfolio",
-          "react",
-          "typescript"
-        ],
-        "fork": false,
-        "updated_at": "2026-11-12T10:12:04Z"
       },
       {
         "name": "act",
@@ -198,6 +198,16 @@
     ],
     "repoBadges": [
       {
+        "name": "portfolio-web",
+        "techStack": [
+          "JavaScript",
+          "TypeScript",
+          "Rust",
+          "Next.js",
+          "Tailwind CSS"
+        ]
+      },
+      {
         "name": "sagarkrjha",
         "techStack": [
           "Rust"
@@ -207,15 +217,6 @@
         "name": "cp-workspace",
         "techStack": [
           "C++20"
-        ]
-      },
-      {
-        "name": "portfolio-web",
-        "techStack": [
-          "TypeScript",
-          "Rust",
-          "Next.js",
-          "Tailwind CSS"
         ]
       },
       {
