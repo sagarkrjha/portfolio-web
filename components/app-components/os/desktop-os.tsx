@@ -464,16 +464,29 @@ export const DesktopOs = () => {
 
   const focusWindow = useCallback((id: WindowId) => {
     setTopZ((prev) => {
-      const nextZ = prev + 1;
-      setWindows((wPrev) => ({
-        ...wPrev,
-        [id]: {
-          ...wPrev[id],
-          isOpen: true,
-          isMinimized: false,
-          zIndex: nextZ,
-        },
-      }));
+      // Ensure active/system windows receive guaranteed highest stacking priority
+      const boost = id === "settings" || id === "taskmanager" ? 10 : 2;
+      const nextZ = prev + boost;
+      setWindows((wPrev) => {
+        const cur = wPrev[id];
+        // Ensure settings window has safe visible coordinates
+        let posX = cur.position.x;
+        let posY = cur.position.y;
+        if (id === "settings" && (posX < 20 || posY < 20 || posX > 600 || posY > 400)) {
+          posX = 140;
+          posY = 50;
+        }
+        return {
+          ...wPrev,
+          [id]: {
+            ...cur,
+            isOpen: true,
+            isMinimized: false,
+            position: { x: posX, y: posY },
+            zIndex: nextZ,
+          },
+        };
+      });
       return nextZ;
     });
     setActiveWindow(id);
@@ -744,6 +757,11 @@ export const DesktopOs = () => {
   const getTilingStyle = (id: WindowId): React.CSSProperties => {
     if (layoutMode === "floating") {
       const w = windows[id];
+      // Active window or system settings receives elevated zIndex in floating mode
+      const computedZ = id === "settings" && activeWindow === "settings" 
+        ? Math.max(w.zIndex, 500) 
+        : (activeWindow === id ? Math.max(w.zIndex, 200) : w.zIndex);
+
       if (w.isMaximized) {
         return {
           position: "absolute",
@@ -753,7 +771,7 @@ export const DesktopOs = () => {
           bottom: 0,
           width: "100%",
           height: "100%",
-          zIndex: w.zIndex,
+          zIndex: computedZ,
         };
       }
       return {
@@ -763,7 +781,7 @@ export const DesktopOs = () => {
         width: `${w.size.width}px`,
         maxWidth: "96vw",
         maxHeight: "84vh",
-        zIndex: w.zIndex,
+        zIndex: computedZ,
       };
     }
 
@@ -1121,7 +1139,7 @@ export const DesktopOs = () => {
             {showControlCenter && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`absolute right-0 top-full mt-1.5 w-72 rounded-2xl border p-3 shadow-2xl backdrop-blur-2xl z-[10010] animate-in fade-in zoom-in-95 duration-100 font-sans text-xs ${
+                className={`absolute right-0 top-full mt-1.5 w-72 rounded-2xl border p-3 shadow-2xl backdrop-blur-2xl z-[10010] pointer-events-auto animate-in fade-in zoom-in-95 duration-100 font-sans text-xs ${
                   isDark ? "text-zinc-200" : "text-zinc-800"
                 }`}
                 style={{
@@ -1665,9 +1683,9 @@ export const DesktopOs = () => {
               borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("settings")}
-            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
-              windows.settings.isMinimized ? "hidden" : ""
-            }`}
+            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.9)] backdrop-blur-xl overflow-hidden transition-all ${
+              activeWindow === "settings" ? "ring-1 ring-primary/40" : ""
+            } ${windows.settings.isMinimized ? "hidden" : ""}`}
           >
             {renderTitleBar("settings", "Settings & Personalization")}
 
