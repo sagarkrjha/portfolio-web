@@ -7,6 +7,7 @@ import {
   FiFolder,
   FiFileText,
   FiBookOpen,
+  FiSettings,
   FiX,
   FiMinus,
   FiMaximize2,
@@ -22,6 +23,8 @@ import {
   FiColumns,
   FiLayers,
   FiCommand,
+  FiCheck,
+  FiSliders,
 } from "react-icons/fi";
 import { useTheme } from "next-themes";
 import { useOsMode } from "@/components/providers";
@@ -30,7 +33,7 @@ import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import cachedData from "@/lib/generated/portfolio-data.json";
 
-export type WindowId = "about" | "terminal" | "projects" | "blog" | "resume";
+export type WindowId = "about" | "terminal" | "projects" | "blog" | "resume" | "settings";
 export type LayoutMode = "floating" | "tiling-horizontal" | "tiling-vertical" | "tiling-grid";
 export type WallpaperKey = "carbon" | "aurora" | "matrix" | "minimal" | "cover";
 
@@ -79,7 +82,8 @@ const WALLPAPERS: Record<WallpaperKey, { name: string; style: React.CSSPropertie
   cover: {
     name: "Cover Art",
     style: {
-      backgroundImage: "linear-gradient(rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.95)), url('/cover-image.jpg')",
+      backgroundImage:
+        "linear-gradient(rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.95)), url('/cover-image.jpg')",
       backgroundSize: "cover",
       backgroundPosition: "center",
     },
@@ -98,6 +102,7 @@ export const DesktopOs = () => {
   const [wallpaper, setWallpaper] = useState<WallpaperKey>("carbon");
   const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
+  const [showLauncher, setShowLauncher] = useState(false);
 
   // Dragging state
   const dragRef = useRef<{
@@ -134,8 +139,8 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 2,
-      position: { x: 120, y: 60 },
-      size: { width: 680, height: 500 },
+      position: { x: 100, y: 50 },
+      size: { width: 680, height: 480 },
     },
     projects: {
       id: "projects",
@@ -145,7 +150,7 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 3,
-      position: { x: 180, y: 50 },
+      position: { x: 160, y: 50 },
       size: { width: 700, height: 520 },
     },
     blog: {
@@ -156,7 +161,7 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 4,
-      position: { x: 220, y: 70 },
+      position: { x: 200, y: 70 },
       size: { width: 640, height: 480 },
     },
     resume: {
@@ -169,6 +174,17 @@ export const DesktopOs = () => {
       zIndex: 5,
       position: { x: 140, y: 40 },
       size: { width: 740, height: 560 },
+    },
+    settings: {
+      id: "settings",
+      title: "Settings & Personalization",
+      icon: FiSettings,
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      zIndex: 6,
+      position: { x: 220, y: 80 },
+      size: { width: 560, height: 440 },
     },
   });
 
@@ -188,25 +204,22 @@ export const DesktopOs = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const focusWindow = useCallback(
-    (id: WindowId) => {
-      setTopZ((prev) => {
-        const nextZ = prev + 1;
-        setWindows((wPrev) => ({
-          ...wPrev,
-          [id]: {
-            ...wPrev[id],
-            isOpen: true,
-            isMinimized: false,
-            zIndex: nextZ,
-          },
-        }));
-        return nextZ;
-      });
-      setActiveWindow(id);
-    },
-    [],
-  );
+  const focusWindow = useCallback((id: WindowId) => {
+    setTopZ((prev) => {
+      const nextZ = prev + 1;
+      setWindows((wPrev) => ({
+        ...wPrev,
+        [id]: {
+          ...wPrev[id],
+          isOpen: true,
+          isMinimized: false,
+          zIndex: nextZ,
+        },
+      }));
+      return nextZ;
+    });
+    setActiveWindow(id);
+  }, []);
 
   const toggleMaximize = useCallback((id: WindowId) => {
     setWindows((prev) => ({
@@ -260,7 +273,6 @@ export const DesktopOs = () => {
     [windows, activeWindow, minimizeWindow, focusWindow],
   );
 
-  // Tab Switching (Alt+Tab / Cmd+K style)
   const windowList = Object.values(windows);
   const openWindows = windowList.filter((w) => w.isOpen);
 
@@ -272,15 +284,32 @@ export const DesktopOs = () => {
     focusWindow(nextId);
   }, [openWindows, activeWindow, focusWindow]);
 
-  // Global Keyboard Navigation (Hyprland / i3 Tiling keys & Alt+Tab)
+  // Global Keyboard Navigation
   useEffect(() => {
     if (!isOsMode) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape to close active window
-      if (e.key === "Escape" && activeWindow) {
-        const target = e.target as HTMLElement;
-        if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+
+      // Super/Alt + Space: Quick App Launcher
+      if ((e.altKey || e.metaKey) && e.code === "Space") {
+        e.preventDefault();
+        setShowLauncher((prev) => !prev);
+        return;
+      }
+
+      // Escape key behavior
+      if (e.key === "Escape") {
+        if (showLauncher) {
+          setShowLauncher(false);
+          return;
+        }
+        if (showWallpaperMenu) {
+          setShowWallpaperMenu(false);
+          return;
+        }
+        if (activeWindow && !isInput) {
           closeWindow(activeWindow);
         }
       }
@@ -292,24 +321,44 @@ export const DesktopOs = () => {
         cycleNextWindow();
       }
 
+      // App Launch shortcuts (Alt + 1..6)
+      if ((e.altKey || e.metaKey) && !isInput) {
+        const appKeys: Record<string, WindowId> = {
+          "1": "about",
+          "2": "terminal",
+          "3": "projects",
+          "4": "blog",
+          "5": "resume",
+          "6": "settings",
+        };
+        if (appKeys[e.key]) {
+          e.preventDefault();
+          toggleWindow(appKeys[e.key]);
+          return;
+        }
+      }
+
       // Super/Alt + M: toggle maximize
-      if ((e.altKey || e.metaKey) && (e.key === "m" || e.key === "M")) {
+      if ((e.altKey || e.metaKey) && (e.key === "m" || e.key === "M") && !isInput) {
         e.preventDefault();
         if (activeWindow) toggleMaximize(activeWindow);
       }
 
-      // Super/Alt + H/V/G: Hyprland-like tiling layouts
-      if ((e.altKey || e.metaKey) && (e.key === "h" || e.key === "H")) {
-        e.preventDefault();
-        setLayoutMode((prev) => (prev === "tiling-horizontal" ? "floating" : "tiling-horizontal"));
-      }
-      if ((e.altKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
-        e.preventDefault();
-        setLayoutMode((prev) => (prev === "tiling-vertical" ? "floating" : "tiling-vertical"));
-      }
-      if ((e.altKey || e.metaKey) && (e.key === "g" || e.key === "G")) {
-        e.preventDefault();
-        setLayoutMode((prev) => (prev === "tiling-grid" ? "floating" : "tiling-grid"));
+      // Hyprland Tiling shortcuts: Alt+H (cols), Alt+V (rows), Alt+G (grid), Alt+F (float)
+      if ((e.altKey || e.metaKey) && !isInput) {
+        if (e.key === "h" || e.key === "H") {
+          e.preventDefault();
+          setLayoutMode((prev) => (prev === "tiling-horizontal" ? "floating" : "tiling-horizontal"));
+        } else if (e.key === "v" || e.key === "V") {
+          e.preventDefault();
+          setLayoutMode((prev) => (prev === "tiling-vertical" ? "floating" : "tiling-vertical"));
+        } else if (e.key === "g" || e.key === "G") {
+          e.preventDefault();
+          setLayoutMode((prev) => (prev === "tiling-grid" ? "floating" : "tiling-grid"));
+        } else if (e.key === "f" || e.key === "F") {
+          e.preventDefault();
+          setLayoutMode("floating");
+        }
       }
     };
 
@@ -325,7 +374,16 @@ export const DesktopOs = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [isOsMode, activeWindow, closeWindow, cycleNextWindow, toggleMaximize]);
+  }, [
+    isOsMode,
+    activeWindow,
+    showLauncher,
+    showWallpaperMenu,
+    closeWindow,
+    cycleNextWindow,
+    toggleMaximize,
+    toggleWindow,
+  ]);
 
   // Window Drag Handlers
   const handleMouseDownHeader = (e: React.MouseEvent, id: WindowId) => {
@@ -451,10 +509,15 @@ export const DesktopOs = () => {
       {/* Top Hyprland / macOS Bar */}
       <header className="h-7.5 w-full bg-[#272220]/95 border-b border-white/10 px-3 flex items-center justify-between text-xs backdrop-blur-md z-50 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 font-bold tracking-tight text-primary">
+          <button
+            type="button"
+            onClick={() => setShowLauncher((prev) => !prev)}
+            className="flex items-center gap-1.5 font-bold tracking-tight text-primary hover:opacity-80 transition-opacity cursor-pointer"
+            title="App Launcher (Alt+Space)"
+          >
             <span className="size-2 rounded-full bg-primary animate-pulse" />
             <span className="font-mono">CARBON-OS</span>
-          </div>
+          </button>
           <span className="text-white/20">|</span>
 
           {/* Active Window Title */}
@@ -491,8 +554,19 @@ export const DesktopOs = () => {
         </div>
 
         {/* Right Status Tray */}
-        <div className="flex items-center gap-2.5 text-zinc-400">
-          {/* Wallpaper Switcher */}
+        <div className="flex items-center gap-2 text-zinc-400">
+          {/* Quick Settings Icon */}
+          <button
+            type="button"
+            onClick={() => toggleWindow("settings")}
+            className="flex items-center gap-1 hover:text-zinc-100 transition-colors cursor-pointer text-[11px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5"
+            title="Settings & Wallpapers (Alt+6)"
+          >
+            <FiSettings className="size-3 text-primary" />
+            <span className="hidden md:inline font-mono">Settings</span>
+          </button>
+
+          {/* Wallpaper Quick Switcher */}
           <div className="relative">
             <button
               type="button"
@@ -538,14 +612,14 @@ export const DesktopOs = () => {
           <button
             type="button"
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="hover:text-zinc-100 transition-colors cursor-pointer"
+            className="hover:text-zinc-100 transition-colors cursor-pointer p-1"
             title="Toggle Theme"
           >
             {isDark ? <FiSun className="size-3.5" /> : <FiMoon className="size-3.5" />}
           </button>
 
-          <FiWifi className="size-3.5" />
-          <FiVolume2 className="size-3.5" />
+          <FiWifi className="size-3.5 hidden sm:inline" />
+          <FiVolume2 className="size-3.5 hidden sm:inline" />
           <FiBatteryCharging className="size-3.5 text-emerald-400" />
           <span className="font-mono text-[11px] text-zinc-200">{time}</span>
 
@@ -556,7 +630,7 @@ export const DesktopOs = () => {
             className="ml-1 px-2 py-0.5 rounded-none bg-primary hover:brightness-110 text-primary-foreground font-medium text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
             title="Exit Desktop OS"
           >
-            <span>Exit OS</span>
+            <span>Exit</span>
             <FiExternalLink className="size-3" />
           </button>
         </div>
@@ -565,17 +639,21 @@ export const DesktopOs = () => {
       {/* Desktop Canvas */}
       <main
         className="relative flex-1 p-4 sm:p-6 overflow-hidden"
-        onClick={() => setShowWallpaperMenu(false)}
+        onClick={() => {
+          setShowWallpaperMenu(false);
+          setShowLauncher(false);
+        }}
       >
         {/* Desktop Application Icons */}
         <div className="grid grid-flow-col grid-rows-4 sm:grid-rows-6 gap-4 sm:gap-6 w-max">
           {(
             [
-              { id: "about", label: "About.app", icon: FiUser },
-              { id: "terminal", label: "Terminal.app", icon: FiTerminal },
-              { id: "projects", label: "Projects.app", icon: FiFolder },
-              { id: "blog", label: "Notes.app", icon: FiBookOpen },
-              { id: "resume", label: "Resume.pdf", icon: FiFileText },
+              { id: "about", label: "About.app", icon: FiUser, key: "1" },
+              { id: "terminal", label: "Terminal.app", icon: FiTerminal, key: "2" },
+              { id: "projects", label: "Projects.app", icon: FiFolder, key: "3" },
+              { id: "blog", label: "Notes.app", icon: FiBookOpen, key: "4" },
+              { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "5" },
+              { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
             ] as const
           ).map((item) => (
             <button
@@ -584,8 +662,11 @@ export const DesktopOs = () => {
               onClick={() => focusWindow(item.id)}
               className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group w-20 text-center"
             >
-              <div className="size-12 rounded-xl bg-[#272220]/90 border border-white/10 flex items-center justify-center text-primary shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs">
+              <div className="relative size-12 rounded-xl bg-[#272220]/90 border border-white/10 flex items-center justify-center text-primary shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs">
                 <item.icon className="size-6" />
+                <span className="absolute bottom-0.5 right-1 text-[8px] font-mono text-zinc-400 opacity-60 group-hover:opacity-100">
+                  ⌥{item.key}
+                </span>
               </div>
               <span className="text-[11px] font-mono text-zinc-200 drop-shadow-md truncate max-w-[76px]">
                 {item.label}
@@ -605,7 +686,6 @@ export const DesktopOs = () => {
               windows.about.isMinimized ? "hidden" : ""
             }`}
           >
-            {/* Draggable Titlebar with Single / Double Tap */}
             <div
               onMouseDown={(e) => handleMouseDownHeader(e, "about")}
               onDoubleClick={() => toggleMaximize("about")}
@@ -683,7 +763,60 @@ export const DesktopOs = () => {
           </div>
         )}
 
-        {/* 2. Projects Window */}
+        {/* 2. Embedded Terminal Window */}
+        {windows.terminal.isOpen && (
+          <div
+            style={getTilingStyle("terminal")}
+            onClick={() => focusWindow("terminal")}
+            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+              windows.terminal.isMinimized ? "hidden" : ""
+            }`}
+          >
+            <div
+              onMouseDown={(e) => handleMouseDownHeader(e, "terminal")}
+              onDoubleClick={() => toggleMaximize("terminal")}
+              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
+            >
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => closeWindow("terminal")}
+                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => minimizeWindow("terminal")}
+                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleMaximize("terminal")}
+                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
+                />
+              </div>
+              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
+                {siteConfig.github.username}@carbon-shell — bash
+              </span>
+              <button
+                type="button"
+                onClick={() => toggleMaximize("terminal")}
+                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
+              >
+                {windows.terminal.isMaximized ? (
+                  <FiMinimize2 className="size-3" />
+                ) : (
+                  <FiMaximize2 className="size-3" />
+                )}
+              </button>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <TerminalModal isEmbedded={true} defaultOpen={true} />
+            </div>
+          </div>
+        )}
+
+        {/* 3. Projects Window */}
         {windows.projects.isOpen && (
           <div
             style={getTilingStyle("projects")}
@@ -761,7 +894,7 @@ export const DesktopOs = () => {
           </div>
         )}
 
-        {/* 3. Blog Notes Window */}
+        {/* 4. Blog Notes Window */}
         {windows.blog.isOpen && (
           <div
             style={getTilingStyle("blog")}
@@ -843,7 +976,7 @@ export const DesktopOs = () => {
           </div>
         )}
 
-        {/* 4. Resume Window */}
+        {/* 5. Resume Window */}
         {windows.resume.isOpen && (
           <div
             style={getTilingStyle("resume")}
@@ -896,8 +1029,185 @@ export const DesktopOs = () => {
           </div>
         )}
 
-        {/* 5. Terminal Window */}
-        {windows.terminal.isOpen && <TerminalModal />}
+        {/* 6. Settings Window */}
+        {windows.settings.isOpen && (
+          <div
+            style={getTilingStyle("settings")}
+            onClick={() => focusWindow("settings")}
+            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+              windows.settings.isMinimized ? "hidden" : ""
+            }`}
+          >
+            <div
+              onMouseDown={(e) => handleMouseDownHeader(e, "settings")}
+              onDoubleClick={() => toggleMaximize("settings")}
+              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
+            >
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => closeWindow("settings")}
+                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => minimizeWindow("settings")}
+                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleMaximize("settings")}
+                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
+                />
+              </div>
+              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
+                Settings & Personalization
+              </span>
+              <button
+                type="button"
+                onClick={() => toggleMaximize("settings")}
+                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
+              >
+                {windows.settings.isMaximized ? (
+                  <FiMinimize2 className="size-3" />
+                ) : (
+                  <FiMaximize2 className="size-3" />
+                )}
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs font-mono">
+              {/* Wallpaper selection section */}
+              <div>
+                <h4 className="text-zinc-200 font-semibold mb-2.5 flex items-center gap-2">
+                  <FiImage className="text-primary size-4" />
+                  <span>Desktop Wallpapers</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {(Object.keys(WALLPAPERS) as WallpaperKey[]).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setWallpaper(key)}
+                      style={WALLPAPERS[key].style}
+                      className={`h-20 rounded-lg border p-2 flex flex-col justify-end text-left cursor-pointer transition-all hover:scale-102 ${
+                        wallpaper === key
+                          ? "border-primary ring-2 ring-primary/40 shadow-lg"
+                          : "border-white/10"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
+                        <span className="text-[10px] text-zinc-100 font-medium truncate">
+                          {WALLPAPERS[key].name}
+                        </span>
+                        {wallpaper === key && <FiCheck className="size-3 text-primary shrink-0" />}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tiling mode preference */}
+              <div className="border-t border-white/10 pt-4">
+                <h4 className="text-zinc-200 font-semibold mb-2 flex items-center gap-2">
+                  <FiSliders className="text-primary size-4" />
+                  <span>Window Manager Layout (Hyprland / i3)</span>
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  {[
+                    { mode: "floating", label: "Floating Mode (Free Drag)", key: "Alt+F" },
+                    { mode: "tiling-horizontal", label: "Horizontal Columns", key: "Alt+H" },
+                    { mode: "tiling-vertical", label: "Vertical Rows", key: "Alt+V" },
+                    { mode: "tiling-grid", label: "2x2 Tiling Grid", key: "Alt+G" },
+                  ].map((l) => (
+                    <button
+                      key={l.mode}
+                      type="button"
+                      onClick={() => setLayoutMode(l.mode as LayoutMode)}
+                      className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between ${
+                        layoutMode === l.mode
+                          ? "bg-primary/20 border-primary text-primary"
+                          : "bg-[#272220]/60 border-white/10 text-zinc-300 hover:bg-white/5"
+                      }`}
+                    >
+                      <span>{l.label}</span>
+                      <kbd className="px-1 py-0.5 rounded bg-black/40 text-[9px] text-zinc-400">
+                        {l.key}
+                      </kbd>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Keyboard Shortcuts Reference */}
+              <div className="border-t border-white/10 pt-4 text-[11px] text-zinc-400 space-y-1.5">
+                <span className="text-zinc-200 font-semibold block">Quick Keyboard Shortcuts:</span>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                  <div>
+                    <kbd className="text-zinc-200">Alt + Space</kbd>: Quick App Launcher
+                  </div>
+                  <div>
+                    <kbd className="text-zinc-200">Alt + Tab</kbd>: Cycle Open Windows
+                  </div>
+                  <div>
+                    <kbd className="text-zinc-200">Alt + M</kbd>: Toggle Maximize
+                  </div>
+                  <div>
+                    <kbd className="text-zinc-200">ESC</kbd>: Close Active Window
+                  </div>
+                  <div>
+                    <kbd className="text-zinc-200">Alt + 1..6</kbd>: Quick Launch Apps
+                  </div>
+                  <div>
+                    <kbd className="text-zinc-200">Alt + H/V/G</kbd>: Hyprland Tiling
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick App Launcher Modal (Alt+Space / Spotlight style) */}
+        {showLauncher && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/40 backdrop-blur-xs animate-in fade-in duration-100"
+          >
+            <div className="w-full max-w-md rounded-2xl bg-[#272220] border border-white/20 shadow-2xl p-3 font-mono">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10 text-xs text-zinc-400">
+                <FiCommand className="size-4 text-primary" />
+                <span className="font-semibold text-zinc-200">Carbon App Launcher</span>
+                <span className="ml-auto text-[10px] text-zinc-500">ESC to close</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 p-2 mt-1">
+                {(
+                  [
+                    { id: "about", label: "About", icon: FiUser, key: "1" },
+                    { id: "terminal", label: "Terminal", icon: FiTerminal, key: "2" },
+                    { id: "projects", label: "Projects", icon: FiFolder, key: "3" },
+                    { id: "blog", label: "Notes", icon: FiBookOpen, key: "4" },
+                    { id: "resume", label: "Resume", icon: FiFileText, key: "5" },
+                    { id: "settings", label: "Settings", icon: FiSettings, key: "6" },
+                  ] as const
+                ).map((app) => (
+                  <button
+                    key={app.id}
+                    type="button"
+                    onClick={() => {
+                      focusWindow(app.id);
+                      setShowLauncher(false);
+                    }}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group text-center"
+                  >
+                    <app.icon className="size-6 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-[11px] text-zinc-200">{app.label}</span>
+                    <span className="text-[9px] text-zinc-500">⌥{app.key}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Alt+Tab Quick Switcher Overlay */}
         {showSwitcher && openWindows.length > 0 && (
@@ -935,6 +1245,7 @@ export const DesktopOs = () => {
               { id: "projects", label: "Projects", icon: FiFolder },
               { id: "blog", label: "Notes", icon: FiBookOpen },
               { id: "resume", label: "Resume", icon: FiFileText },
+              { id: "settings", label: "Settings", icon: FiSettings },
             ] as const
           ).map((item) => {
             const w = windows[item.id];

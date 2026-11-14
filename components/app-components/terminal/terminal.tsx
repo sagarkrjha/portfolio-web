@@ -8,6 +8,9 @@ import type { MergedProject } from "@/lib/services/github";
 
 interface TerminalModalProps {
   projects?: MergedProject[];
+  defaultOpen?: boolean;
+  isEmbedded?: boolean;
+  onClose?: () => void;
 }
 
 interface CommandHistoryItem {
@@ -138,8 +141,13 @@ const NeofetchOutput = () => {
   );
 };
 
-export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const TerminalModal = ({
+  projects = [],
+  defaultOpen = false,
+  isEmbedded = false,
+  onClose,
+}: TerminalModalProps) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [inputVal, setInputVal] = useState("");
   const [sessionCommands, setSessionCommands] = useState<string[]>([]);
@@ -714,6 +722,85 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
     handleCommand(inputVal);
     setInputVal("");
   };
+
+  // When embedded in Desktop OS window, render the terminal body directly
+  if (isEmbedded) {
+    return (
+      <div
+        onClick={() => inputRef.current?.focus()}
+        className="w-full h-full flex flex-col bg-[#1c1917] text-[#f4f4f4] font-mono overflow-hidden select-text"
+      >
+        {/* Quick Command Action Chips */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-white/5 bg-[#1c1917]/70 text-[11px] overflow-x-auto shrink-0 select-none">
+          <span className="text-zinc-500 shrink-0">Quick run:</span>
+          {["neofetch", "about", "skills", "projects", "leetcode", "help", "clear"].map(
+            (cmd) => (
+              <button
+                key={cmd}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCommand(cmd);
+                }}
+                className="px-2 py-0.5 rounded bg-[#272220] hover:bg-[#33b1ff]/20 hover:text-[#33b1ff] text-zinc-300 transition-colors cursor-pointer font-mono shrink-0 border border-white/5 shadow-xs"
+              >
+                {cmd}
+              </button>
+            ),
+          )}
+        </div>
+
+        {/* Terminal Body Output */}
+        <div className="flex-1 p-3.5 space-y-2.5 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#1c1917]">
+          {history.map((item, index) => (
+            <div key={index} className="space-y-1">
+              {item.command && (
+                <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-400">
+                  <span className="text-[#33b1ff] font-semibold select-none shrink-0">
+                    <span className="hidden sm:inline">
+                      {siteConfig.terminal.unixUser}@{siteConfig.terminal.hostname}{" "}
+                    </span>
+                    ~ %
+                  </span>
+                  <span className="text-zinc-100 font-medium break-all">{item.command}</span>
+                </div>
+              )}
+              {item.output && <div className="text-zinc-300 pl-4">{item.output}</div>}
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Terminal Prompt Input Bar */}
+        <form
+          onSubmit={onSubmit}
+          className="flex items-center px-3.5 py-2.5 border-t border-white/5 bg-[#1c1917]/95 shrink-0"
+        >
+          <span className="text-[#33b1ff] font-semibold mr-1.5 sm:mr-2 text-xs select-none shrink-0">
+            <span className="hidden sm:inline">
+              {siteConfig.terminal.unixUser}@{siteConfig.terminal.hostname}{" "}
+            </span>
+            ~ %
+          </span>
+          <div className="relative flex-1 flex items-center">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value)}
+              onKeyDown={onKeyDownInput}
+              placeholder="type a command (e.g. 'neofetch', 'help', 'about')..."
+              className="flex-1 bg-transparent border-0 outline-none text-zinc-100 placeholder:text-zinc-600 font-mono text-xs focus:ring-0 p-0"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+            />
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <>
