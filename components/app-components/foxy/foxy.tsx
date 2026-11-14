@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useOsMode } from "@/components/providers";
 
 // Sprite mapping coordinates (multiplied by 32px) from foxy.gif
 const SPRITES: Record<string, [number, number][]> = {
@@ -62,6 +63,7 @@ const DIALOGUES = [
 ];
 
 export const Foxy = () => {
+  const { isOsMode } = useOsMode();
   // Check if device has an accurate pointing device (mouse / trackpad)
   const [hasMouse, setHasMouse] = useState<boolean>(false);
 
@@ -241,7 +243,8 @@ export const Foxy = () => {
   };
 
   // Do not render Foxy if device does not have a mouse / precision pointer
-  if (!hasMouse) {
+  // Hide Foxy while Desktop OS mode is active so OS apps have full focus
+  if (!hasMouse || isOsMode) {
     return null;
   }
 

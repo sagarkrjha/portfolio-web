@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiTerminal, FiFolder } from "react-icons/fi";
 import { siteConfig } from "@/lib/config";
+import { useOsMode } from "@/components/providers";
 import cachedData from "@/lib/generated/portfolio-data.json";
 import type { MergedProject } from "@/lib/services/github";
 
@@ -147,6 +148,7 @@ export const TerminalModal = ({
   isEmbedded = false,
   onClose,
 }: TerminalModalProps) => {
+  const { isOsMode } = useOsMode();
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [inputVal, setInputVal] = useState("");
@@ -724,6 +726,11 @@ export const TerminalModal = ({
   };
 
   // When embedded in Desktop OS window, render the terminal body directly
+  // When OS mode is active, the standalone floating terminal button/modal is hidden in favor of Desktop OS apps
+  if (isOsMode && !isEmbedded) {
+    return null;
+  }
+
   if (isEmbedded) {
     return (
       <div

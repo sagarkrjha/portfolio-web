@@ -208,7 +208,7 @@ export const DesktopOs = () => {
 
   const [time, setTime] = useState("");
   const [activeWindow, setActiveWindow] = useState<WindowId | null>("about");
-  const [topZ, setTopZ] = useState(10);
+  const [topZ, setTopZ] = useState(100);
   const [layoutMode, setLayoutModeState] = useState<LayoutMode>("floating");
   const [osTheme, setOsThemeState] = useState<OsThemeKey>("carbon");
   const [showDesktopIcons, setShowDesktopIconsState] = useState<boolean>(true);
@@ -373,7 +373,7 @@ export const DesktopOs = () => {
       isOpen: true,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 1,
+      zIndex: 10,
       position: { x: 30, y: 25 },
       size: { width: 680, height: 500 },
     },
@@ -384,7 +384,7 @@ export const DesktopOs = () => {
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 2,
+      zIndex: 20,
       position: { x: 80, y: 40 },
       size: { width: 720, height: 520 },
     },
@@ -395,7 +395,7 @@ export const DesktopOs = () => {
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 3,
+      zIndex: 30,
       position: { x: 120, y: 40 },
       size: { width: 740, height: 540 },
     },
@@ -406,7 +406,7 @@ export const DesktopOs = () => {
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 4,
+      zIndex: 40,
       position: { x: 160, y: 50 },
       size: { width: 700, height: 520 },
     },
@@ -417,7 +417,7 @@ export const DesktopOs = () => {
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 5,
+      zIndex: 50,
       position: { x: 100, y: 30 },
       size: { width: 760, height: 580 },
     },
@@ -428,7 +428,7 @@ export const DesktopOs = () => {
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 6,
+      zIndex: 60,
       position: { x: 180, y: 60 },
       size: { width: 620, height: 500 },
     },
@@ -439,7 +439,7 @@ export const DesktopOs = () => {
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
-      zIndex: 7,
+      zIndex: 70,
       position: { x: 150, y: 70 },
       size: { width: 640, height: 460 },
     },
@@ -904,13 +904,13 @@ export const DesktopOs = () => {
       onMouseUp={handleMouseUp}
       onContextMenu={handleContextMenu}
       style={getHeroWallpaperStyle(isDark)}
-      className={`fixed inset-0 z-50 flex flex-col font-sans select-none overflow-hidden animate-in fade-in duration-200 transition-all ${
+      className={`fixed inset-0 z-[9990] flex flex-col font-sans select-none overflow-hidden animate-in fade-in duration-200 transition-all ${
         isDark ? "text-zinc-100" : "text-zinc-900"
       }`}
     >
       {/* macOS Native Top Menu Bar */}
       <header
-        className={`h-7 w-full border-b px-2.5 sm:px-3 flex items-center justify-between text-xs backdrop-blur-xl z-50 shadow-sm select-none ${
+        className={`h-7 w-full border-b px-2.5 sm:px-3 flex items-center justify-between text-xs backdrop-blur-xl z-[10000] shadow-sm select-none ${
           isDark ? "text-zinc-200" : "text-zinc-800"
         }`}
         style={{
@@ -943,7 +943,7 @@ export const DesktopOs = () => {
             {showAppleMenu && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`absolute left-0 top-full mt-1 w-56 rounded-xl border p-1 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-100 text-xs font-sans ${
+                className={`absolute left-0 top-full mt-1 w-56 rounded-xl border p-1 shadow-2xl backdrop-blur-xl z-[10010] animate-in fade-in zoom-in-95 duration-100 text-xs font-sans ${
                   isDark ? "text-zinc-200" : "text-zinc-800"
                 }`}
                 style={{
@@ -1121,7 +1121,7 @@ export const DesktopOs = () => {
             {showControlCenter && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`absolute right-0 top-full mt-1.5 w-72 rounded-2xl border p-3 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-100 font-sans text-xs ${
+                className={`absolute right-0 top-full mt-1.5 w-72 rounded-2xl border p-3 shadow-2xl backdrop-blur-2xl z-[10010] animate-in fade-in zoom-in-95 duration-100 font-sans text-xs ${
                   isDark ? "text-zinc-200" : "text-zinc-800"
                 }`}
                 style={{
@@ -1935,7 +1935,7 @@ export const DesktopOs = () => {
               backgroundColor: isDark ? `${currentTheme.card}F5` : "rgba(255, 255, 255, 0.98)",
               borderColor: currentTheme.border,
             }}
-            className={`fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
+            className={`fixed z-[10020] w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
             <div className={`px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}>
               Desktop
@@ -2047,7 +2047,7 @@ export const DesktopOs = () => {
               backgroundColor: isDark ? `${currentTheme.card}F5` : "rgba(255, 255, 255, 0.98)",
               borderColor: currentTheme.border,
             }}
-            className={`fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
+            className={`fixed z-[10020] w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
             <div className={`flex items-center gap-2 px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}>
               <span>{windows[appContextMenu.windowId].title}</span>
@@ -2171,7 +2171,7 @@ export const DesktopOs = () => {
         {showLauncher && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-100 p-4"
+            className="fixed inset-0 z-[10030] flex items-start justify-center pt-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-100 p-4"
           >
             <div
               className="w-full max-w-lg rounded-2xl border shadow-2xl p-4 font-mono overflow-hidden flex flex-col gap-3"
@@ -2329,7 +2329,7 @@ export const DesktopOs = () => {
 
         {/* Alt+Tab Quick Switcher Overlay */}
         {showSwitcher && openWindows.length > 0 && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="fixed inset-0 z-[10040] flex items-center justify-center pointer-events-none">
             <div
               className="flex items-center gap-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-xl"
               style={{
@@ -2363,7 +2363,7 @@ export const DesktopOs = () => {
       </main>
 
       {/* Bottom Floating Dock */}
-      <footer className="h-16 w-full flex items-center justify-center pb-2 z-50 pointer-events-auto">
+      <footer className="h-16 w-full flex items-center justify-center pb-2 z-[10000] pointer-events-auto">
         <div
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border backdrop-blur-xl shadow-2xl"
           style={{
