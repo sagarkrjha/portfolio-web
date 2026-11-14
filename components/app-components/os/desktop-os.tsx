@@ -48,6 +48,7 @@ import { useOsMode } from "@/components/providers";
 import { siteConfig, heroConfig, aboutConfig, blogConfig } from "@/lib/config";
 import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
+import { AboutView } from "@/components/app-components/about";
 import cachedData from "@/lib/generated/portfolio-data.json";
 
 export type WindowId =
@@ -1309,78 +1310,7 @@ export const DesktopOs = () => {
             <div className={`p-4 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed font-sans ${
               isDark ? "text-zinc-300" : "text-zinc-700"
             }`}>
-              <div className={`flex items-center gap-4 border-b pb-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
-                <div
-                  style={{
-                    width: "56px",
-                    height: "56px",
-                    backgroundImage: `url('${heroConfig.avatar.src}')`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                  className={`shrink-0 size-14 rounded-xl border-2 border-primary/40 shadow-md ${
-                    isDark ? "bg-[#272220]" : "bg-white"
-                  }`}
-                />
-                <div>
-                  <h3 className={`text-base font-bold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{siteConfig.name}</h3>
-                  <p className="text-primary font-mono text-xs font-medium">{siteConfig.role}</p>
-                  <p className={`text-[11px] mt-0.5 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
-                    {siteConfig.location} · {siteConfig.availability}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <h4 className={`font-semibold mb-1 text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Architectural Philosophy</h4>
-                <p className={isDark ? "text-zinc-300" : "text-zinc-700"}>{aboutConfig.description}</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {aboutConfig.focus.map((f) => (
-                  <div
-                    key={f.title}
-                    className="p-3 rounded-lg border space-y-1"
-                    style={{
-                      backgroundColor: isDark ? `${currentTheme.card}B3` : "rgba(255, 255, 255, 0.8)",
-                      borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.08)",
-                    }}
-                  >
-                    <span className="text-primary font-mono font-semibold text-[11px] block">
-                      {f.title}
-                    </span>
-                    <p className={`text-[11px] leading-normal ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>{f.description}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className={`border-t pt-3 ${isDark ? "border-white/10" : "border-black/10"}`}>
-                <h4 className={`font-semibold mb-2 text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Technical Proficiency</h4>
-                <div className="space-y-2">
-                  {siteConfig.skills.map((c) => (
-                    <div
-                      key={c.title}
-                      className="flex flex-col sm:flex-row sm:items-center gap-1.5 font-mono text-[11px]"
-                    >
-                      <span className={`w-28 shrink-0 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>{c.title}:</span>
-                      <div className="flex flex-wrap gap-1">
-                        {c.skills.map((s) => (
-                          <span
-                            key={s.name}
-                            className={`px-1.5 py-0.2 rounded border text-[10px] ${
-                              isDark
-                                ? "bg-black/40 text-zinc-300 border-white/5"
-                                : "bg-black/5 text-zinc-800 border-black/10"
-                            }`}
-                          >
-                            {s.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <AboutView metrics={cachedData?.profile} />
             </div>
           </div>
         )}
