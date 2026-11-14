@@ -728,11 +728,11 @@ export const TerminalModal = ({
     return (
       <div
         onClick={() => inputRef.current?.focus()}
-        className="w-full h-full flex flex-col bg-[#1c1917] text-[#f4f4f4] font-mono overflow-hidden select-text"
+        className="w-full h-full flex flex-col bg-[#1c1917] text-[#f4f4f4] font-mono overflow-hidden select-text min-h-[300px]"
       >
         {/* Quick Command Action Chips */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-white/5 bg-[#1c1917]/70 text-[11px] overflow-x-auto shrink-0 select-none">
-          <span className="text-zinc-500 shrink-0">Quick run:</span>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-white/10 bg-[#272220]/95 text-[11px] overflow-x-auto shrink-0 select-none">
+          <span className="text-zinc-400 shrink-0 font-medium">Quick run:</span>
           {["neofetch", "about", "skills", "projects", "leetcode", "help", "clear"].map(
             (cmd) => (
               <button
@@ -742,7 +742,7 @@ export const TerminalModal = ({
                   e.stopPropagation();
                   handleCommand(cmd);
                 }}
-                className="px-2 py-0.5 rounded bg-[#272220] hover:bg-[#33b1ff]/20 hover:text-[#33b1ff] text-zinc-300 transition-colors cursor-pointer font-mono shrink-0 border border-white/5 shadow-xs"
+                className="px-2 py-0.5 rounded bg-[#1c1917] hover:bg-[#33b1ff]/20 hover:text-[#33b1ff] text-zinc-200 transition-colors cursor-pointer font-mono shrink-0 border border-white/10 shadow-xs"
               >
                 {cmd}
               </button>
@@ -751,7 +751,7 @@ export const TerminalModal = ({
         </div>
 
         {/* Terminal Body Output */}
-        <div className="flex-1 p-3.5 space-y-2.5 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#1c1917]">
+        <div className="flex-1 p-4 space-y-3 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#1c1917]">
           {history.map((item, index) => (
             <div key={index} className="space-y-1">
               {item.command && (
@@ -774,7 +774,7 @@ export const TerminalModal = ({
         {/* Terminal Prompt Input Bar */}
         <form
           onSubmit={onSubmit}
-          className="flex items-center px-3.5 py-2.5 border-t border-white/5 bg-[#1c1917]/95 shrink-0"
+          className="flex items-center px-4 py-3 border-t border-white/10 bg-[#272220]/95 shrink-0"
         >
           <span className="text-[#33b1ff] font-semibold mr-1.5 sm:mr-2 text-xs select-none shrink-0">
             <span className="hidden sm:inline">
@@ -790,7 +790,7 @@ export const TerminalModal = ({
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={onKeyDownInput}
               placeholder="type a command (e.g. 'neofetch', 'help', 'about')..."
-              className="flex-1 bg-transparent border-0 outline-none text-zinc-100 placeholder:text-zinc-600 font-mono text-xs focus:ring-0 p-0"
+              className="flex-1 bg-transparent border-0 outline-none text-zinc-100 placeholder:text-zinc-500 font-mono text-xs focus:ring-0 p-0"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"

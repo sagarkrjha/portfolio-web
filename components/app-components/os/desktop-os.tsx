@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import {
   FiTerminal,
   FiUser,
@@ -25,17 +26,36 @@ import {
   FiCommand,
   FiCheck,
   FiSliders,
+  FiGithub,
+  FiAward,
+  FiCode,
+  FiCpu,
+  FiClock,
+  FiActivity,
+  FiRefreshCw,
+  FiPlay,
+  FiSquare,
+  FiDroplet,
 } from "react-icons/fi";
 import { useTheme } from "next-themes";
 import { useOsMode } from "@/components/providers";
-import { siteConfig } from "@/lib/config";
+import { siteConfig, heroConfig, aboutConfig } from "@/lib/config";
 import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import cachedData from "@/lib/generated/portfolio-data.json";
 
-export type WindowId = "about" | "terminal" | "projects" | "blog" | "resume" | "settings";
+export type WindowId =
+  | "about"
+  | "terminal"
+  | "projects"
+  | "blog"
+  | "resume"
+  | "settings"
+  | "taskmanager";
+
 export type LayoutMode = "floating" | "tiling-horizontal" | "tiling-vertical" | "tiling-grid";
-export type WallpaperKey = "carbon" | "aurora" | "matrix" | "minimal" | "cover";
+export type WallpaperKey = "hero" | "carbon" | "aurora" | "matrix" | "minimal";
+export type OsThemeKey = "carbon" | "nord" | "matrix" | "dracula" | "paper";
 
 interface WindowState {
   id: WindowId;
@@ -49,12 +69,80 @@ interface WindowState {
   size: { width: number; height: number };
 }
 
+const OS_THEMES: Record<
+  OsThemeKey,
+  {
+    name: string;
+    bg: string;
+    card: string;
+    primary: string;
+    border: string;
+    text: string;
+    accent: string;
+  }
+> = {
+  carbon: {
+    name: "Carbon Obsidian (Default)",
+    bg: "#1c1917",
+    card: "#272220",
+    primary: "#33b1ff",
+    border: "rgba(255, 255, 255, 0.1)",
+    text: "#f4f4f4",
+    accent: "#0f62fe",
+  },
+  nord: {
+    name: "Nordic Frost",
+    bg: "#242933",
+    card: "#2e3440",
+    primary: "#88c0d0",
+    border: "rgba(136, 192, 208, 0.2)",
+    text: "#eceff4",
+    accent: "#81a1c1",
+  },
+  matrix: {
+    name: "Cyber Emerald",
+    bg: "#0d1117",
+    card: "#161b22",
+    primary: "#2ea043",
+    border: "rgba(46, 160, 67, 0.3)",
+    text: "#56d364",
+    accent: "#3fb950",
+  },
+  dracula: {
+    name: "Dracula Twilight",
+    bg: "#1e1f29",
+    card: "#282a36",
+    primary: "#bd93f9",
+    border: "rgba(189, 147, 249, 0.25)",
+    text: "#f8f8f2",
+    accent: "#ff79c6",
+  },
+  paper: {
+    name: "Paper Titanium (Clean)",
+    bg: "#f4f4f4",
+    card: "#ffffff",
+    primary: "#0f62fe",
+    border: "rgba(0, 0, 0, 0.12)",
+    text: "#161616",
+    accent: "#33b1ff",
+  },
+};
+
 const WALLPAPERS: Record<WallpaperKey, { name: string; style: React.CSSProperties }> = {
+  hero: {
+    name: "Hero Cover (Default)",
+    style: {
+      backgroundImage: `linear-gradient(rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.96)), url('${heroConfig.media.src}')`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    },
+  },
   carbon: {
     name: "Carbon Gradient",
     style: {
       background:
-        "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(51, 177, 255, 0.12), rgba(28, 25, 23, 1))",
+        "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(51, 177, 255, 0.14), rgba(28, 25, 23, 1))",
     },
   },
   aurora: {
@@ -79,30 +167,37 @@ const WALLPAPERS: Record<WallpaperKey, { name: string; style: React.CSSPropertie
       backgroundColor: "#1c1917",
     },
   },
-  cover: {
-    name: "Cover Art",
-    style: {
-      backgroundImage:
-        "linear-gradient(rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.95)), url('/cover-image.jpg')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    },
-  },
 };
 
 export const DesktopOs = () => {
   const { isOsMode, toggleOsMode } = useOsMode();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
   const [time, setTime] = useState("");
   const [activeWindow, setActiveWindow] = useState<WindowId | null>("about");
   const [topZ, setTopZ] = useState(10);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("floating");
-  const [wallpaper, setWallpaper] = useState<WallpaperKey>("carbon");
+  const [wallpaper, setWallpaper] = useState<WallpaperKey>("hero");
+  const [osTheme, setOsTheme] = useState<OsThemeKey>("carbon");
   const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
+
+  // Context Menu state (Right Click)
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+  });
+
+  // Simulated system task metrics
+  const [cpuUsage, setCpuUsage] = useState(14);
+  const [memUsage, setMemUsage] = useState(2.4);
 
   // Dragging state
   const dragRef = useRef<{
@@ -128,8 +223,8 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 1,
-      position: { x: 40, y: 30 },
-      size: { width: 620, height: 460 },
+      position: { x: 30, y: 25 },
+      size: { width: 680, height: 500 },
     },
     terminal: {
       id: "terminal",
@@ -139,8 +234,8 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 2,
-      position: { x: 100, y: 50 },
-      size: { width: 680, height: 480 },
+      position: { x: 80, y: 40 },
+      size: { width: 720, height: 520 },
     },
     projects: {
       id: "projects",
@@ -150,8 +245,8 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 3,
-      position: { x: 160, y: 50 },
-      size: { width: 700, height: 520 },
+      position: { x: 120, y: 40 },
+      size: { width: 740, height: 540 },
     },
     blog: {
       id: "blog",
@@ -161,8 +256,8 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 4,
-      position: { x: 200, y: 70 },
-      size: { width: 640, height: 480 },
+      position: { x: 160, y: 50 },
+      size: { width: 700, height: 520 },
     },
     resume: {
       id: "resume",
@@ -172,8 +267,8 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 5,
-      position: { x: 140, y: 40 },
-      size: { width: 740, height: 560 },
+      position: { x: 100, y: 30 },
+      size: { width: 760, height: 580 },
     },
     settings: {
       id: "settings",
@@ -183,12 +278,23 @@ export const DesktopOs = () => {
       isMinimized: false,
       isMaximized: false,
       zIndex: 6,
-      position: { x: 220, y: 80 },
-      size: { width: 560, height: 440 },
+      position: { x: 180, y: 60 },
+      size: { width: 620, height: 500 },
+    },
+    taskmanager: {
+      id: "taskmanager",
+      title: "Task Manager & Processes",
+      icon: FiActivity,
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      zIndex: 7,
+      position: { x: 150, y: 70 },
+      size: { width: 640, height: 460 },
     },
   });
 
-  // Clock
+  // Clock & system metrics jitter
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -198,6 +304,7 @@ export const DesktopOs = () => {
           minute: "2-digit",
         }),
       );
+      setCpuUsage((prev) => Math.min(65, Math.max(8, prev + (Math.random() * 8 - 4))));
     };
     updateTime();
     const timer = setInterval(updateTime, 1000);
@@ -231,11 +338,16 @@ export const DesktopOs = () => {
     }));
   }, []);
 
+  // Guaranteed Close Handler with direct state update
   const closeWindow = useCallback(
-    (id: WindowId) => {
+    (id: WindowId, e?: React.MouseEvent) => {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
       setWindows((prev) => ({
         ...prev,
-        [id]: { ...prev[id], isOpen: false },
+        [id]: { ...prev[id], isOpen: false, isMinimized: false, isMaximized: false },
       }));
       if (activeWindow === id) {
         setActiveWindow(null);
@@ -245,7 +357,11 @@ export const DesktopOs = () => {
   );
 
   const minimizeWindow = useCallback(
-    (id: WindowId) => {
+    (id: WindowId, e?: React.MouseEvent) => {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
       setWindows((prev) => ({
         ...prev,
         [id]: { ...prev[id], isMinimized: true },
@@ -292,7 +408,7 @@ export const DesktopOs = () => {
       const target = e.target as HTMLElement;
       const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
 
-      // Super/Alt + Space: Quick App Launcher
+      // Super/Alt + Space: Spotlight App Launcher
       if ((e.altKey || e.metaKey) && e.code === "Space") {
         e.preventDefault();
         setShowLauncher((prev) => !prev);
@@ -301,6 +417,10 @@ export const DesktopOs = () => {
 
       // Escape key behavior
       if (e.key === "Escape") {
+        if (contextMenu.visible) {
+          setContextMenu((prev) => ({ ...prev, visible: false }));
+          return;
+        }
         if (showLauncher) {
           setShowLauncher(false);
           return;
@@ -321,7 +441,7 @@ export const DesktopOs = () => {
         cycleNextWindow();
       }
 
-      // App Launch shortcuts (Alt + 1..6)
+      // App Launch shortcuts (Alt + 1..7)
       if ((e.altKey || e.metaKey) && !isInput) {
         const appKeys: Record<string, WindowId> = {
           "1": "about",
@@ -330,6 +450,7 @@ export const DesktopOs = () => {
           "4": "blog",
           "5": "resume",
           "6": "settings",
+          "7": "taskmanager",
         };
         if (appKeys[e.key]) {
           e.preventDefault();
@@ -348,7 +469,9 @@ export const DesktopOs = () => {
       if ((e.altKey || e.metaKey) && !isInput) {
         if (e.key === "h" || e.key === "H") {
           e.preventDefault();
-          setLayoutMode((prev) => (prev === "tiling-horizontal" ? "floating" : "tiling-horizontal"));
+          setLayoutMode((prev) =>
+            prev === "tiling-horizontal" ? "floating" : "tiling-horizontal",
+          );
         } else if (e.key === "v" || e.key === "V") {
           e.preventDefault();
           setLayoutMode((prev) => (prev === "tiling-vertical" ? "floating" : "tiling-vertical"));
@@ -377,6 +500,7 @@ export const DesktopOs = () => {
   }, [
     isOsMode,
     activeWindow,
+    contextMenu.visible,
     showLauncher,
     showWallpaperMenu,
     closeWindow,
@@ -420,6 +544,16 @@ export const DesktopOs = () => {
     dragRef.current.windowId = null;
   }, []);
 
+  // Desktop Right Click Handler
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: Math.min(window.innerWidth - 200, e.clientX),
+      y: Math.min(window.innerHeight - 250, e.clientY),
+    });
+  };
+
   if (!isOsMode) return null;
 
   // Compute Tiling Styles if Tiling Layout is active
@@ -445,7 +579,7 @@ export const DesktopOs = () => {
         top: `${w.position.y}px`,
         width: `${w.size.width}px`,
         maxWidth: "96vw",
-        maxHeight: "82vh",
+        maxHeight: "84vh",
         zIndex: w.zIndex,
       };
     }
@@ -499,34 +633,120 @@ export const DesktopOs = () => {
     };
   };
 
+  const currentTheme = OS_THEMES[osTheme];
+
+  // Helper renderer for Window Titlebar with fixed stop-propagation close button
+  const renderTitleBar = (id: WindowId, title: string) => (
+    <div
+      onMouseDown={(e) => handleMouseDownHeader(e, id)}
+      onDoubleClick={() => toggleMaximize(id)}
+      className="flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0"
+      style={{
+        backgroundColor: currentTheme.card,
+        borderColor: currentTheme.border,
+      }}
+    >
+      <div className="flex items-center gap-2">
+        {/* Red Close Button */}
+        <button
+          type="button"
+          onClick={(e) => closeWindow(id, e)}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="size-3.5 rounded-full bg-[#ff5f56] hover:brightness-125 border border-[#e0443e] cursor-pointer flex items-center justify-center group"
+          title="Close (ESC)"
+        >
+          <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
+            ✕
+          </span>
+        </button>
+
+        {/* Yellow Minimize Button */}
+        <button
+          type="button"
+          onClick={(e) => minimizeWindow(id, e)}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="size-3.5 rounded-full bg-[#ffbd2e] hover:brightness-125 border border-[#dea123] cursor-pointer flex items-center justify-center group"
+          title="Minimize"
+        >
+          <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
+            −
+          </span>
+        </button>
+
+        {/* Green Maximize Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleMaximize(id);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="size-3.5 rounded-full bg-[#27c93f] hover:brightness-125 border border-[#1aab29] cursor-pointer flex items-center justify-center group"
+          title="Maximize / Restore (Double Tap)"
+        >
+          <span className="opacity-0 group-hover:opacity-100 text-[7px] font-bold text-black/80 leading-none">
+            {windows[id].isMaximized ? "⤓" : "⤢"}
+          </span>
+        </button>
+      </div>
+
+      <span className="text-xs font-semibold text-zinc-200 pointer-events-none truncate max-w-[65%] font-mono">
+        {title}
+      </span>
+
+      <button
+        type="button"
+        onClick={() => toggleMaximize(id)}
+        className="text-zinc-400 hover:text-zinc-100 cursor-pointer p-0.5"
+      >
+        {windows[id].isMaximized ? (
+          <FiMinimize2 className="size-3.5" />
+        ) : (
+          <FiMaximize2 className="size-3.5" />
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onContextMenu={handleContextMenu}
       style={WALLPAPERS[wallpaper].style}
       className="fixed inset-0 z-50 flex flex-col text-[#f4f4f4] font-sans select-none overflow-hidden animate-in fade-in duration-200 transition-all"
     >
       {/* Top Hyprland / macOS Bar */}
-      <header className="h-7.5 w-full bg-[#272220]/95 border-b border-white/10 px-3 flex items-center justify-between text-xs backdrop-blur-md z-50 shadow-sm">
+      <header
+        className="h-7.5 w-full border-b px-3 flex items-center justify-between text-xs backdrop-blur-md z-50 shadow-sm"
+        style={{
+          backgroundColor: `${currentTheme.card}F0`,
+          borderColor: currentTheme.border,
+        }}
+      >
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setShowLauncher((prev) => !prev)}
-            className="flex items-center gap-1.5 font-bold tracking-tight text-primary hover:opacity-80 transition-opacity cursor-pointer"
+            className="flex items-center gap-1.5 font-bold tracking-tight hover:opacity-80 transition-opacity cursor-pointer"
+            style={{ color: currentTheme.primary }}
             title="App Launcher (Alt+Space)"
           >
-            <span className="size-2 rounded-full bg-primary animate-pulse" />
+            <span
+              className="size-2 rounded-full animate-pulse"
+              style={{ backgroundColor: currentTheme.primary }}
+            />
             <span className="font-mono">CARBON-OS</span>
           </button>
           <span className="text-white/20">|</span>
 
           {/* Active Window Title */}
-          <span className="font-medium text-zinc-300 hidden sm:inline">
+          <span className="font-medium text-zinc-300 hidden sm:inline font-mono">
             {activeWindow ? windows[activeWindow].title : "Desktop"}
           </span>
 
           {/* Hyprland Tiling Mode Pills */}
-          <div className="flex items-center gap-1 bg-black/30 p-0.5 rounded border border-white/5 text-[10px] font-mono">
+          <div className="flex items-center gap-1 bg-black/40 p-0.5 rounded border border-white/5 text-[10px] font-mono">
             {(
               [
                 { mode: "floating", label: "Float", icon: FiLayers },
@@ -541,9 +761,13 @@ export const DesktopOs = () => {
                 onClick={() => setLayoutMode(l.mode)}
                 className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
                   layoutMode === l.mode
-                    ? "bg-primary text-primary-foreground font-semibold"
+                    ? "font-semibold shadow-xs"
                     : "text-zinc-400 hover:text-zinc-100"
                 }`}
+                style={{
+                  backgroundColor: layoutMode === l.mode ? currentTheme.primary : "transparent",
+                  color: layoutMode === l.mode ? "#000" : undefined,
+                }}
                 title={`Switch layout to ${l.label} (Alt+${l.label[0]})`}
               >
                 <l.icon className="size-2.5" />
@@ -555,12 +779,24 @@ export const DesktopOs = () => {
 
         {/* Right Status Tray */}
         <div className="flex items-center gap-2 text-zinc-400">
+          {/* Task Manager Quick Gauge */}
+          <button
+            type="button"
+            onClick={() => toggleWindow("taskmanager")}
+            className="flex items-center gap-1.5 hover:text-zinc-100 transition-colors cursor-pointer text-[10px] font-mono px-2 py-0.5 rounded border border-white/10 bg-white/5"
+            title="Open Task Manager (Alt+7)"
+          >
+            <FiActivity className="size-3 text-emerald-400" />
+            <span className="text-emerald-400 font-bold">{Math.round(cpuUsage)}%</span>
+            <span className="hidden md:inline text-zinc-500">CPU</span>
+          </button>
+
           {/* Quick Settings Icon */}
           <button
             type="button"
             onClick={() => toggleWindow("settings")}
             className="flex items-center gap-1 hover:text-zinc-100 transition-colors cursor-pointer text-[11px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5"
-            title="Settings & Wallpapers (Alt+6)"
+            title="Settings & Themes (Alt+6)"
           >
             <FiSettings className="size-3 text-primary" />
             <span className="hidden md:inline font-mono">Settings</span>
@@ -581,7 +817,11 @@ export const DesktopOs = () => {
             {showWallpaperMenu && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="absolute right-0 top-full mt-1.5 w-44 rounded-lg bg-[#272220] border border-white/10 p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-xs font-mono"
+                className="absolute right-0 top-full mt-1.5 w-48 rounded-lg border p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-xs font-mono"
+                style={{
+                  backgroundColor: currentTheme.card,
+                  borderColor: currentTheme.border,
+                }}
               >
                 <div className="px-2 py-1 text-[10px] text-zinc-400 uppercase font-semibold">
                   Wallpapers
@@ -594,29 +834,49 @@ export const DesktopOs = () => {
                       setWallpaper(key);
                       setShowWallpaperMenu(false);
                     }}
-                    className={`w-full text-left px-2 py-1 rounded transition-colors cursor-pointer flex items-center justify-between ${
-                      wallpaper === key
-                        ? "bg-primary text-primary-foreground font-bold"
-                        : "hover:bg-white/10 text-zinc-300"
+                    className={`w-full text-left px-2 py-1.5 rounded transition-colors cursor-pointer flex items-center justify-between ${
+                      wallpaper === key ? "font-bold" : "hover:bg-white/10 text-zinc-300"
                     }`}
+                    style={{
+                      backgroundColor: wallpaper === key ? currentTheme.primary : "transparent",
+                      color: wallpaper === key ? "#000" : undefined,
+                    }}
                   >
                     <span>{WALLPAPERS[key].name}</span>
-                    {wallpaper === key && <span className="size-1.5 rounded-full bg-white" />}
+                    {wallpaper === key && <span className="size-1.5 rounded-full bg-black" />}
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Theme switcher */}
-          <button
-            type="button"
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="hover:text-zinc-100 transition-colors cursor-pointer p-1"
-            title="Toggle Theme"
-          >
-            {isDark ? <FiSun className="size-3.5" /> : <FiMoon className="size-3.5" />}
-          </button>
+          {/* Direct Theme Mode Switcher */}
+          <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded border border-white/10 text-[10px] font-mono">
+            <button
+              type="button"
+              onClick={() => setTheme("dark")}
+              className={`p-1 rounded cursor-pointer transition-colors ${
+                theme === "dark" || (!theme && isDark)
+                  ? "bg-primary text-primary-foreground font-bold"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+              title="Dark Mode"
+            >
+              <FiMoon className="size-3" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme("light")}
+              className={`p-1 rounded cursor-pointer transition-colors ${
+                theme === "light"
+                  ? "bg-primary text-primary-foreground font-bold"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+              title="Light Mode"
+            >
+              <FiSun className="size-3" />
+            </button>
+          </div>
 
           <FiWifi className="size-3.5 hidden sm:inline" />
           <FiVolume2 className="size-3.5 hidden sm:inline" />
@@ -627,8 +887,12 @@ export const DesktopOs = () => {
           <button
             type="button"
             onClick={toggleOsMode}
-            className="ml-1 px-2 py-0.5 rounded-none bg-primary hover:brightness-110 text-primary-foreground font-medium text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-            title="Exit Desktop OS"
+            className="ml-1 px-2.5 py-0.5 rounded-none font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+            style={{
+              backgroundColor: currentTheme.primary,
+              color: "#000",
+            }}
+            title="Exit Desktop OS & Return to Web Mode"
           >
             <span>Exit</span>
             <FiExternalLink className="size-3" />
@@ -642,6 +906,7 @@ export const DesktopOs = () => {
         onClick={() => {
           setShowWallpaperMenu(false);
           setShowLauncher(false);
+          setContextMenu((prev) => ({ ...prev, visible: false }));
         }}
       >
         {/* Desktop Application Icons */}
@@ -654,6 +919,7 @@ export const DesktopOs = () => {
               { id: "blog", label: "Notes.app", icon: FiBookOpen, key: "4" },
               { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "5" },
               { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
+              { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "7" },
             ] as const
           ).map((item) => (
             <button
@@ -662,7 +928,14 @@ export const DesktopOs = () => {
               onClick={() => focusWindow(item.id)}
               className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group w-20 text-center"
             >
-              <div className="relative size-12 rounded-xl bg-[#272220]/90 border border-white/10 flex items-center justify-center text-primary shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs">
+              <div
+                className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
+                style={{
+                  backgroundColor: `${currentTheme.card}E6`,
+                  borderColor: currentTheme.border,
+                  color: currentTheme.primary,
+                }}
+              >
                 <item.icon className="size-6" />
                 <span className="absolute bottom-0.5 right-1 text-[8px] font-mono text-zinc-400 opacity-60 group-hover:opacity-100">
                   ⌥{item.key}
@@ -680,83 +953,83 @@ export const DesktopOs = () => {
         {/* 1. About Window */}
         {windows.about.isOpen && (
           <div
-            style={getTilingStyle("about")}
+            style={{
+              ...getTilingStyle("about"),
+              backgroundColor: `${currentTheme.bg}F5`,
+              borderColor: currentTheme.border,
+            }}
             onClick={() => focusWindow("about")}
-            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
               windows.about.isMinimized ? "hidden" : ""
             }`}
           >
-            <div
-              onMouseDown={(e) => handleMouseDownHeader(e, "about")}
-              onDoubleClick={() => toggleMaximize("about")}
-              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => closeWindow("about")}
-                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
-                  title="Close (ESC)"
-                />
-                <button
-                  type="button"
-                  onClick={() => minimizeWindow("about")}
-                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
-                  title="Minimize"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleMaximize("about")}
-                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
-                  title="Maximize / Restore (Double Tap)"
-                />
-              </div>
-              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
-                About — {siteConfig.name}
-              </span>
-              <button
-                type="button"
-                onClick={() => toggleMaximize("about")}
-                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
-              >
-                {windows.about.isMaximized ? (
-                  <FiMinimize2 className="size-3" />
-                ) : (
-                  <FiMaximize2 className="size-3" />
-                )}
-              </button>
-            </div>
+            {renderTitleBar("about", `About — ${siteConfig.name}`)}
 
             <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-zinc-300 font-sans">
               <div className="flex items-center gap-4 border-b border-white/10 pb-4">
                 <div
                   style={{
-                    width: "48px",
-                    height: "48px",
-                    backgroundImage: "url('/foxy.gif')",
-                    imageRendering: "pixelated",
-                    backgroundPosition: "-96px -96px",
+                    width: "56px",
+                    height: "56px",
+                    backgroundImage: `url('${heroConfig.avatar.src}')`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
                   }}
-                  className="shrink-0 size-12 rounded-lg bg-[#272220] border border-white/10 p-1"
+                  className="shrink-0 size-14 rounded-xl bg-[#272220] border-2 border-primary/40 shadow-md"
                 />
                 <div>
                   <h3 className="text-base font-bold text-zinc-100">{siteConfig.name}</h3>
-                  <p className="text-primary font-mono text-[11px]">{siteConfig.role}</p>
+                  <p className="text-primary font-mono text-xs font-medium">{siteConfig.role}</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    {siteConfig.location} · {siteConfig.availability}
+                  </p>
                 </div>
               </div>
 
-              <p className="text-zinc-200">{siteConfig.bio}</p>
+              <div>
+                <h4 className="text-zinc-200 font-semibold mb-1 text-xs">Architectural Philosophy</h4>
+                <p className="text-zinc-300">{aboutConfig.description}</p>
+              </div>
 
-              <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
-                <div className="p-2.5 rounded bg-[#272220] border border-white/5">
-                  <span className="text-zinc-400 block text-[10px]">CORE DOMAIN</span>
-                  <span className="text-zinc-100 font-medium">Systems, C++ & Rust</span>
-                </div>
-                <div className="p-2.5 rounded bg-[#272220] border border-white/5">
-                  <span className="text-zinc-400 block text-[10px]">LEETCODE SOLVED</span>
-                  <span className="text-primary font-bold">
-                    {cachedData.leetcode?.totalSolved ?? 710}+ Solved
-                  </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {aboutConfig.focus.map((f) => (
+                  <div
+                    key={f.title}
+                    className="p-3 rounded-lg border space-y-1"
+                    style={{
+                      backgroundColor: `${currentTheme.card}B3`,
+                      borderColor: currentTheme.border,
+                    }}
+                  >
+                    <span className="text-primary font-mono font-semibold text-[11px] block">
+                      {f.title}
+                    </span>
+                    <p className="text-zinc-400 text-[11px] leading-normal">{f.description}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-white/10 pt-3">
+                <h4 className="text-zinc-200 font-semibold mb-2 text-xs">Technical Proficiency</h4>
+                <div className="space-y-2">
+                  {siteConfig.skills.map((c) => (
+                    <div
+                      key={c.title}
+                      className="flex flex-col sm:flex-row sm:items-center gap-1.5 font-mono text-[11px]"
+                    >
+                      <span className="text-zinc-400 w-28 shrink-0">{c.title}:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {c.skills.map((s) => (
+                          <span
+                            key={s.name}
+                            className="px-1.5 py-0.2 rounded bg-black/40 text-zinc-300 border border-white/5 text-[10px]"
+                          >
+                            {s.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -766,51 +1039,19 @@ export const DesktopOs = () => {
         {/* 2. Embedded Terminal Window */}
         {windows.terminal.isOpen && (
           <div
-            style={getTilingStyle("terminal")}
+            style={{
+              ...getTilingStyle("terminal"),
+              backgroundColor: "#1c1917",
+              borderColor: currentTheme.border,
+            }}
             onClick={() => focusWindow("terminal")}
-            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
               windows.terminal.isMinimized ? "hidden" : ""
             }`}
           >
-            <div
-              onMouseDown={(e) => handleMouseDownHeader(e, "terminal")}
-              onDoubleClick={() => toggleMaximize("terminal")}
-              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => closeWindow("terminal")}
-                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => minimizeWindow("terminal")}
-                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleMaximize("terminal")}
-                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
-                />
-              </div>
-              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
-                {siteConfig.github.username}@carbon-shell — bash
-              </span>
-              <button
-                type="button"
-                onClick={() => toggleMaximize("terminal")}
-                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
-              >
-                {windows.terminal.isMaximized ? (
-                  <FiMinimize2 className="size-3" />
-                ) : (
-                  <FiMaximize2 className="size-3" />
-                )}
-              </button>
-            </div>
+            {renderTitleBar("terminal", `${siteConfig.github.username}@carbon-shell — bash`)}
 
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-[300px] overflow-hidden">
               <TerminalModal isEmbedded={true} defaultOpen={true} />
             </div>
           </div>
@@ -819,66 +1060,72 @@ export const DesktopOs = () => {
         {/* 3. Projects Window */}
         {windows.projects.isOpen && (
           <div
-            style={getTilingStyle("projects")}
+            style={{
+              ...getTilingStyle("projects"),
+              backgroundColor: `${currentTheme.bg}F5`,
+              borderColor: currentTheme.border,
+            }}
             onClick={() => focusWindow("projects")}
-            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
               windows.projects.isMinimized ? "hidden" : ""
             }`}
           >
-            <div
-              onMouseDown={(e) => handleMouseDownHeader(e, "projects")}
-              onDoubleClick={() => toggleMaximize("projects")}
-              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => closeWindow("projects")}
-                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => minimizeWindow("projects")}
-                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleMaximize("projects")}
-                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
-                />
-              </div>
-              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
-                Repositories & Projects
-              </span>
-              <button
-                type="button"
-                onClick={() => toggleMaximize("projects")}
-                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
-              >
-                {windows.projects.isMaximized ? (
-                  <FiMinimize2 className="size-3" />
-                ) : (
-                  <FiMaximize2 className="size-3" />
-                )}
-              </button>
-            </div>
+            {renderTitleBar(
+              "projects",
+              `Repositories & Highlighted Engineering Projects (${siteConfig.featuredProjects.length})`,
+            )}
 
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-3">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-3.5">
               {siteConfig.featuredProjects.map((p) => (
                 <div
                   key={p.title}
-                  className="p-3 rounded-lg bg-[#272220]/80 border border-white/5 hover:border-primary/40 transition-colors"
+                  className="p-3.5 rounded-lg border space-y-2 hover:border-primary/50 transition-colors"
+                  style={{
+                    backgroundColor: `${currentTheme.card}CC`,
+                    borderColor: currentTheme.border,
+                  }}
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-zinc-100">{p.title}</h4>
-                    {p.stars !== undefined && p.stars > 0 && (
-                      <span className="text-[11px] font-mono text-primary font-bold">
-                        ★ {p.stars}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-semibold text-zinc-100">{p.title}</h4>
+                      {p.featured && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-primary/20 text-primary border border-primary/30 font-bold uppercase">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {p.stars !== undefined && p.stars > 0 && (
+                        <span className="text-[11px] font-mono text-primary font-bold">
+                          ★ {p.stars}
+                        </span>
+                      )}
+                      {p.githubUrl && (
+                        <a
+                          href={p.githubUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-zinc-400 hover:text-zinc-100 p-1"
+                          title="View on GitHub"
+                        >
+                          <FiGithub className="size-3.5" />
+                        </a>
+                      )}
+                      {p.liveUrl && (
+                        <a
+                          href={p.liveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:opacity-80 p-1"
+                          title="Live Demo"
+                        >
+                          <FiExternalLink className="size-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-zinc-300 mt-1 line-clamp-2">{p.description}</p>
-                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  <p className="text-xs text-zinc-300 leading-relaxed">{p.description}</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
                     {p.techStack.map((tech) => (
                       <span
                         key={tech}
@@ -897,80 +1144,88 @@ export const DesktopOs = () => {
         {/* 4. Blog Notes Window */}
         {windows.blog.isOpen && (
           <div
-            style={getTilingStyle("blog")}
+            style={{
+              ...getTilingStyle("blog"),
+              backgroundColor: `${currentTheme.bg}F5`,
+              borderColor: currentTheme.border,
+            }}
             onClick={() => focusWindow("blog")}
-            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
               windows.blog.isMinimized ? "hidden" : ""
             }`}
           >
-            <div
-              onMouseDown={(e) => handleMouseDownHeader(e, "blog")}
-              onDoubleClick={() => toggleMaximize("blog")}
-              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => closeWindow("blog")}
-                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => minimizeWindow("blog")}
-                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleMaximize("blog")}
-                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
-                />
-              </div>
-              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
-                Notes & Articles
-              </span>
-              <button
-                type="button"
-                onClick={() => toggleMaximize("blog")}
-                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
-              >
-                {windows.blog.isMaximized ? (
-                  <FiMinimize2 className="size-3" />
-                ) : (
-                  <FiMaximize2 className="size-3" />
-                )}
-              </button>
-            </div>
+            {renderTitleBar("blog", "Engineering Notes & Articles")}
 
             <div className="p-4 sm:p-6 overflow-y-auto space-y-3">
               {[
                 {
                   title: "Anatomy of a File System Race Condition",
                   slug: "anatomy-of-a-file-system-race-condition",
-                  date: "2026-11-10",
+                  date: "Nov 10, 2026",
+                  readTime: "8 min read",
+                  tags: ["Systems", "Linux", "Concurrency"],
                 },
                 {
                   title: "Myers Diff Algorithm in Deep Dive",
                   slug: "myers-diff-algorithm",
-                  date: "2026-10-24",
+                  date: "Oct 24, 2026",
+                  readTime: "12 min read",
+                  tags: ["Algorithms", "Git", "Graph Theory"],
                 },
                 {
                   title: "DSA Sheet 2027: Systems & Algorithmic Patterns",
                   slug: "dsa-sheet-2027",
-                  date: "2026-09-15",
+                  date: "Sep 15, 2026",
+                  readTime: "15 min read",
+                  tags: ["LeetCode", "Data Structures", "C++20"],
+                },
+                {
+                  title: "Building a Config-Driven Developer Portfolio",
+                  slug: "building-a-config-driven-portfolio",
+                  date: "Aug 20, 2026",
+                  readTime: "6 min read",
+                  tags: ["Architecture", "Next.js", "TypeScript"],
+                },
+                {
+                  title: "Understanding Algorithms in Production Systems",
+                  slug: "understanding-algorithms-in-practice",
+                  date: "Jul 12, 2026",
+                  readTime: "7 min read",
+                  tags: ["Optimization", "Storage", "Performance"],
                 },
               ].map((article) => (
-                <a
+                <Link
                   key={article.slug}
                   href={`/blog/${article.slug}`}
-                  className="block p-3 rounded-lg bg-[#272220]/80 border border-white/5 hover:border-primary/50 transition-colors group"
+                  className="block p-3.5 rounded-lg border hover:border-primary/50 transition-colors group"
+                  style={{
+                    backgroundColor: `${currentTheme.card}CC`,
+                    borderColor: currentTheme.border,
+                  }}
                 >
-                  <p className="text-xs font-semibold text-zinc-100 group-hover:text-primary transition-colors">
-                    {article.title}
-                  </p>
-                  <span className="text-[10px] font-mono text-zinc-500 mt-1 block">
-                    {article.date}
-                  </span>
-                </a>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-zinc-100 group-hover:text-primary transition-colors">
+                      {article.title}
+                    </p>
+                    <span className="text-[10px] font-mono text-zinc-500 shrink-0">
+                      {article.readTime}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 font-mono text-[10px]">
+                    <span className="text-zinc-500">{article.date}</span>
+                    <span className="text-zinc-600">•</span>
+                    <div className="flex gap-1">
+                      {article.tags.map((t) => (
+                        <span
+                          key={t}
+                          className="px-1 py-0.2 rounded bg-black/40 text-primary border border-primary/20"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -979,49 +1234,17 @@ export const DesktopOs = () => {
         {/* 5. Resume Window */}
         {windows.resume.isOpen && (
           <div
-            style={getTilingStyle("resume")}
+            style={{
+              ...getTilingStyle("resume"),
+              backgroundColor: `${currentTheme.bg}F5`,
+              borderColor: currentTheme.border,
+            }}
             onClick={() => focusWindow("resume")}
-            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
               windows.resume.isMinimized ? "hidden" : ""
             }`}
           >
-            <div
-              onMouseDown={(e) => handleMouseDownHeader(e, "resume")}
-              onDoubleClick={() => toggleMaximize("resume")}
-              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => closeWindow("resume")}
-                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => minimizeWindow("resume")}
-                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleMaximize("resume")}
-                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
-                />
-              </div>
-              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
-                Resume Preview (PDF)
-              </span>
-              <button
-                type="button"
-                onClick={() => toggleMaximize("resume")}
-                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
-              >
-                {windows.resume.isMaximized ? (
-                  <FiMinimize2 className="size-3" />
-                ) : (
-                  <FiMaximize2 className="size-3" />
-                )}
-              </button>
-            </div>
+            {renderTitleBar("resume", "Resume Preview (PDF) — Sagar Kumar Jha")}
 
             <div className="flex-1 p-2 sm:p-4 overflow-y-auto">
               <ResumePdfViewer />
@@ -1032,56 +1255,69 @@ export const DesktopOs = () => {
         {/* 6. Settings Window */}
         {windows.settings.isOpen && (
           <div
-            style={getTilingStyle("settings")}
+            style={{
+              ...getTilingStyle("settings"),
+              backgroundColor: `${currentTheme.bg}F8`,
+              borderColor: currentTheme.border,
+            }}
             onClick={() => focusWindow("settings")}
-            className={`flex flex-col rounded-xl border border-white/10 bg-[#1c1917]/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md overflow-hidden ${
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
               windows.settings.isMinimized ? "hidden" : ""
             }`}
           >
-            <div
-              onMouseDown={(e) => handleMouseDownHeader(e, "settings")}
-              onDoubleClick={() => toggleMaximize("settings")}
-              className="flex items-center justify-between px-3.5 py-2 border-b border-white/10 bg-[#272220]/95 select-none cursor-move shrink-0"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => closeWindow("settings")}
-                  className="size-3 rounded-full bg-[#ff5f56] hover:brightness-110 border border-[#e0443e]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => minimizeWindow("settings")}
-                  className="size-3 rounded-full bg-[#ffbd2e] hover:brightness-110 border border-[#dea123]/80 cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleMaximize("settings")}
-                  className="size-3 rounded-full bg-[#27c93f] hover:brightness-110 border border-[#1aab29]/80 cursor-pointer"
-                />
-              </div>
-              <span className="text-xs font-medium text-zinc-300 pointer-events-none truncate max-w-[60%]">
-                Settings & Personalization
-              </span>
-              <button
-                type="button"
-                onClick={() => toggleMaximize("settings")}
-                className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
-              >
-                {windows.settings.isMaximized ? (
-                  <FiMinimize2 className="size-3" />
-                ) : (
-                  <FiMaximize2 className="size-3" />
-                )}
-              </button>
-            </div>
+            {renderTitleBar("settings", "Settings & Personalization")}
 
             <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs font-mono">
-              {/* Wallpaper selection section */}
+              {/* OS Theme selection section */}
               <div>
-                <h4 className="text-zinc-200 font-semibold mb-2.5 flex items-center gap-2">
+                <h4 className="text-zinc-200 font-semibold mb-2 flex items-center gap-2">
+                  <FiDroplet className="text-primary size-4" />
+                  <span>Desktop OS Themes</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {(Object.keys(OS_THEMES) as OsThemeKey[]).map((key) => {
+                    const t = OS_THEMES[key];
+                    const active = osTheme === key;
+
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setOsTheme(key)}
+                        className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex flex-col gap-1.5 ${
+                          active ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-white/10"
+                        }`}
+                        style={{ backgroundColor: t.card }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-zinc-100">{t.name}</span>
+                          {active && <FiCheck className="size-3 text-primary" />}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span
+                            className="size-3.5 rounded-full border border-white/20"
+                            style={{ backgroundColor: t.bg }}
+                          />
+                          <span
+                            className="size-3.5 rounded-full border border-white/20"
+                            style={{ backgroundColor: t.primary }}
+                          />
+                          <span
+                            className="size-3.5 rounded-full border border-white/20"
+                            style={{ backgroundColor: t.accent }}
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Wallpaper selection section with Hero Image */}
+              <div className="border-t border-white/10 pt-4">
+                <h4 className="text-zinc-200 font-semibold mb-2 flex items-center gap-2">
                   <FiImage className="text-primary size-4" />
-                  <span>Desktop Wallpapers</span>
+                  <span>Desktop Wallpapers (Hero Image Included)</span>
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {(Object.keys(WALLPAPERS) as WallpaperKey[]).map((key) => (
@@ -1090,13 +1326,13 @@ export const DesktopOs = () => {
                       type="button"
                       onClick={() => setWallpaper(key)}
                       style={WALLPAPERS[key].style}
-                      className={`h-20 rounded-lg border p-2 flex flex-col justify-end text-left cursor-pointer transition-all hover:scale-102 ${
+                      className={`h-22 rounded-lg border p-2 flex flex-col justify-end text-left cursor-pointer transition-all hover:scale-102 ${
                         wallpaper === key
                           ? "border-primary ring-2 ring-primary/40 shadow-lg"
                           : "border-white/10"
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
+                      <div className="flex items-center justify-between w-full bg-black/75 px-1.5 py-0.5 rounded backdrop-blur-xs">
                         <span className="text-[10px] text-zinc-100 font-medium truncate">
                           {WALLPAPERS[key].name}
                         </span>
@@ -1127,8 +1363,11 @@ export const DesktopOs = () => {
                       className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between ${
                         layoutMode === l.mode
                           ? "bg-primary/20 border-primary text-primary"
-                          : "bg-[#272220]/60 border-white/10 text-zinc-300 hover:bg-white/5"
+                          : "border-white/10 text-zinc-300 hover:bg-white/5"
                       }`}
+                      style={{
+                        backgroundColor: layoutMode === l.mode ? `${currentTheme.primary}20` : undefined,
+                      }}
                     >
                       <span>{l.label}</span>
                       <kbd className="px-1 py-0.5 rounded bg-black/40 text-[9px] text-zinc-400">
@@ -1144,7 +1383,7 @@ export const DesktopOs = () => {
                 <span className="text-zinc-200 font-semibold block">Quick Keyboard Shortcuts:</span>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div>
-                    <kbd className="text-zinc-200">Alt + Space</kbd>: Quick App Launcher
+                    <kbd className="text-zinc-200">Alt + Space</kbd>: Spotlight Launcher
                   </div>
                   <div>
                     <kbd className="text-zinc-200">Alt + Tab</kbd>: Cycle Open Windows
@@ -1156,7 +1395,7 @@ export const DesktopOs = () => {
                     <kbd className="text-zinc-200">ESC</kbd>: Close Active Window
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + 1..6</kbd>: Quick Launch Apps
+                    <kbd className="text-zinc-200">Alt + 1..7</kbd>: Quick Launch Apps
                   </div>
                   <div>
                     <kbd className="text-zinc-200">Alt + H/V/G</kbd>: Hyprland Tiling
@@ -1167,13 +1406,197 @@ export const DesktopOs = () => {
           </div>
         )}
 
+        {/* 7. Task Manager Window */}
+        {windows.taskmanager.isOpen && (
+          <div
+            style={{
+              ...getTilingStyle("taskmanager"),
+              backgroundColor: `${currentTheme.bg}F8`,
+              borderColor: currentTheme.border,
+            }}
+            onClick={() => focusWindow("taskmanager")}
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
+              windows.taskmanager.isMinimized ? "hidden" : ""
+            }`}
+          >
+            {renderTitleBar("taskmanager", "Task Manager & System Resources")}
+
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-4 font-mono text-xs">
+              {/* CPU & Memory Gauges */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-[11px]">CPU UTILIZATION</span>
+                    <span className="text-emerald-400 font-bold">{Math.round(cpuUsage)}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-400 transition-all duration-300"
+                      style={{ width: `${cpuUsage}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-[11px]">MEMORY IN USE</span>
+                    <span className="text-primary font-bold">{memUsage.toFixed(1)} GB / 16 GB</span>
+                  </div>
+                  <div className="w-full h-2 rounded bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ width: `${(memUsage / 16) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Running Processes Table */}
+              <div>
+                <h4 className="text-zinc-200 font-semibold mb-2 text-[11px]">Active Window Processes</h4>
+                <div className="border border-white/10 rounded-lg overflow-hidden">
+                  <table className="w-full text-left text-[11px]">
+                    <thead className="bg-black/60 text-zinc-400 border-b border-white/10 text-[10px]">
+                      <tr>
+                        <th className="p-2">APP / PROCESS</th>
+                        <th className="p-2">STATUS</th>
+                        <th className="p-2">MEMORY</th>
+                        <th className="p-2 text-right">ACTION</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {windowList.map((w) => (
+                        <tr key={w.id} className="hover:bg-white/5 transition-colors">
+                          <td className="p-2 flex items-center gap-2">
+                            <w.icon className="size-3.5 text-primary" />
+                            <span className="text-zinc-200 font-medium">{w.title}</span>
+                          </td>
+                          <td className="p-2">
+                            {w.isOpen ? (
+                              <span className="inline-flex items-center gap-1 text-emerald-400">
+                                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                Running
+                              </span>
+                            ) : (
+                              <span className="text-zinc-500">Stopped</span>
+                            )}
+                          </td>
+                          <td className="p-2 text-zinc-400">
+                            {w.isOpen ? `${Math.floor(Math.random() * 40 + 30)} MB` : "—"}
+                          </td>
+                          <td className="p-2 text-right">
+                            {w.isOpen ? (
+                              <button
+                                type="button"
+                                onClick={(e) => closeWindow(w.id, e)}
+                                className="px-2 py-0.5 rounded bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 text-[10px] cursor-pointer"
+                              >
+                                End Task
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => focusWindow(w.id)}
+                                className="px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/30 text-[10px] cursor-pointer"
+                              >
+                                Start
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Context Menu (Right Click) */}
+        {contextMenu.visible && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              left: `${contextMenu.x}px`,
+              top: `${contextMenu.y}px`,
+              backgroundColor: currentTheme.card,
+              borderColor: currentTheme.border,
+            }}
+            className="fixed z-50 w-48 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs text-zinc-200"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                focusWindow("terminal");
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiTerminal className="size-3.5 text-primary" />
+              <span>Open Terminal</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                focusWindow("settings");
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiSettings className="size-3.5 text-primary" />
+              <span>Change Wallpaper</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                focusWindow("taskmanager");
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiActivity className="size-3.5 text-emerald-400" />
+              <span>Task Manager</span>
+            </button>
+            <div className="my-1 border-t border-white/10" />
+            <button
+              type="button"
+              onClick={() => {
+                setLayoutMode((prev) => (prev === "tiling-grid" ? "floating" : "tiling-grid"));
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <FiGrid className="size-3.5 text-primary" />
+              <span>Toggle Tile Grid</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toggleOsMode();
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 text-red-400 cursor-pointer"
+            >
+              <FiExternalLink className="size-3.5" />
+              <span>Exit Desktop OS</span>
+            </button>
+          </div>
+        )}
+
         {/* Quick App Launcher Modal (Alt+Space / Spotlight style) */}
         {showLauncher && (
           <div
             onClick={(e) => e.stopPropagation()}
             className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/40 backdrop-blur-xs animate-in fade-in duration-100"
           >
-            <div className="w-full max-w-md rounded-2xl bg-[#272220] border border-white/20 shadow-2xl p-3 font-mono">
+            <div
+              className="w-full max-w-md rounded-2xl border shadow-2xl p-3 font-mono"
+              style={{
+                backgroundColor: currentTheme.card,
+                borderColor: currentTheme.border,
+              }}
+            >
               <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10 text-xs text-zinc-400">
                 <FiCommand className="size-4 text-primary" />
                 <span className="font-semibold text-zinc-200">Carbon App Launcher</span>
@@ -1188,6 +1611,7 @@ export const DesktopOs = () => {
                     { id: "blog", label: "Notes", icon: FiBookOpen, key: "4" },
                     { id: "resume", label: "Resume", icon: FiFileText, key: "5" },
                     { id: "settings", label: "Settings", icon: FiSettings, key: "6" },
+                    { id: "taskmanager", label: "Tasks", icon: FiActivity, key: "7" },
                   ] as const
                 ).map((app) => (
                   <button
@@ -1212,19 +1636,28 @@ export const DesktopOs = () => {
         {/* Alt+Tab Quick Switcher Overlay */}
         {showSwitcher && openWindows.length > 0 && (
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#272220]/95 border border-white/20 shadow-2xl backdrop-blur-xl">
+            <div
+              className="flex items-center gap-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-xl"
+              style={{
+                backgroundColor: `${currentTheme.card}F2`,
+                borderColor: currentTheme.border,
+              }}
+            >
               {openWindows.map((w) => (
                 <div
                   key={w.id}
                   className={`flex flex-col items-center gap-2 p-3 rounded-xl min-w-[80px] transition-all ${
                     activeWindow === w.id
-                      ? "bg-primary/20 border border-primary/50 scale-105"
+                      ? "border scale-105"
                       : "bg-white/5 border border-transparent"
                   }`}
+                  style={{
+                    backgroundColor: activeWindow === w.id ? `${currentTheme.primary}25` : undefined,
+                    borderColor: activeWindow === w.id ? currentTheme.primary : "transparent",
+                    color: activeWindow === w.id ? currentTheme.primary : "#a1a1aa",
+                  }}
                 >
-                  <w.icon
-                    className={`size-8 ${activeWindow === w.id ? "text-primary" : "text-zinc-400"}`}
-                  />
+                  <w.icon className="size-8" />
                   <span className="text-[11px] font-mono text-zinc-200 truncate max-w-[80px]">
                     {w.title.split(" ")[0]}
                   </span>
@@ -1237,7 +1670,13 @@ export const DesktopOs = () => {
 
       {/* Bottom Floating Dock */}
       <footer className="h-16 w-full flex items-center justify-center pb-2 z-50 pointer-events-auto">
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#272220]/90 border border-white/15 backdrop-blur-xl shadow-2xl">
+        <div
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border backdrop-blur-xl shadow-2xl"
+          style={{
+            backgroundColor: `${currentTheme.card}E6`,
+            borderColor: currentTheme.border,
+          }}
+        >
           {(
             [
               { id: "about", label: "About", icon: FiUser },
@@ -1246,6 +1685,7 @@ export const DesktopOs = () => {
               { id: "blog", label: "Notes", icon: FiBookOpen },
               { id: "resume", label: "Resume", icon: FiFileText },
               { id: "settings", label: "Settings", icon: FiSettings },
+              { id: "taskmanager", label: "Tasks", icon: FiActivity },
             ] as const
           ).map((item) => {
             const w = windows[item.id];
@@ -1258,18 +1698,22 @@ export const DesktopOs = () => {
                 type="button"
                 onClick={() => toggleWindow(item.id)}
                 className={`group relative flex flex-col items-center justify-center size-11 rounded-xl transition-all hover:scale-115 active:scale-95 cursor-pointer ${
-                  isFocused
-                    ? "bg-primary/20 text-primary border border-primary/40"
-                    : "hover:bg-white/10 text-zinc-300"
+                  isFocused ? "border" : "hover:bg-white/10 text-zinc-300"
                 }`}
+                style={{
+                  backgroundColor: isFocused ? `${currentTheme.primary}25` : undefined,
+                  borderColor: isFocused ? currentTheme.primary : "transparent",
+                  color: isFocused ? currentTheme.primary : undefined,
+                }}
                 title={item.label}
               >
                 <item.icon className="size-5 transition-transform group-hover:-translate-y-0.5" />
                 {isRunning && (
                   <span
-                    className={`size-1 rounded-full absolute bottom-1 ${
-                      isFocused ? "bg-primary" : "bg-zinc-400"
-                    }`}
+                    className="size-1 rounded-full absolute bottom-1"
+                    style={{
+                      backgroundColor: isFocused ? currentTheme.primary : "#a1a1aa",
+                    }}
                   />
                 )}
               </button>
