@@ -609,7 +609,7 @@ export const DesktopOs = () => {
         return;
       }
 
-      // 3. Alt+Tab / Alt+` / Alt+\: Cycle Next Open Window (with browser-safe fallbacks)
+      // 3. Alt+` / Alt+Tab: Cycle Next Open Window (with browser-safe Alt+` fallback)
       if (
         e.altKey &&
         !e.ctrlKey &&
@@ -617,9 +617,7 @@ export const DesktopOs = () => {
         (e.key === "Tab" ||
           e.code === "Tab" ||
           e.key === "`" ||
-          e.code === "Backquote" ||
-          e.key === "\\" ||
-          e.code === "Backslash")
+          e.code === "Backquote")
       ) {
         e.preventDefault();
         setShowSwitcher(true);
@@ -704,7 +702,20 @@ export const DesktopOs = () => {
         return;
       }
 
-      // 11. Quick Terminal Dropdown Toggle: Ctrl + ` or Alt + T
+      // 11. Quick Settings Shortcut: Alt+, or Alt+S
+      if (
+        e.altKey &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        (e.key === "," || e.key === "s" || e.key === "S")
+      ) {
+        e.preventDefault();
+        toggleWindow("settings");
+        return;
+      }
+
+      // 12. Quick Terminal Dropdown Toggle: Ctrl + ` or Alt + T
       if (
         ((e.ctrlKey && !e.altKey && !e.metaKey) || (e.altKey && !e.ctrlKey && !e.metaKey)) &&
         (e.key === "`" || e.code === "Backquote" || e.key === "t" || e.key === "T")
@@ -2105,7 +2116,7 @@ export const DesktopOs = () => {
                   {/* Quick Launch & Tools */}
                   <div>
                     <span className="text-[9px] uppercase tracking-wider font-semibold text-primary block mb-1">
-                      Quick Launch & Terminal
+                      Quick Launch & Tools
                     </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px]">
                       <div className="flex items-center justify-between py-0.5 border-b border-white/5">
@@ -2114,6 +2125,14 @@ export const DesktopOs = () => {
                           <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl + `</kbd>
                           <span className="text-[9px] text-zinc-500">/</span>
                           <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + T</kbd>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Open Settings</span>
+                        <div className="flex items-center gap-1">
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + ,</kbd>
+                          <span className="text-[9px] text-zinc-500">/</span>
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + S</kbd>
                         </div>
                       </div>
                       <div className="flex items-center justify-between py-0.5 border-b border-white/5">
