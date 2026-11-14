@@ -569,8 +569,13 @@ export const DesktopOs = () => {
       const isInput =
         target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
 
-      // 1. Escape key behavior: close topmost overlays/context menus or active window
+      // 1. Escape key behavior: close topmost overlays/context menus or active window (Alt+Esc disabled)
       if (e.key === "Escape") {
+        if (e.altKey) {
+          // Explicitly ignore Alt+Esc
+          e.preventDefault();
+          return;
+        }
         if (appContextMenu.visible) {
           setAppContextMenu((prev) => ({ ...prev, visible: false }));
           return;
@@ -609,13 +614,13 @@ export const DesktopOs = () => {
         return;
       }
 
-      // 3. Alt+` / Alt+Tab: Cycle Next Open Window (with browser-safe Alt+` fallback)
+      // 3. Alt+\ or Alt+`: Cycle Open Windows
       if (
         e.altKey &&
         !e.ctrlKey &&
         !e.shiftKey &&
-        (e.key === "Tab" ||
-          e.code === "Tab" ||
+        (e.key === "\\" ||
+          e.code === "Backslash" ||
           e.key === "`" ||
           e.code === "Backquote")
       ) {
@@ -2077,9 +2082,9 @@ export const DesktopOs = () => {
                       <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                         <span className="text-zinc-400">Cycle Open Windows</span>
                         <div className="flex items-center gap-1">
-                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + `</kbd>
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + \</kbd>
                           <span className="text-[9px] text-zinc-500">/</span>
-                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Tab</kbd>
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + `</kbd>
                         </div>
                       </div>
                       <div className="flex items-center justify-between py-0.5 border-b border-white/5">
