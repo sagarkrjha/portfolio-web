@@ -7,8 +7,6 @@ readTime: "4 min read"
 tags: ["Architecture", "SystemDesign", "SoftwareEngineering"]
 ---
 
-# Building a Config-Driven Developer Portfolio
-
 Developer portfolios and content-driven websites often become brittle and unmaintained because updating personal details, career timelines, or featured projects requires hunting through deeply nested presentation components.
 
 By designing a **centralized, schema-driven configuration architecture**, we cleanly decouple content and business data from visual layout layers.
@@ -17,7 +15,7 @@ By designing a **centralized, schema-driven configuration architecture**, we cle
 
 When profile records, social links, project metadata, and metrics are duplicated across landing pages, sidebars, footers, and interactive widgets, making a single update becomes error-prone and causes drift across components:
 
-```c
+```pseudocode
 // Anti-Pattern: Hardcoded data scattered across presentation modules
 render_hero_header()    => Display("Sagar Kumar Jha - Systems & Full-Stack Engineer")
 render_about_card()     => Display("Building developer tools and systems from first principles")
@@ -61,7 +59,7 @@ featured_projects:
     tags: ["TypeScript", "Storage", "Electron"]
 ```
 
-```c
+```pseudocode
 // Core Architecture: Single source of truth consumed across all presentation layers
 struct SiteConfig {
     Profile profile;

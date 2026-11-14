@@ -7,15 +7,13 @@ readTime: "6 min read"
 tags: ["Algorithms", "Performance", "Computer Science", "Systems"]
 ---
 
-# Understanding Algorithms: Space-Time Complexity in Practice
-
 Big-O notation is often treated purely as an interview topic, but understanding algorithmic complexity is critical when designing high-throughput backend pipelines, real-time databases, and responsive UI application states.
 
 ## Why Complexity Matters
 
 Consider searching through an unsorted collection versus maintaining an indexed hash map:
 
-```c
+```pseudocode
 // Linear Scan: O(N) time, O(1) auxiliary space
 function find_element(Collection items, Predicate match) {
     for (item in items) {

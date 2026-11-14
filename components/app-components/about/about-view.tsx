@@ -23,7 +23,7 @@ import { siteConfig, aboutConfig } from "@/lib/config";
 import type { DynamicProfileMetrics } from "@/lib/services/github";
 
 interface AboutViewProps {
-  metrics: DynamicProfileMetrics;
+  metrics?: DynamicProfileMetrics;
 }
 
 const getFocusArtwork = (title: string) => {
@@ -57,6 +57,9 @@ const getFocusArtwork = (title: string) => {
 };
 
 export const AboutView = ({ metrics }: AboutViewProps) => {
+  const displayRole = metrics?.role || siteConfig.role;
+  const displayBio = metrics?.bio || siteConfig.bio;
+
   return (
     <div className="py-10 max-w-3xl mx-auto space-y-12">
       {/* Intro Header */}
@@ -67,10 +70,10 @@ export const AboutView = ({ metrics }: AboutViewProps) => {
       >
         <div className="flex items-center gap-2 mb-4">
           <Badge variant="outline" className="rounded-none">About</Badge>
-          <span className="text-xs text-muted-foreground font-mono">{metrics.role}</span>
+          <span className="text-xs text-muted-foreground font-mono">{displayRole}</span>
         </div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{aboutConfig.title}</h1>
-        <p className="mt-4 text-base leading-7 text-muted-foreground">{metrics.bio}</p>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">{displayBio}</p>
 
         {/* Social / Professional links */}
         <div className="flex flex-wrap items-center gap-3 mt-6">
