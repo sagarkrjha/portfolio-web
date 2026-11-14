@@ -353,7 +353,7 @@ export const DesktopOs = () => {
   const [cpuUsage, setCpuUsage] = useState(14);
   const [memUsage, setMemUsage] = useState(2.4);
 
-  // Dragging state
+  // Dragging & Resizing state
   const dragRef = useRef<{
     windowId: WindowId | null;
     startX: number;
@@ -366,6 +366,26 @@ export const DesktopOs = () => {
     startY: 0,
     origX: 0,
     origY: 0,
+  });
+
+  const resizeRef = useRef<{
+    windowId: WindowId | null;
+    direction: "e" | "w" | "s" | "n" | "se" | "sw" | "ne" | "nw" | null;
+    startX: number;
+    startY: number;
+    origX: number;
+    origY: number;
+    origW: number;
+    origH: number;
+  }>({
+    windowId: null,
+    direction: null,
+    startX: 0,
+    startY: 0,
+    origX: 0,
+    origY: 0,
+    origW: 0,
+    origH: 0,
   });
 
   const [windows, setWindows] = useState<Record<WindowId, WindowState>>({
@@ -718,26 +738,104 @@ export const DesktopOs = () => {
     };
   };
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragRef.current.windowId) return;
-    const { windowId, startX, startY, origX, origY } = dragRef.current;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
+  // Window Resize Handlers
+  const handleMouseDownResize = (
+    e: React.MouseEvent,
+    id: WindowId,
+    direction: "e" | "w" | "s" | "n" | "se" | "sw" | "ne" | "nw",
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (layoutMode !== "floating" || windows[id].isMaximized) return;
+    focusWindow(id);
+    resizeRef.current = {
+      windowId: id,
+      direction,
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: windows[id].position.x,
+      origY: windows[id].position.y,
+      origW: windows[id].size.width,
+      origH: windows[id].size.height,
+    };
+  };
 
-    setWindows((prev) => ({
-      ...prev,
-      [windowId]: {
-        ...prev[windowId],
-        position: {
-          x: Math.max(0, origX + dx),
-          y: Math.max(0, origY + dy),
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // 1. Handle Dragging
+    if (dragRef.current.windowId) {
+      const { windowId, startX, startY, origX, origY } = dragRef.current;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      setWindows((prev) => ({
+        ...prev,
+        [windowId]: {
+          ...prev[windowId],
+          position: {
+            x: Math.max(0, origX + dx),
+            y: Math.max(0, origY + dy),
+          },
         },
-      },
-    }));
+      }));
+      return;
+    }
+
+    // 2. Handle Resizing
+    if (resizeRef.current.windowId && resizeRef.current.direction) {
+      const { windowId, direction, startX, startY, origX, origY, origW, origH } = resizeRef.current;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      const MIN_WIDTH = 340;
+      const MIN_HEIGHT = 220;
+
+      let newX = origX;
+      let newY = origY;
+      let newW = origW;
+      let newH = origH;
+
+      if (direction.includes("e")) {
+        newW = Math.max(MIN_WIDTH, origW + dx);
+      }
+      if (direction.includes("s")) {
+        newH = Math.max(MIN_HEIGHT, origH + dy);
+      }
+      if (direction.includes("w")) {
+        const potentialW = origW - dx;
+        if (potentialW >= MIN_WIDTH) {
+          newW = potentialW;
+          newX = origX + dx;
+        } else {
+          newW = MIN_WIDTH;
+          newX = origX + (origW - MIN_WIDTH);
+        }
+      }
+      if (direction.includes("n")) {
+        const potentialH = origH - dy;
+        if (potentialH >= MIN_HEIGHT) {
+          newH = potentialH;
+          newY = Math.max(0, origY + dy);
+        } else {
+          newH = MIN_HEIGHT;
+          newY = origY + (origH - MIN_HEIGHT);
+        }
+      }
+
+      setWindows((prev) => ({
+        ...prev,
+        [windowId]: {
+          ...prev[windowId],
+          position: { x: newX, y: newY },
+          size: { width: newW, height: newH },
+        },
+      }));
+    }
   }, []);
 
   const handleMouseUp = useCallback(() => {
     dragRef.current.windowId = null;
+    resizeRef.current.windowId = null;
+    resizeRef.current.direction = null;
   }, []);
 
   // Desktop Canvas Right Click Handler
@@ -793,6 +891,7 @@ export const DesktopOs = () => {
       left: `${w.position.x}px`,
       top: `${w.position.y}px`,
       width: `${w.size.width}px`,
+      height: `${w.size.height}px`,
       maxWidth: "96vw",
       maxHeight: "84vh",
       zIndex: computedZ,
@@ -809,77 +908,136 @@ export const DesktopOs = () => {
 
   // Helper renderer for Window Titlebar with fixed stop-propagation close button
   const renderTitleBar = (id: WindowId, title: string) => (
-    <div
-      onMouseDown={(e) => handleMouseDownHeader(e, id)}
-      onDoubleClick={() => toggleMaximize(id)}
-      className="flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0"
-      style={{
-        backgroundColor: isDark ? currentTheme.card : "#f4f4f4",
-        borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.1)",
-        color: isDark ? "#f4f4f4" : "#161616",
-      }}
-    >
-      <div className="flex items-center gap-2">
-        {/* Red Close Button */}
-        <button
-          type="button"
-          onClick={(e) => closeWindow(id, e)}
-          onMouseDown={(e) => e.stopPropagation()}
-          className="size-3.5 rounded-full bg-[#ff5f56] hover:brightness-125 border border-[#e0443e] cursor-pointer flex items-center justify-center group"
-          title="Close (ESC)"
-        >
-          <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
-            ✕
-          </span>
-        </button>
+    <>
+      {renderResizeHandles(id)}
+      <div
+        onMouseDown={(e) => handleMouseDownHeader(e, id)}
+        onDoubleClick={() => toggleMaximize(id)}
+        className="flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0"
+        style={{
+          backgroundColor: isDark ? currentTheme.card : "#f4f4f4",
+          borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.1)",
+          color: isDark ? "#f4f4f4" : "#161616",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          {/* Red Close Button */}
+          <button
+            type="button"
+            onClick={(e) => closeWindow(id, e)}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="size-3.5 rounded-full bg-[#ff5f56] hover:brightness-125 border border-[#e0443e] cursor-pointer flex items-center justify-center group"
+            title="Close (ESC)"
+          >
+            <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
+              ✕
+            </span>
+          </button>
 
-        {/* Yellow Minimize Button */}
-        <button
-          type="button"
-          onClick={(e) => minimizeWindow(id, e)}
-          onMouseDown={(e) => e.stopPropagation()}
-          className="size-3.5 rounded-full bg-[#ffbd2e] hover:brightness-125 border border-[#dea123] cursor-pointer flex items-center justify-center group"
-          title="Minimize"
-        >
-          <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
-            −
-          </span>
-        </button>
+          {/* Yellow Minimize Button */}
+          <button
+            type="button"
+            onClick={(e) => minimizeWindow(id, e)}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="size-3.5 rounded-full bg-[#ffbd2e] hover:brightness-125 border border-[#dea123] cursor-pointer flex items-center justify-center group"
+            title="Minimize"
+          >
+            <span className="opacity-0 group-hover:opacity-100 text-[8px] font-bold text-black/80 leading-none">
+              −
+            </span>
+          </button>
 
-        {/* Green Maximize Button */}
+          {/* Green Maximize Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleMaximize(id);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="size-3.5 rounded-full bg-[#27c93f] hover:brightness-125 border border-[#1aab29] cursor-pointer flex items-center justify-center group"
+            title="Maximize / Restore (Double Tap)"
+          >
+            <span className="opacity-0 group-hover:opacity-100 text-[7px] font-bold text-black/80 leading-none">
+              {windows[id].isMaximized ? "⤓" : "⤢"}
+            </span>
+          </button>
+        </div>
+
+        <span className={`text-xs font-semibold pointer-events-none truncate max-w-[65%] font-mono ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
+          {title}
+        </span>
+
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleMaximize(id);
-          }}
-          onMouseDown={(e) => e.stopPropagation()}
-          className="size-3.5 rounded-full bg-[#27c93f] hover:brightness-125 border border-[#1aab29] cursor-pointer flex items-center justify-center group"
-          title="Maximize / Restore (Double Tap)"
+          onClick={() => toggleMaximize(id)}
+          className={`cursor-pointer p-0.5 transition-colors ${isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-900"}`}
         >
-          <span className="opacity-0 group-hover:opacity-100 text-[7px] font-bold text-black/80 leading-none">
-            {windows[id].isMaximized ? "⤓" : "⤢"}
-          </span>
+          {windows[id].isMaximized ? (
+            <FiMinimize2 className="size-3.5" />
+          ) : (
+            <FiMaximize2 className="size-3.5" />
+          )}
         </button>
       </div>
-
-      <span className={`text-xs font-semibold pointer-events-none truncate max-w-[65%] font-mono ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
-        {title}
-      </span>
-
-      <button
-        type="button"
-        onClick={() => toggleMaximize(id)}
-        className={`cursor-pointer p-0.5 transition-colors ${isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-900"}`}
-      >
-        {windows[id].isMaximized ? (
-          <FiMinimize2 className="size-3.5" />
-        ) : (
-          <FiMaximize2 className="size-3.5" />
-        )}
-      </button>
-    </div>
+    </>
   );
+
+  // Helper renderer for Smart Window Resize Handles (Edges and Corners)
+  const renderResizeHandles = (id: WindowId) => {
+    if (layoutMode !== "floating" || windows[id].isMaximized) return null;
+
+    return (
+      <>
+        {/* Cardinal Edges */}
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "n")}
+          className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize z-30 hover:bg-primary/20 transition-colors"
+        />
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "s")}
+          className="absolute bottom-0 left-2 right-2 h-2 cursor-ns-resize z-30 hover:bg-primary/20 transition-colors"
+        />
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "w")}
+          className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize z-30 hover:bg-primary/20 transition-colors"
+        />
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "e")}
+          className="absolute top-2 bottom-2 right-0 w-2 cursor-ew-resize z-30 hover:bg-primary/20 transition-colors"
+        />
+
+        {/* Diagonal Corners */}
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "nw")}
+          className="absolute top-0 left-0 size-3 cursor-nwse-resize z-30 hover:bg-primary/30"
+        />
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "ne")}
+          className="absolute top-0 right-0 size-3 cursor-nesw-resize z-30 hover:bg-primary/30"
+        />
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "sw")}
+          className="absolute bottom-0 left-0 size-3 cursor-nesw-resize z-30 hover:bg-primary/30"
+        />
+        <div
+          onMouseDown={(e) => handleMouseDownResize(e, id, "se")}
+          className="absolute bottom-0 right-0 size-3.5 cursor-nwse-resize z-30 hover:bg-primary/40 flex items-end justify-end p-0.5 group"
+          title="Drag to resize window"
+        >
+          <svg
+            className="size-2 text-zinc-400 group-hover:text-primary transition-colors pointer-events-none"
+            viewBox="0 0 6 6"
+            fill="currentColor"
+          >
+            <circle cx="5" cy="5" r="0.8" />
+            <circle cx="5" cy="2.5" r="0.8" />
+            <circle cx="2.5" cy="5" r="0.8" />
+          </svg>
+        </div>
+      </>
+    );
+  };
 
   return (
     <div
@@ -1788,6 +1946,7 @@ export const DesktopOs = () => {
               windows.browser.isMinimized ? "hidden" : ""
             }`}
           >
+            {renderResizeHandles("browser")}
             {/* Titlebar with address bar */}
             <div
               onMouseDown={(e) => handleMouseDownHeader(e, "browser")}
