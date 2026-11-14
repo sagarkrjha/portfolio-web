@@ -79,16 +79,20 @@ export const OsProvider = ({ children }: { children: React.ReactNode }) => {
     if (isOsMode) {
       document.documentElement.classList.add("os-mode-active");
       document.body.classList.add("os-mode-active");
-      const prevOverflow = document.body.style.overflow;
+      const prevHtmlOverflow = document.documentElement.style.overflow;
+      const prevBodyOverflow = document.body.style.overflow;
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
       return () => {
         document.documentElement.classList.remove("os-mode-active");
         document.body.classList.remove("os-mode-active");
-        document.body.style.overflow = prevOverflow;
+        document.documentElement.style.overflow = prevHtmlOverflow;
+        document.body.style.overflow = prevBodyOverflow;
       };
     } else {
       document.documentElement.classList.remove("os-mode-active");
       document.body.classList.remove("os-mode-active");
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }
   }, [isOsMode]);

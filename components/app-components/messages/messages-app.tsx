@@ -1,16 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  FiSend,
-  FiUser,
-  FiSmile,
-  FiStar,
-  FiZap,
-  FiHeart,
-  FiRotateCcw,
-} from "react-icons/fi";
+import { AnimatePresence, motion } from "motion/react";
+import type React from "react";
+import { useState } from "react";
+import { FiRotateCcw, FiSend, FiStar } from "react-icons/fi";
 
 export type SequoiaTextEffect =
   | "big"
@@ -59,7 +52,6 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
   const [messages, setMessages] = useState<MessageItem[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState("");
   const [selectedEffect, setSelectedEffect] = useState<SequoiaTextEffect>("none");
-  const [showEffectPicker, setShowEffectPicker] = useState(false);
 
   const effectsList: { id: SequoiaTextEffect; label: string; previewClass: string }[] = [
     { id: "explode", label: "💥 Explode", previewClass: "text-amber-400 font-bold" },
@@ -87,7 +79,6 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
     setMessages((prev) => [...prev, newMsg]);
     setInputText("");
     setSelectedEffect("none");
-    setShowEffectPicker(false);
 
     // Simulated reply
     setTimeout(() => {
@@ -273,9 +264,13 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
   };
 
   return (
-    <div className={`flex flex-col h-full w-full select-none ${isDark ? "bg-[#18181b] text-zinc-100" : "bg-white text-zinc-900"}`}>
+    <div
+      className={`flex flex-col h-full w-full select-none ${isDark ? "bg-[#18181b] text-zinc-100" : "bg-white text-zinc-900"}`}
+    >
       {/* Header Info */}
-      <div className={`px-4 py-3 border-b flex items-center justify-between backdrop-blur-md ${isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"}`}>
+      <div
+        className={`px-4 py-3 border-b flex items-center justify-between backdrop-blur-md ${isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"}`}
+      >
         <div className="flex items-center gap-3">
           <div className="relative size-9 rounded-full bg-linear-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md font-semibold text-xs">
             SKJ
@@ -296,7 +291,9 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
           type="button"
           onClick={() => setMessages(INITIAL_MESSAGES)}
           className={`p-1.5 rounded-lg border transition-all cursor-pointer flex items-center gap-1 text-[10px] font-mono ${
-            isDark ? "hover:bg-white/10 border-white/10 text-zinc-400 hover:text-zinc-200" : "hover:bg-black/5 border-black/10 text-zinc-600 hover:text-zinc-900"
+            isDark
+              ? "hover:bg-white/10 border-white/10 text-zinc-400 hover:text-zinc-200"
+              : "hover:bg-black/5 border-black/10 text-zinc-600 hover:text-zinc-900"
           }`}
           title="Reset conversation"
         >
@@ -328,8 +325,8 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
                     isMe
                       ? "bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-br-xs"
                       : isDark
-                      ? "bg-[#27272a] text-zinc-100 rounded-bl-xs border border-white/5"
-                      : "bg-[#e4e4e7] text-zinc-900 rounded-bl-xs border border-black/5"
+                        ? "bg-[#27272a] text-zinc-100 rounded-bl-xs border border-white/5"
+                        : "bg-[#e4e4e7] text-zinc-900 rounded-bl-xs border border-black/5"
                   }`}
                 >
                   {renderAnimatedContent(msg.text, msg.effect)}
@@ -350,7 +347,9 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
       </div>
 
       {/* Effect Selector Toolbar */}
-      <div className={`px-3 py-1.5 border-t flex items-center justify-between text-[11px] ${isDark ? "border-white/10 bg-black/20" : "border-black/10 bg-zinc-50"}`}>
+      <div
+        className={`px-3 py-1.5 border-t flex items-center justify-between text-[11px] ${isDark ? "border-white/10 bg-black/20" : "border-black/10 bg-zinc-50"}`}
+      >
         <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
           <span className="text-[10px] text-zinc-400 font-mono flex items-center gap-1 mr-1">
             <FiStar className="size-3 text-amber-400" />
@@ -369,8 +368,8 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
                   active
                     ? "bg-primary text-black font-bold border-primary shadow-sm"
                     : isDark
-                    ? "border-white/10 hover:bg-white/10 text-zinc-300"
-                    : "border-black/10 hover:bg-black/5 text-zinc-700"
+                      ? "border-white/10 hover:bg-white/10 text-zinc-300"
+                      : "border-black/10 hover:bg-black/5 text-zinc-700"
                 }`}
               >
                 {eff.label}
@@ -399,8 +398,8 @@ export const MessagesApp = ({ isDark }: { isDark: boolean }) => {
               selectedEffect !== "none"
                 ? "border-primary ring-1 ring-primary/40"
                 : isDark
-                ? "bg-white/5 border-white/15 focus:border-white/30 text-zinc-100 placeholder:text-zinc-500"
-                : "bg-black/5 border-black/15 focus:border-black/30 text-zinc-900 placeholder:text-zinc-400"
+                  ? "bg-white/5 border-white/15 focus:border-white/30 text-zinc-100 placeholder:text-zinc-500"
+                  : "bg-black/5 border-black/15 focus:border-black/30 text-zinc-900 placeholder:text-zinc-400"
             }`}
           />
           {selectedEffect !== "none" && (
