@@ -41,31 +41,26 @@ const AVAILABLE_COMMANDS = [
   "exit",
 ];
 
-// ASCII Art Fox Mascot for neofetch and mascot command
+// Animated Foxy GIF Mascot for neofetch and mascot command (replaces textual ASCII)
 const FoxMascot = () => (
-  <div className="flex flex-col items-center shrink-0">
-    <div
-      style={{
-        width: "32px",
-        height: "32px",
-        backgroundImage: "url('/foxy.gif')",
-        imageRendering: "pixelated",
-        backgroundPosition: "-96px -96px",
-      }}
-      className="size-8 my-1 drop-shadow-md hover:scale-110 transition-transform cursor-pointer"
-      title="Foxy Mascot"
-    />
-    <div className="text-amber-500 font-mono text-[11px] leading-tight whitespace-pre select-none font-bold">
-      {`   /\\   /\\
-  //\\\\_//\\\\
-  \\_     _/
-   / · · \\
-  =\\_ Y _/=
-   /     \\
-  (       )
-  (_______)`}
+  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-white/10 bg-[#272220]/70 shadow-inner shrink-0 select-none">
+    <div className="relative size-20 flex items-center justify-center overflow-hidden drop-shadow-lg">
+      <div
+        style={{
+          width: "32px",
+          height: "32px",
+          backgroundImage: "url('/foxy.gif')",
+          imageRendering: "pixelated",
+          backgroundPosition: "-96px -96px",
+          transform: "scale(2.2)",
+          transformOrigin: "center center",
+        }}
+        className="shrink-0 transition-transform hover:scale-[2.5]"
+      />
     </div>
-    <div className="text-center text-[10px] text-zinc-400 font-mono mt-0.5 font-medium">[fox-mascot]</div>
+    <div className="text-center text-[10px] text-zinc-400 font-mono mt-1 font-semibold tracking-wider uppercase">
+      [foxy-mascot]
+    </div>
   </div>
 );
 
