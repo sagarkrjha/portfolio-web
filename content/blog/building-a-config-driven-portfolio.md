@@ -17,7 +17,7 @@ By designing a **centralized, schema-driven configuration architecture**, we cle
 
 When profile records, social links, project metadata, and metrics are duplicated across landing pages, sidebars, footers, and interactive widgets, making a single update becomes error-prone and causes drift across components:
 
-```c
+```pseudocode
 // Anti-Pattern: Hardcoded data scattered across presentation modules
 render_hero_header()    => Display("Sagar Kumar Jha - Systems & Full-Stack Engineer")
 render_about_card()     => Display("Building developer tools and systems from first principles")
@@ -61,7 +61,7 @@ featured_projects:
     tags: ["TypeScript", "Storage", "Electron"]
 ```
 
-```c
+```pseudocode
 // Core Architecture: Single source of truth consumed across all presentation layers
 struct SiteConfig {
     Profile profile;

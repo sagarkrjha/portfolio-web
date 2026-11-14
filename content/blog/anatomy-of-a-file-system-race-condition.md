@@ -62,7 +62,7 @@ To observe this failure mode under controlled conditions, we engineered an isola
 
 ### Language-Agnostic Pseudocode: Direct In-Place Overwrite
 
-```c
+```pseudocode
 // Naive Direct Overwrite Writer Loop
 while (keep_running) {
     byte_buffer payload = generate_payload(version++);
@@ -160,7 +160,7 @@ While POSIX systems handle `rename` gracefully even when another process holds t
 
 To build truly resilient multi-platform software, our persistence routine must wrap the atomic swap in an **exponential backoff and lock recovery loop**:
 
-```c
+```pseudocode
 // Language-Agnostic Pseudocode: Resilient Atomic Write Engine
 function atomic_write_file(string file_path, byte_buffer content) {
     string dir = dirname(file_path);
@@ -259,7 +259,7 @@ graph TD
 
 This protocol can be expressed cleanly in any programming language:
 
-```c
+```pseudocode
 // Language-Agnostic Conflict Resolution Matrix
 function merge_records(List<Record> incoming_records, List<Record> disk_records, Options options) {
     // Rule 3: Authoritative deletion prevents zombie resurrection

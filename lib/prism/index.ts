@@ -19,6 +19,15 @@ import "prismjs/components/prism-java";
 import "prismjs/components/prism-toml";
 import "prismjs/components/prism-docker";
 
+// Custom grammar for expressive pseudocode, algorithmic steps, and domain models
+if (!Prism.languages.pseudocode) {
+  Prism.languages.pseudocode = Prism.languages.extend("clike", {
+    keyword:
+      /\b(?:function|func|procedure|algorithm|struct|class|interface|type|var|let|const|val|return|returns|yield|if|then|else|elif|while|do|for|in|to|downto|step|each|repeat|until|break|continue|new|null|nil|true|false|and|or|not|xor|match|case|switch|try|catch|finally|throw|import|export|from|as|public|private|protected|static|override|virtual|abstract|final|byte_buffer|file_handle|slice|status|string|int|float|double|bool|boolean|void|Collection|Predicate|Map|Key|Value|List|Record|Options|ID|Version|HistoryEntry|Profile|Project|SkillCategory|SiteConfig)\b/i,
+    operator: /[-+*\/%&|^!=<>]=?|<<|>>|&&|\|\||=>|->|\.\./,
+  });
+}
+
 const LANGUAGE_MAP: Record<string, string> = {
   ts: "typescript",
   typescript: "typescript",
@@ -60,6 +69,10 @@ const LANGUAGE_MAP: Record<string, string> = {
   toml: "toml",
   docker: "docker",
   dockerfile: "docker",
+  pseudo: "pseudocode",
+  pseudocode: "pseudocode",
+  algorithm: "pseudocode",
+  algo: "pseudocode",
   text: "plain",
   txt: "plain",
   plain: "plain",

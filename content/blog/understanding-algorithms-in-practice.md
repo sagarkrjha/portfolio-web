@@ -15,7 +15,7 @@ Big-O notation is often treated purely as an interview topic, but understanding 
 
 Consider searching through an unsorted collection versus maintaining an indexed hash map:
 
-```c
+```pseudocode
 // Linear Scan: O(N) time, O(1) auxiliary space
 function find_element(Collection items, Predicate match) {
     for (item in items) {

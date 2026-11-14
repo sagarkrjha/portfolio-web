@@ -55,17 +55,17 @@ export function CodeBlock({
         </button>
       </div>
 
-      <div className="overflow-x-auto text-xs sm:text-sm leading-relaxed">
+      <pre className="overflow-x-auto text-xs sm:text-sm leading-relaxed m-0 p-0 font-mono">
         {highlightedHtml ? (
           <code
-            className={`language-${language} font-mono`}
+            className={`language-${language} font-mono block`}
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Prism output is safe
             dangerouslySetInnerHTML={{ __html: highlightedHtml }}
           />
         ) : (
-          <code>{code}</code>
+          <code className="font-mono block whitespace-pre">{code}</code>
         )}
-      </div>
+      </pre>
     </div>
   );
 }
