@@ -43,17 +43,29 @@ const AVAILABLE_COMMANDS = [
 
 // ASCII Art Fox Mascot for neofetch and mascot command
 const FoxMascot = () => (
-  <div className="text-amber-500 font-mono text-xs leading-snug whitespace-pre select-none font-bold shrink-0">
-    {`          /\\   /\\
-         //\\\\_//\\\\
-         \\_     _/
-          / · · \\
-         =\\_ Y _/=
-          /     \\
-         (       )
-         /   |   \\
-        (____|____)`}
-    <div className="text-center text-[10px] text-zinc-500 font-normal mt-1">[fox-mascot]</div>
+  <div className="flex flex-col items-center shrink-0">
+    <div
+      style={{
+        width: "32px",
+        height: "32px",
+        backgroundImage: "url('/foxy.gif')",
+        imageRendering: "pixelated",
+        backgroundPosition: "-96px -96px",
+      }}
+      className="size-8 my-1 drop-shadow-md hover:scale-110 transition-transform cursor-pointer"
+      title="Foxy Mascot"
+    />
+    <div className="text-amber-500 font-mono text-[11px] leading-tight whitespace-pre select-none font-bold">
+      {`   /\\   /\\
+  //\\\\_//\\\\
+  \\_     _/
+   / · · \\
+  =\\_ Y _/=
+   /     \\
+  (       )
+  (_______)`}
+    </div>
+    <div className="text-center text-[10px] text-zinc-400 font-mono mt-0.5 font-medium">[fox-mascot]</div>
   </div>
 );
 
@@ -745,12 +757,12 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
               isFullScreen
                 ? "max-w-5xl h-[92vh] sm:h-[88vh]"
                 : "max-w-2xl h-[80vh] sm:h-[520px] max-h-[580px]"
-            } rounded-xl border border-white/10 bg-[#161616]/95 text-[#f4f4f4] font-mono shadow-2xl overflow-hidden flex flex-col backdrop-blur-md animate-in zoom-in-95 duration-150 transition-[max-width,height]`}
+            } rounded-xl border border-white/10 dark:border-white/10 bg-[#1c1917]/95 text-[#f4f4f4] font-mono shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] dark:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_40px_rgba(255,255,255,0.03)] overflow-hidden flex flex-col backdrop-blur-md animate-in zoom-in-95 duration-150 transition-[max-width,height]`}
           >
             {/* Authentic macOS Terminal Window Titlebar */}
             <div
               onDoubleClick={() => setIsFullScreen((prev) => !prev)}
-              className="relative flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-[#262626]/90 select-none cursor-default shrink-0"
+              className="relative flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-[#272220]/95 select-none cursor-default shrink-0"
             >
               {/* macOS Traffic Light Buttons */}
               <div className="flex items-center gap-2 z-10">
@@ -788,12 +800,12 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
                     e.stopPropagation();
                     setIsFullScreen((prev) => !prev);
                   }}
-                  className="group/btn relative flex size-3 items-center justify-center rounded-full bg-[#27c93f] hover:brightness-95 transition-all cursor-pointer border border-[#1aab29]/80"
-                  title={isFullScreen ? "Exit Full Screen" : "Full Screen"}
-                  aria-label="Full screen"
+                  className="group/btn relative flex size-3 items-center justify-center rounded-full bg-[#27c93f] hover:brightness-110 active:scale-90 transition-all cursor-pointer border border-[#1aab29]/80 shadow-[0_0_6px_rgba(39,201,63,0.5)]"
+                  title={isFullScreen ? "Exit Full Screen" : "Full Screen (Zoom)"}
+                  aria-label={isFullScreen ? "Exit Full Screen" : "Full Screen"}
                 >
-                  <span className="opacity-0 group-hover/btn:opacity-100 text-[7px] font-bold text-black/70 leading-none select-none">
-                    ⤢
+                  <span className="opacity-0 group-hover/btn:opacity-100 text-[7px] font-bold text-black/80 leading-none select-none">
+                    {isFullScreen ? "⤓" : "⤢"}
                   </span>
                 </button>
               </div>
@@ -810,7 +822,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             </div>
 
             {/* Quick Command Action Chips */}
-            <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/5 bg-[#161616]/70 text-[11px] overflow-x-auto shrink-0">
+            <div className="flex items-center gap-1.5 px-4 py-2 border-b border-white/5 bg-[#1c1917]/70 text-[11px] overflow-x-auto shrink-0">
               <span className="text-zinc-500 shrink-0">Quick run:</span>
               {["neofetch", "about", "skills", "projects", "leetcode", "help", "clear"].map(
                 (cmd) => (
@@ -821,7 +833,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
                       e.stopPropagation();
                       handleCommand(cmd);
                     }}
-                    className="px-2 py-0.5 rounded bg-[#262626] hover:bg-[#33b1ff]/20 hover:text-[#33b1ff] text-zinc-300 transition-colors cursor-pointer font-mono shrink-0 border border-white/5"
+                    className="px-2 py-0.5 rounded bg-[#272220] hover:bg-[#33b1ff]/20 hover:text-[#33b1ff] text-zinc-300 transition-colors cursor-pointer font-mono shrink-0 border border-white/5 shadow-xs"
                   >
                     {cmd}
                   </button>
@@ -830,7 +842,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             </div>
 
             {/* Terminal Body Output (macOS zsh prompt style) */}
-            <div className="flex-1 p-4 space-y-3 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#161616]">
+            <div className="flex-1 p-4 space-y-3 overflow-y-auto min-h-0 text-xs leading-relaxed font-mono bg-[#1c1917]">
               {history.map((item, index) => (
                 <div key={index} className="space-y-1">
                   {item.command && (
@@ -853,7 +865,7 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             {/* Terminal Prompt Input Bar */}
             <form
               onSubmit={onSubmit}
-              className="flex items-center px-4 py-3 border-t border-white/5 bg-[#161616]/90 shrink-0"
+              className="flex items-center px-4 py-3 border-t border-white/5 bg-[#1c1917]/95 shrink-0"
             >
               <span className="text-[#33b1ff] font-semibold mr-1.5 sm:mr-2 text-xs select-none shrink-0">
                 <span className="hidden sm:inline">
