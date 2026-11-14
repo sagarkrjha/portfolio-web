@@ -541,13 +541,24 @@ export const DesktopOs = () => {
   const windowList = Object.values(windows);
   const openWindows = windowList.filter((w) => w.isOpen);
 
+  const switcherTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const cycleNextWindow = useCallback(() => {
-    if (openWindows.length <= 1) return;
-    const currentIndex = openWindows.findIndex((w) => w.id === activeWindow);
-    const nextIndex = (currentIndex + 1) % openWindows.length;
-    const nextId = openWindows[nextIndex].id;
+    // Collect all open windows, or auto-open top apps if none open
+    const currentOpen = Object.values(windows).filter((w) => w.isOpen);
+    if (currentOpen.length === 0) {
+      focusWindow("about");
+      return;
+    }
+    if (currentOpen.length === 1) {
+      focusWindow(currentOpen[0].id);
+      return;
+    }
+    const currentIndex = currentOpen.findIndex((w) => w.id === activeWindow);
+    const nextIndex = (currentIndex + 1) % currentOpen.length;
+    const nextId = currentOpen[nextIndex].id;
     focusWindow(nextId);
-  }, [openWindows, activeWindow, focusWindow]);
+  }, [windows, activeWindow, focusWindow]);
 
   // Global Keyboard Navigation (Carefully scoped with Alt/Option to avoid browser shortcuts)
   useEffect(() => {
@@ -598,10 +609,26 @@ export const DesktopOs = () => {
         return;
       }
 
-      // 3. Alt+Tab: Cycle Next Open Window
-      if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === "Tab") {
+      // 3. Alt+Tab / Alt+` / Alt+\: Cycle Next Open Window (with browser-safe fallbacks)
+      if (
+        e.altKey &&
+        !e.ctrlKey &&
+        !e.shiftKey &&
+        (e.key === "Tab" ||
+          e.code === "Tab" ||
+          e.key === "`" ||
+          e.code === "Backquote" ||
+          e.key === "\\" ||
+          e.code === "Backslash")
+      ) {
         e.preventDefault();
         setShowSwitcher(true);
+        if (switcherTimerRef.current) {
+          clearTimeout(switcherTimerRef.current);
+        }
+        switcherTimerRef.current = setTimeout(() => {
+          setShowSwitcher(false);
+        }, 1800);
         cycleNextWindow();
         return;
       }
@@ -680,14 +707,32 @@ export const DesktopOs = () => {
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === "Alt") {
         setShowSwitcher(false);
+        if (switcherTimerRef.current) {
+          clearTimeout(switcherTimerRef.current);
+          switcherTimerRef.current = null;
+        }
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setShowSwitcher(false);
+      if (switcherTimerRef.current) {
+        clearTimeout(switcherTimerRef.current);
+        switcherTimerRef.current = null;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
+      if (switcherTimerRef.current) {
+        clearTimeout(switcherTimerRef.current);
+        switcherTimerRef.current = null;
+      }
     };
   }, [
     isOsMode,
@@ -2005,7 +2050,11 @@ export const DesktopOs = () => {
                   </div>
                   <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                     <span className="text-zinc-400">Cycle Open Windows</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Tab</kbd>
+                    <div className="flex items-center gap-1">
+                      <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Tab</kbd>
+                      <span className="text-[9px] text-zinc-500">or</span>
+                      <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + `</kbd>
+                    </div>
                   </div>
                   <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                     <span className="text-zinc-400">Shut Down Carbon OS</span>
