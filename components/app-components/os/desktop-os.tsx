@@ -984,45 +984,46 @@ export const DesktopOs = () => {
   );
 
   // Helper renderer for Smart Window Resize Handles (Edges and Corners)
+  // Attached directly to outer perimeter without overlapping the inner scrolling track
   const renderResizeHandles = (id: WindowId) => {
     if (layoutMode !== "floating" || windows[id].isMaximized) return null;
 
     return (
-      <>
-        {/* Cardinal Edges */}
+      <div className="pointer-events-none select-none">
+        {/* Cardinal Edges: thin 4px zones strictly along outer perimeter */}
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "n")}
-          className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize z-30 hover:bg-primary/20 transition-colors"
+          className="absolute top-0 left-3 right-3 h-1 cursor-ns-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "s")}
-          className="absolute bottom-0 left-2 right-2 h-2 cursor-ns-resize z-30 hover:bg-primary/20 transition-colors"
+          className="absolute bottom-0 left-3 right-3 h-1.5 cursor-ns-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "w")}
-          className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize z-30 hover:bg-primary/20 transition-colors"
+          className="absolute top-3 bottom-3 left-0 w-1 cursor-ew-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "e")}
-          className="absolute top-2 bottom-2 right-0 w-2 cursor-ew-resize z-30 hover:bg-primary/20 transition-colors"
+          className="absolute top-3 bottom-3 right-0 w-1.5 cursor-ew-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
 
         {/* Diagonal Corners */}
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "nw")}
-          className="absolute top-0 left-0 size-3 cursor-nwse-resize z-30 hover:bg-primary/30"
+          className="absolute top-0 left-0 size-3 cursor-nwse-resize z-40 pointer-events-auto hover:bg-primary/40"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "ne")}
-          className="absolute top-0 right-0 size-3 cursor-nesw-resize z-30 hover:bg-primary/30"
+          className="absolute top-0 right-0 size-3 cursor-nesw-resize z-40 pointer-events-auto hover:bg-primary/40"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "sw")}
-          className="absolute bottom-0 left-0 size-3 cursor-nesw-resize z-30 hover:bg-primary/30"
+          className="absolute bottom-0 left-0 size-3.5 cursor-nesw-resize z-40 pointer-events-auto hover:bg-primary/40"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "se")}
-          className="absolute bottom-0 right-0 size-3.5 cursor-nwse-resize z-30 hover:bg-primary/40 flex items-end justify-end p-0.5 group"
+          className="absolute bottom-0 right-0 size-4 cursor-nwse-resize z-40 pointer-events-auto hover:bg-primary/50 flex items-end justify-end p-0.5 group"
           title="Drag to resize window"
         >
           <svg
@@ -1035,7 +1036,7 @@ export const DesktopOs = () => {
             <circle cx="2.5" cy="5" r="0.8" />
           </svg>
         </div>
-      </>
+      </div>
     );
   };
 
