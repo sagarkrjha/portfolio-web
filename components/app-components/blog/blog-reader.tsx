@@ -191,8 +191,9 @@ function renderMarkdownContent(content: string, postTitle?: string) {
   return parts.map((part, index) => {
     if (part.startsWith("```") && part.endsWith("```")) {
       const firstLineEnd = part.indexOf("\n");
-      const lang = part.slice(3, firstLineEnd).trim();
-      const code = part.slice(firstLineEnd + 1, -3);
+      const lang = (firstLineEnd !== -1 ? part.slice(3, firstLineEnd) : "").trim().toLowerCase();
+      const rawCode = firstLineEnd !== -1 ? part.slice(firstLineEnd + 1, -3) : part.slice(3, -3);
+      const code = rawCode.replace(/^\r?\n/, "").replace(/\r?\n\s*$/, "");
 
       if (lang === "mermaid") {
         return (

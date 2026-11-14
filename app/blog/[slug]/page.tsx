@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/services/blog";
 import { highlightCode } from "@/lib/prism";
 import { Mermaid } from "@/components/ui/mermaid";
+import { CodeBlock } from "@/components/blog/code-block";
+import { TableOfContents, type HeadingItem } from "@/components/blog/table-of-contents";
 import React from "react";
 
 interface BlogPostPageProps {
@@ -157,8 +159,9 @@ function renderMarkdownContent(content: string, postTitle?: string) {
   return parts.map((part, index) => {
     if (part.startsWith("```") && part.endsWith("```")) {
       const firstLineEnd = part.indexOf("\n");
-      const lang = part.slice(3, firstLineEnd).trim();
-      const code = part.slice(firstLineEnd + 1, -3);
+      const lang = (firstLineEnd !== -1 ? part.slice(3, firstLineEnd) : "").trim().toLowerCase();
+      const rawCode = firstLineEnd !== -1 ? part.slice(firstLineEnd + 1, -3) : part.slice(3, -3);
+      const code = rawCode.replace(/^\r?\n/, "").replace(/\r?\n\s*$/, "");
 
       if (lang === "mermaid") {
         return <Mermaid key={index} chart={code} />;
@@ -167,20 +170,13 @@ function renderMarkdownContent(content: string, postTitle?: string) {
       const { highlightedHtml, language } = highlightCode(code, lang);
 
       return (
-        <pre
+        <CodeBlock
           key={index}
-          className="my-5 overflow-x-auto rounded-lg border border-border bg-muted/60 p-4 font-mono text-xs sm:text-sm leading-relaxed text-foreground"
-        >
-          {highlightedHtml ? (
-            <code
-              className={`language-${language} font-mono`}
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: Prism output is safe
-              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-            />
-          ) : (
-            <code>{code}</code>
-          )}
-        </pre>
+          code={code}
+          lang={lang}
+          highlightedHtml={highlightedHtml}
+          language={language}
+        />
       );
     }
 
@@ -213,22 +209,36 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             );
           }
           if (trimmed.startsWith("## ")) {
+            const h2Text = trimmed.replace("## ", "").trim();
+            const headingId = h2Text
+              .replace(/[`*]/g, "")
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, "")
+              .replace(/\s+/g, "-");
             return (
               <h2
                 key={pIdx}
-                className="text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-border pb-2"
+                id={headingId}
+                className="scroll-mt-24 text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-border pb-2"
               >
-                {renderInlineFormatted(trimmed.replace("## ", ""))}
+                {renderInlineFormatted(h2Text)}
               </h2>
             );
           }
           if (trimmed.startsWith("### ")) {
+            const h3Text = trimmed.replace("### ", "").trim();
+            const headingId = h3Text
+              .replace(/[`*]/g, "")
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, "")
+              .replace(/\s+/g, "-");
             return (
               <h3
                 key={pIdx}
-                className="text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2 text-foreground"
+                id={headingId}
+                className="scroll-mt-24 text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2 text-foreground"
               >
-                {renderInlineFormatted(trimmed.replace("### ", ""))}
+                {renderInlineFormatted(h3Text)}
               </h3>
             );
           }
@@ -525,6 +535,22 @@ function renderMarkdownContent(content: string, postTitle?: string) {
   });
 }
 
+// Extract table of contents headings from raw markdown content
+function extractHeadings(content: string): HeadingItem[] {
+  const list: HeadingItem[] = [];
+  const lines = content.split("\n");
+  for (const line of lines) {
+    const match = line.match(/^(#{2,3})\s+(.*)$/);
+    if (match) {
+      const level = match[1].length;
+      const text = match[2].trim().replace(/[`*]/g, "");
+      const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+      list.push({ id, text, level });
+    }
+  }
+  return list;
+}
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -533,43 +559,56 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  return (
-    <article className="py-10 max-w-3xl mx-auto">
-      <div className="mb-8">
-        <Link
-          href="/blog"
-          className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 mb-6"
-        >
-          ← Back to all posts
-        </Link>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-          <time dateTime={post.meta.date}>{post.meta.date}</time>
-          <span>•</span>
-          <span>{post.meta.readTime}</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          {post.meta.title}
-        </h1>
-        {post.meta.subtitle && (
-          <p className="mt-3 text-lg sm:text-xl text-muted-foreground font-normal leading-relaxed">
-            {post.meta.subtitle}
-          </p>
-        )}
-        <div className="flex flex-wrap gap-1.5 mt-4">
-          {post.meta.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded text-muted-foreground"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
+  const headings = extractHeadings(post.content);
 
-      <div className="border-t pt-8 space-y-4">
-        {renderMarkdownContent(post.content, post.meta.title)}
+  return (
+    <div className="py-10 max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="flex gap-12 justify-center">
+        {/* Main Article Container */}
+        <article className="max-w-3xl w-full">
+          <div className="mb-8">
+            <Link
+              href="/blog"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 mb-6"
+            >
+              ← Back to all posts
+            </Link>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+              <time dateTime={post.meta.date}>{post.meta.date}</time>
+              <span>•</span>
+              <span>{post.meta.readTime}</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              {post.meta.title}
+            </h1>
+            {post.meta.subtitle && (
+              <p className="mt-3 text-lg sm:text-xl text-muted-foreground font-normal leading-relaxed">
+                {post.meta.subtitle}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-1.5 mt-4">
+              {post.meta.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded text-muted-foreground"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Mobile / Tablet Collapsible Outline */}
+            <TableOfContents headings={headings} variant="mobile" />
+          </div>
+
+          <div className="border-t pt-8 space-y-4">
+            {renderMarkdownContent(post.content, post.meta.title)}
+          </div>
+        </article>
+
+        {/* Desktop Sticky Table of Contents Sidebar */}
+        <TableOfContents headings={headings} variant="desktop" />
       </div>
-    </article>
+    </div>
   );
 }
