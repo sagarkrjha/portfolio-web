@@ -57,6 +57,7 @@ export type WindowId =
   | "terminal"
   | "projects"
   | "blog"
+  | "reader"
   | "resume"
   | "settings"
   | "taskmanager"
@@ -434,6 +435,17 @@ export const DesktopOs = () => {
       position: { x: 160, y: 50 },
       size: { width: 700, height: 520 },
     },
+    reader: {
+      id: "reader",
+      title: "Article Reader (Markdown)",
+      icon: FiFileText,
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      zIndex: 45,
+      position: { x: 90, y: 30 },
+      size: { width: 880, height: 620 },
+    },
     resume: {
       id: "resume",
       title: "Resume (PDF)",
@@ -484,6 +496,10 @@ export const DesktopOs = () => {
   const [browserUrl, setBrowserUrl] = useState("https://sagarkrjha.vercel.app");
   const [browserTitle, setBrowserTitle] = useState("Live Project Demo");
   const [inputUrl, setInputUrl] = useState("https://sagarkrjha.vercel.app");
+
+  // Separate dedicated Reader Window state
+  const [activeArticleSlug, setActiveArticleSlug] = useState<string>("dsa-sheet-2027");
+  const [activeArticleTitle, setActiveArticleTitle] = useState<string>("Data Structures & Algorithmic Patterns");
 
 
   // Clock & system metrics jitter
@@ -538,6 +554,12 @@ export const DesktopOs = () => {
     setInputUrl(url);
     if (title) setBrowserTitle(title);
     focusWindow("browser");
+  }, [focusWindow]);
+
+  const openInReader = useCallback((slug: string, title: string) => {
+    setActiveArticleSlug(slug);
+    setActiveArticleTitle(title);
+    focusWindow("reader");
   }, [focusWindow]);
 
   const toggleMaximize = useCallback((id: WindowId) => {
@@ -670,16 +692,18 @@ export const DesktopOs = () => {
       // Only check non-input shortcuts below
       if (isInput) return;
 
-      // 4. Alt + 1..7: Quick App Launcher shortcuts
+      // 4. Alt + 1..9: Quick App Launcher shortcuts
       if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
         const appKeys: Record<string, WindowId> = {
           "1": "about",
           "2": "terminal",
           "3": "projects",
           "4": "blog",
-          "5": "resume",
-          "6": "settings",
-          "7": "taskmanager",
+          "5": "reader",
+          "6": "resume",
+          "7": "settings",
+          "8": "taskmanager",
+          "9": "browser",
         };
         if (appKeys[e.key]) {
           e.preventDefault();
@@ -1371,10 +1395,11 @@ export const DesktopOs = () => {
                 { id: "terminal", label: "Terminal.app", icon: FiTerminal, key: "2" },
                 { id: "projects", label: "Projects.app", icon: FiFolder, key: "3" },
                 { id: "blog", label: "Notes.app", icon: FiBookOpen, key: "4" },
-                { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "5" },
-                { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
-                { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "7" },
-                { id: "browser", label: "Browser.app", icon: FiGlobe, key: "8" },
+                { id: "reader", label: "Reader.app", icon: FiFileText, key: "5" },
+                { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "6" },
+                { id: "settings", label: "Settings.app", icon: FiSettings, key: "7" },
+                { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "8" },
+                { id: "browser", label: "Browser.app", icon: FiGlobe, key: "9" },
               ] as const
             )
               .filter((item) => desktopApps.includes(item.id))
@@ -1632,7 +1657,7 @@ export const DesktopOs = () => {
               {blogConfig.posts.map((article) => (
                 <div
                   key={article.slug}
-                  onClick={() => openInBrowser(`/blog/${article.slug}`, `${article.title} — Reader`)}
+                  onClick={() => openInReader(article.slug, article.title)}
                   className="block p-3.5 rounded-lg border hover:border-primary/50 transition-colors group cursor-pointer"
                   style={{
                     backgroundColor: isDark ? `${currentTheme.card}CC` : "rgba(255, 255, 255, 0.9)",
@@ -1674,11 +1699,32 @@ export const DesktopOs = () => {
                       </div>
                     </div>
                     <span className="text-[10px] text-primary group-hover:underline flex items-center gap-1 font-medium">
-                      Open in Browser <FiExternalLink className="size-2.5" />
+                      Open in Reader <FiExternalLink className="size-2.5" />
                     </span>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dedicated Article Reader Window (VS Code Style) */}
+        {windows.reader.isOpen && (
+          <div
+            style={{
+              ...getWindowStyle("reader"),
+              backgroundColor: isDark ? "#181514FA" : "#ffffffFA",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.15)",
+            }}
+            onClick={() => focusWindow("reader")}
+            className={`flex flex-col rounded-xl border shadow-[0_30px_90px_-10px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden ${
+              windows.reader.isMinimized ? "hidden" : ""
+            }`}
+          >
+            {renderTitleBar("reader", `${activeArticleTitle} — Markdown Reader`)}
+
+            <div className="flex-1 overflow-hidden">
+              <BlogReaderView slug={activeArticleSlug} isDark={isDark} />
             </div>
           </div>
         )}
@@ -2080,25 +2126,16 @@ export const DesktopOs = () => {
               </div>
             </div>
 
-            {/* Embedded Live View / Native Reader / External IFrame */}
-            <div className={`flex-1 w-full h-full min-h-[420px] relative overflow-y-auto ${
-              isDark ? "bg-[#181514] text-zinc-100" : "bg-white text-zinc-900"
-            }`}>
-              {browserUrl.startsWith("/blog/") ? (
-                <BlogReaderView
-                  slug={browserUrl.replace(/^\/blog\//, "").split("?")[0]}
-                  isDark={isDark}
-                />
-              ) : (
-                <iframe
-                  key={browserUrl}
-                  src={browserUrl}
-                  title={browserTitle}
-                  className="w-full h-full border-0 absolute inset-0 bg-white"
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-                  loading="lazy"
-                />
-              )}
+            {/* Embedded Live View / External IFrame */}
+            <div className="flex-1 w-full h-full min-h-[420px] relative bg-white">
+              <iframe
+                key={browserUrl}
+                src={browserUrl}
+                title={browserTitle}
+                className="w-full h-full border-0 absolute inset-0 bg-white"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+                loading="lazy"
+              />
             </div>
           </div>
         )}

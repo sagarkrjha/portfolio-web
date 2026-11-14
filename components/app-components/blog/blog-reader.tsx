@@ -1,8 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { FiClock, FiCalendar, FiTag, FiExternalLink, FiLoader, FiAlertCircle } from "react-icons/fi";
+import {
+  FiClock,
+  FiCalendar,
+  FiTag,
+  FiExternalLink,
+  FiLoader,
+  FiAlertCircle,
+  FiCode,
+  FiEye,
+  FiList,
+  FiCopy,
+  FiCheck,
+  FiFileText,
+  FiBookmark,
+  FiShare2,
+} from "react-icons/fi";
 import { highlightCode } from "@/lib/prism";
 import { Mermaid } from "@/components/ui/mermaid";
 
@@ -22,6 +37,12 @@ interface BlogPostData {
 interface BlogReaderViewProps {
   slug: string;
   isDark: boolean;
+}
+
+interface HeadingItem {
+  id: string;
+  text: string;
+  level: number;
 }
 
 // Format LaTeX math expressions cleanly into readable text and symbols
@@ -115,6 +136,50 @@ function renderInlineFormatted(text: string): React.ReactNode {
   });
 }
 
+function CodeBlockWithCopy({ code, lang }: { code: string; lang: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const { highlightedHtml, language } = highlightCode(code, lang);
+
+  return (
+    <div className="relative my-5 rounded-lg border border-black/10 dark:border-white/10 bg-[#1e1e1e] text-zinc-100 overflow-hidden font-mono shadow-md group">
+      {/* VS Code editor file/tab header */}
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-b border-black/20 text-[11px] text-zinc-400 select-none">
+        <span className="flex items-center gap-1.5 font-mono uppercase font-semibold text-[10px] text-zinc-300">
+          <FiCode className="size-3 text-primary" />
+          {lang || "code"}
+        </span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-[10px]"
+          title="Copy code snippet"
+        >
+          {copied ? <FiCheck className="size-3 text-emerald-400" /> : <FiCopy className="size-3" />}
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </button>
+      </div>
+
+      <div className="p-4 overflow-x-auto text-xs sm:text-sm leading-relaxed">
+        {highlightedHtml ? (
+          <code
+            className={`language-${language} font-mono`}
+            dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+          />
+        ) : (
+          <code>{code}</code>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function renderMarkdownContent(content: string, postTitle?: string) {
   const parts = content.split(/(```[\s\S]*?```)/g);
 
@@ -125,26 +190,20 @@ function renderMarkdownContent(content: string, postTitle?: string) {
       const code = part.slice(firstLineEnd + 1, -3);
 
       if (lang === "mermaid") {
-        return <Mermaid key={index} chart={code} />;
+        return (
+          <div key={index} className="my-6 rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#1a1817] p-4 shadow-sm overflow-x-auto">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-black/5 dark:border-white/5 text-[11px] font-mono opacity-70">
+              <span className="flex items-center gap-1.5 font-semibold text-primary">
+                <FiEye className="size-3" />
+                Mermaid Diagram Preview
+              </span>
+            </div>
+            <Mermaid chart={code} />
+          </div>
+        );
       }
 
-      const { highlightedHtml, language } = highlightCode(code, lang);
-
-      return (
-        <pre
-          key={index}
-          className="my-5 overflow-x-auto rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/50 p-4 font-mono text-xs sm:text-sm leading-relaxed"
-        >
-          {highlightedHtml ? (
-            <code
-              className={`language-${language} font-mono`}
-              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-            />
-          ) : (
-            <code>{code}</code>
-          )}
-        </pre>
-      );
+      return <CodeBlockWithCopy key={index} code={code} lang={lang} />;
     }
 
     const paragraphs = part.split(/\n\n+/);
@@ -210,9 +269,12 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             return (
               <div
                 key={pIdx}
-                className="my-4 py-3 px-4 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-center font-mono text-sm sm:text-base overflow-x-auto"
+                className="my-5 py-4 px-5 rounded-lg bg-black/5 dark:bg-[#1a1716] border border-primary/20 text-center font-mono text-sm sm:text-base overflow-x-auto shadow-inner"
               >
-                {formattedExpr}
+                <div className="text-[10px] uppercase font-mono text-primary/70 mb-1 text-left select-none">
+                  Mathematical Notation (LaTeX)
+                </div>
+                <div className="py-1">{formattedExpr}</div>
               </div>
             );
           }
@@ -259,6 +321,76 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             );
           }
 
+          // Process tables
+          if (trimmed.includes("|") && trimmed.split("\n").length >= 2) {
+            const tableLines = trimmed.split("\n").filter((l) => l.trim().startsWith("|") && l.trim().endsWith("|"));
+            if (tableLines.length >= 2) {
+              const parseRowCells = (rowStr: string): string[] => {
+                const trimmedRow = rowStr.trim();
+                const inner = trimmedRow.startsWith("|") && trimmedRow.endsWith("|")
+                  ? trimmedRow.slice(1, -1)
+                  : trimmedRow;
+                const cells: string[] = [];
+                let current = "";
+                let inCode = false;
+                for (let i = 0; i < inner.length; i++) {
+                  const ch = inner[i];
+                  if (ch === "`") {
+                    inCode = !inCode;
+                    current += ch;
+                  } else if (ch === "\\" && i + 1 < inner.length && inner[i + 1] === "|") {
+                    current += "|";
+                    i++;
+                  } else if (ch === "|" && !inCode) {
+                    cells.push(current.trim());
+                    current = "";
+                  } else {
+                    current += ch;
+                  }
+                }
+                cells.push(current.trim());
+                return cells;
+              };
+
+              const headerLine = tableLines[0];
+              const delimiterLine = tableLines[1];
+              if (delimiterLine.includes("---")) {
+                const headerCells = parseRowCells(headerLine);
+                const bodyLines = tableLines.slice(2);
+
+                return (
+                  <div key={pIdx} className="my-6 overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10 font-semibold">
+                        <tr>
+                          {headerCells.map((h, hIdx) => (
+                            <th key={hIdx} className="px-4 py-2.5">
+                              {renderInlineFormatted(h)}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-black/5 dark:divide-white/5">
+                        {bodyLines.map((row, rIdx) => {
+                          const cells = parseRowCells(row);
+                          return (
+                            <tr key={rIdx} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                              {cells.map((cell, cIdx) => (
+                                <td key={cIdx} className="px-4 py-2 opacity-90 align-top">
+                                  {renderInlineFormatted(cell)}
+                                </td>
+                              ))}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              }
+            }
+          }
+
           return (
             <p key={pIdx} className="text-sm sm:text-base leading-7 opacity-90">
               {renderInlineFormatted(trimmed)}
@@ -274,6 +406,8 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"preview" | "raw">("preview");
+  const [showToc, setShowToc] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -303,11 +437,28 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
     };
   }, [slug]);
 
+  // Extract table of contents headings
+  const headings = useMemo<HeadingItem[]>(() => {
+    if (!post?.content) return [];
+    const list: HeadingItem[] = [];
+    const lines = post.content.split("\n");
+    for (const line of lines) {
+      const match = line.match(/^(#{2,3})\s+(.*)$/);
+      if (match) {
+        const level = match[1].length;
+        const text = match[2].trim().replace(/[`*]/g, "");
+        const id = text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+        list.push({ id, text, level });
+      }
+    }
+    return list;
+  }, [post?.content]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[380px] space-y-3 font-mono text-xs opacity-75">
         <FiLoader className="size-6 animate-spin text-primary" />
-        <p>Loading article content...</p>
+        <p>Loading article & compiling markdown AST...</p>
       </div>
     );
   }
@@ -332,48 +483,152 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
   }
 
   return (
-    <article className="p-6 sm:p-10 max-w-3xl mx-auto space-y-8 select-text">
-      {/* Article Header */}
-      <div className="space-y-4 border-b border-black/10 dark:border-white/10 pb-6">
-        <div className="flex flex-wrap items-center gap-3 font-mono text-xs opacity-75">
-          <span className="flex items-center gap-1">
-            <FiCalendar className="size-3 text-primary" />
-            {post.meta.date}
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <FiClock className="size-3 text-primary" />
-            {post.meta.readTime}
-          </span>
+    <div className="flex flex-col h-full select-text">
+      {/* VS Code like Editor / Markdown Header Bar */}
+      <div className={`flex items-center justify-between px-4 py-2 border-b select-none shrink-0 text-xs font-mono ${
+        isDark ? "bg-[#1f1c1a] border-white/10 text-zinc-300" : "bg-[#f5f5f5] border-black/10 text-zinc-700"
+      }`}>
+        <div className="flex items-center gap-2 truncate">
+          <FiFileText className="size-3.5 text-primary" />
+          <span className="font-semibold truncate">{post.meta.slug}.md</span>
+          <span className="text-[10px] opacity-60">({post.meta.readTime})</span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {post.meta.title}
-        </h1>
+        <div className="flex items-center gap-1.5">
+          {/* Toggle Outline / Table of Contents */}
+          {headings.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowToc((prev) => !prev)}
+              className={`flex items-center gap-1 px-2 py-0.8 rounded text-[11px] transition-colors cursor-pointer border ${
+                showToc
+                  ? "bg-primary/20 text-primary border-primary/40 font-semibold"
+                  : "hover:bg-black/5 dark:hover:bg-white/10 border-transparent"
+              }`}
+              title="Toggle Table of Contents"
+            >
+              <FiList className="size-3" />
+              <span>Outline ({headings.length})</span>
+            </button>
+          )}
 
-        {post.meta.subtitle && (
-          <p className="text-sm sm:text-base opacity-80 leading-relaxed font-normal">
-            {post.meta.subtitle}
-          </p>
+          {/* Toggle Markdown Preview vs Raw Source */}
+          <div className="flex items-center rounded border border-black/10 dark:border-white/10 overflow-hidden text-[11px]">
+            <button
+              type="button"
+              onClick={() => setViewMode("preview")}
+              className={`flex items-center gap-1 px-2.5 py-0.8 transition-colors cursor-pointer ${
+                viewMode === "preview"
+                  ? "bg-primary text-black font-bold"
+                  : "hover:bg-black/5 dark:hover:bg-white/10 opacity-70"
+              }`}
+            >
+              <FiEye className="size-3" />
+              <span>Preview</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("raw")}
+              className={`flex items-center gap-1 px-2.5 py-0.8 transition-colors cursor-pointer ${
+                viewMode === "raw"
+                  ? "bg-primary text-black font-bold"
+                  : "hover:bg-black/5 dark:hover:bg-white/10 opacity-70"
+              }`}
+            >
+              <FiCode className="size-3" />
+              <span>Source</span>
+            </button>
+          </div>
+
+          <a
+            href={`/blog/${slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1 hover:text-primary transition-colors ml-1"
+            title="Open in new external browser tab"
+          >
+            <FiExternalLink className="size-3.5" />
+          </a>
+        </div>
+      </div>
+
+      {/* Main Content Area: Split View when Outline is active */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Table of Contents sidebar */}
+        {showToc && headings.length > 0 && viewMode === "preview" && (
+          <aside className={`w-56 shrink-0 border-r p-3 overflow-y-auto space-y-1 text-xs select-none ${
+            isDark ? "bg-[#181514] border-white/5" : "bg-[#fbfbfb] border-black/5"
+          }`}>
+            <span className="text-[10px] font-mono uppercase font-bold text-primary block mb-2 px-1">
+              Table of Contents
+            </span>
+            {headings.map((h, i) => (
+              <div
+                key={i}
+                className={`truncate py-1 px-1.5 rounded hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-[11px] ${
+                  h.level === 3 ? "pl-4 opacity-80" : "font-medium"
+                }`}
+                title={h.text}
+              >
+                {h.text}
+              </div>
+            ))}
+          </aside>
         )}
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5 pt-2">
-          {post.meta.tags.map((t) => (
-            <span
-              key={t}
-              className="px-2 py-0.5 rounded text-[11px] font-mono border border-primary/30 bg-primary/10 text-primary font-medium"
-            >
-              {t}
-            </span>
-          ))}
+        {/* Article Body */}
+        <div className="flex-1 overflow-y-auto p-6 sm:p-10">
+          {viewMode === "raw" ? (
+            <pre className="font-mono text-xs leading-relaxed whitespace-pre-wrap select-text opacity-90">
+              {post.content}
+            </pre>
+          ) : (
+            <article className="max-w-3xl mx-auto space-y-8 select-text">
+              {/* Article Header */}
+              <div className="space-y-4 border-b border-black/10 dark:border-white/10 pb-6">
+                <div className="flex flex-wrap items-center gap-3 font-mono text-xs opacity-75">
+                  <span className="flex items-center gap-1">
+                    <FiCalendar className="size-3 text-primary" />
+                    {post.meta.date}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <FiClock className="size-3 text-primary" />
+                    {post.meta.readTime}
+                  </span>
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  {post.meta.title}
+                </h1>
+
+                {post.meta.subtitle && (
+                  <p className="text-sm sm:text-base opacity-80 leading-relaxed font-normal">
+                    {post.meta.subtitle}
+                  </p>
+                )}
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {post.meta.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="px-2 py-0.5 rounded text-[11px] font-mono border border-primary/30 bg-primary/10 text-primary font-medium"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Rendered Markdown Body */}
+              <div className="space-y-5 leading-relaxed text-sm sm:text-base">
+                {renderMarkdownContent(post.content, post.meta.title)}
+              </div>
+            </article>
+          )}
         </div>
       </div>
-
-      {/* Article Body */}
-      <div className="space-y-5 leading-relaxed text-sm sm:text-base">
-        {renderMarkdownContent(post.content, post.meta.title)}
-      </div>
-    </article>
+    </div>
   );
 };
