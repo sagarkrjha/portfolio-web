@@ -233,22 +233,28 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             );
           }
           if (trimmed.startsWith("## ")) {
+            const h2Text = trimmed.replace("## ", "").trim();
+            const headingId = h2Text.replace(/[`*]/g, "").toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
             return (
               <h2
                 key={pIdx}
-                className="text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-black/10 dark:border-white/10 pb-2"
+                id={headingId}
+                className="scroll-mt-6 text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-black/10 dark:border-white/10 pb-2"
               >
-                {renderInlineFormatted(trimmed.replace("## ", ""))}
+                {renderInlineFormatted(h2Text)}
               </h2>
             );
           }
           if (trimmed.startsWith("### ")) {
+            const h3Text = trimmed.replace("### ", "").trim();
+            const headingId = h3Text.replace(/[`*]/g, "").toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
             return (
               <h3
                 key={pIdx}
-                className="text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2"
+                id={headingId}
+                className="scroll-mt-6 text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2"
               >
-                {renderInlineFormatted(trimmed.replace("### ", ""))}
+                {renderInlineFormatted(h3Text)}
               </h3>
             );
           }
@@ -375,11 +381,18 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                           const cells = parseRowCells(row);
                           return (
                             <tr key={rIdx} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                              {cells.map((cell, cIdx) => (
-                                <td key={cIdx} className="px-4 py-2 opacity-90 align-top">
-                                  {renderInlineFormatted(cell)}
-                                </td>
-                              ))}
+                              {cells.map((cell, cIdx) => {
+                                const subLines = cell.split(/<br\s*\/?>/i);
+                                return (
+                                  <td key={cIdx} className="px-4 py-2 opacity-90 align-top">
+                                    {subLines.map((sub, sIdx) => (
+                                      <div key={sIdx} className={sIdx > 0 ? "mt-1.5" : ""}>
+                                        {renderInlineFormatted(sub.trim())}
+                                      </div>
+                                    ))}
+                                  </td>
+                                );
+                              })}
                             </tr>
                           );
                         })}
@@ -391,11 +404,94 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             }
           }
 
-          return (
-            <p key={pIdx} className="text-sm sm:text-base leading-7 opacity-90">
-              {renderInlineFormatted(trimmed)}
-            </p>
-          );
+          // Process line-by-line for structured content (nested lists, numbered steps, bullets, checkboxes, embedded math)
+          const rawLines = trimmed.split("\n");
+          const hasListItems = rawLines.some((l) => /^\s*(\*|-|\d+\.|- \[[ xX]\])\s/.test(l));
+
+          if (hasListItems) {
+            return (
+              <div key={pIdx} className="space-y-2 my-3 text-sm sm:text-base opacity-90">
+                {rawLines.map((line, lIdx) => {
+                  const lineTrimmed = line.trim();
+                  if (!lineTrimmed) return null;
+
+                  // Block math within a list block:
+                  if (lineTrimmed.startsWith("$$") && lineTrimmed.endsWith("$$")) {
+                    const rawExpr = lineTrimmed.slice(2, -2).trim();
+                    const formattedExpr = formatMathExpression(rawExpr);
+                    return (
+                      <div
+                        key={lIdx}
+                        className="my-2 py-2 px-3 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-center font-mono text-sm sm:text-base overflow-x-auto mx-4"
+                      >
+                        {formattedExpr}
+                      </div>
+                    );
+                  }
+
+                  const isSubItem = /^\s{4,}/.test(line) || /^\t+/.test(line);
+                  const isChecklist = /^\s*[-*]\s\[([ xX])\]\s/.test(line);
+                  const isBullet = /^\s*[-*]\s/.test(line);
+                  const isNumbered = /^\s*\d+\.\s/.test(line);
+
+                  if (isChecklist) {
+                    const checked = /\[[xX]\]/.test(lineTrimmed);
+                    const cleanText = lineTrimmed.replace(/^[-*]\s\[([ xX])\]\s+/, "");
+                    return (
+                      <div key={lIdx} className="flex items-start gap-2.5 pt-1">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          readOnly
+                          className="mt-1 h-3.5 w-3.5 rounded accent-primary pointer-events-none"
+                        />
+                        <div className="leading-relaxed flex-1">
+                          {renderInlineFormatted(cleanText)}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (isNumbered) {
+                    const cleanText = lineTrimmed.replace(/^\d+\.\s+/, "");
+                    return (
+                      <div key={lIdx} className="flex items-start gap-2 pt-2 first:pt-0">
+                        <span className="font-semibold text-primary shrink-0 select-none">
+                          {lineTrimmed.match(/^\d+\./)?.[0]}
+                        </span>
+                        <div className="leading-relaxed flex-1">
+                          {renderInlineFormatted(cleanText)}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (isBullet) {
+                    const cleanText = lineTrimmed.replace(/^[-*]\s+/, "");
+                    return (
+                      <div
+                        key={lIdx}
+                        className={`flex items-start gap-2.5 ${isSubItem ? "pl-5 opacity-90" : "pt-1"}`}
+                      >
+                        <span className="text-primary mt-1.5 text-[8px] leading-none select-none">
+                          {isSubItem ? "○" : "●"}
+                        </span>
+                        <div className="leading-relaxed flex-1">
+                          {renderInlineFormatted(cleanText)}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={lIdx} className="leading-relaxed pl-5">
+                      {renderInlineFormatted(lineTrimmed)}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
         })}
       </div>
     );
@@ -563,15 +659,22 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
               Table of Contents
             </span>
             {headings.map((h, i) => (
-              <div
+              <button
+                type="button"
                 key={i}
-                className={`truncate py-1 px-1.5 rounded hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-[11px] ${
+                onClick={() => {
+                  const el = document.getElementById(h.id);
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                className={`w-full text-left truncate py-1 px-1.5 rounded hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-[11px] ${
                   h.level === 3 ? "pl-4 opacity-80" : "font-medium"
                 }`}
                 title={h.text}
               >
                 {h.text}
-              </div>
+              </button>
             ))}
           </aside>
         )}
