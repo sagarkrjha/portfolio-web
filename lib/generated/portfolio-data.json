@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-11-14T09:36:00.326970748+00:00",
+  "lastUpdated": "2026-11-14T10:14:37.621272816+00:00",
   "profile": {
     "role": "Systems & Full-Stack Developer",
-    "bio": "Engineer specializing in TypeScript, C++20, Rust, JavaScript. Architect of cp-workspace (⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O). Passionate about building high-performance, clean-architecture software and developer tools.",
+    "bio": "Engineer specializing in TypeScript, Rust, C++20, Go. Architect of cp-workspace (⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O). Passionate about building high-performance, clean-architecture software and developer tools.",
     "totalRepos": 7,
     "totalStars": 16,
     "primaryLanguages": [
       "TypeScript",
-      "C++20",
       "Rust",
-      "JavaScript"
+      "C++20",
+      "Go"
     ],
     "activeProjectsCount": 4
   },
