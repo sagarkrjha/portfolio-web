@@ -150,8 +150,11 @@ export const DesktopOs = () => {
   const [time, setTime] = useState("");
   const [activeWindow, setActiveWindow] = useState<WindowId | null>("about");
   const [topZ, setTopZ] = useState(10);
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>("floating");
-  const [osTheme, setOsTheme] = useState<OsThemeKey>("carbon");
+  const [layoutMode, setLayoutModeState] = useState<LayoutMode>("floating");
+  const [osTheme, setOsThemeState] = useState<OsThemeKey>("carbon");
+  const [showDesktopIcons, setShowDesktopIconsState] = useState<boolean>(true);
+  const [showAppleMenu, setShowAppleMenu] = useState(false);
+  const [showControlCenter, setShowControlCenter] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
   const [launcherSearch, setLauncherSearch] = useState("");
@@ -167,15 +170,27 @@ export const DesktopOs = () => {
     "taskmanager",
   ]);
 
-  // Load custom desktop icons preference from localStorage
+  // Load persistent preferences from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("portfolio_desktop_apps");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+      const savedApps = localStorage.getItem("portfolio_desktop_apps");
+      if (savedApps) {
+        const parsed = JSON.parse(savedApps);
+        if (Array.isArray(parsed)) {
           setDesktopApps(parsed);
         }
+      }
+      const savedTheme = localStorage.getItem("portfolio_os_theme") as OsThemeKey | null;
+      if (savedTheme && (savedTheme in OS_THEMES)) {
+        setOsThemeState(savedTheme);
+      }
+      const savedLayout = localStorage.getItem("portfolio_layout_mode") as LayoutMode | null;
+      if (savedLayout && ["floating", "tiling-horizontal", "tiling-vertical", "tiling-grid"].includes(savedLayout)) {
+        setLayoutModeState(savedLayout);
+      }
+      const savedDesktopIcons = localStorage.getItem("portfolio_show_desktop_icons");
+      if (savedDesktopIcons !== null) {
+        setShowDesktopIconsState(savedDesktopIcons === "true");
       }
     } catch {
       // Ignore
@@ -189,6 +204,39 @@ export const DesktopOs = () => {
     } catch {
       // Ignore
     }
+  };
+
+  const setOsTheme = (themeKey: OsThemeKey) => {
+    setOsThemeState(themeKey);
+    try {
+      localStorage.setItem("portfolio_os_theme", themeKey);
+    } catch {
+      // Ignore
+    }
+  };
+
+  const setLayoutMode = (mode: LayoutMode | ((prev: LayoutMode) => LayoutMode)) => {
+    setLayoutModeState((prev) => {
+      const nextVal = typeof mode === "function" ? mode(prev) : mode;
+      try {
+        localStorage.setItem("portfolio_layout_mode", nextVal);
+      } catch {
+        // Ignore
+      }
+      return nextVal;
+    });
+  };
+
+  const setShowDesktopIcons = (show: boolean | ((prev: boolean) => boolean)) => {
+    setShowDesktopIconsState((prev) => {
+      const nextVal = typeof show === "function" ? show(prev) : show;
+      try {
+        localStorage.setItem("portfolio_show_desktop_icons", String(nextVal));
+      } catch {
+        // Ignore
+      }
+      return nextVal;
+    });
   };
 
   const removeDesktopShortcut = (id: WindowId) => {
@@ -463,6 +511,14 @@ export const DesktopOs = () => {
         }
         if (contextMenu.visible) {
           setContextMenu((prev) => ({ ...prev, visible: false }));
+          return;
+        }
+        if (showAppleMenu) {
+          setShowAppleMenu(false);
+          return;
+        }
+        if (showControlCenter) {
+          setShowControlCenter(false);
           return;
         }
         if (showLauncher) {
@@ -787,149 +843,326 @@ export const DesktopOs = () => {
         isDark ? "text-zinc-100" : "text-zinc-900"
       }`}
     >
-      {/* Top Hyprland / macOS Bar */}
+      {/* macOS Native Top Menu Bar */}
       <header
-        className={`h-7.5 w-full border-b px-3 flex items-center justify-between text-xs backdrop-blur-md z-50 shadow-sm ${
+        className={`h-7 w-full border-b px-2.5 sm:px-3 flex items-center justify-between text-xs backdrop-blur-xl z-50 shadow-sm select-none ${
           isDark ? "text-zinc-200" : "text-zinc-800"
         }`}
         style={{
-          backgroundColor: isDark ? `${currentTheme.card}F0` : "rgba(255, 255, 255, 0.92)",
+          backgroundColor: isDark ? `${currentTheme.card}F5` : "rgba(255, 255, 255, 0.94)",
           borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.1)",
         }}
       >
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setShowLauncher((prev) => !prev)}
-            className="flex items-center gap-1.5 font-bold tracking-tight hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ color: currentTheme.primary }}
-            title="App Launcher (Alt+Space)"
-          >
-            <span
-              className="size-2 rounded-full animate-pulse"
-              style={{ backgroundColor: currentTheme.primary }}
-            />
-            <span className="font-mono">CARBON-OS</span>
-          </button>
-          <span className="text-white/20">|</span>
-
-          {/* Active Window Title */}
-          <span className={`font-medium hidden sm:inline font-mono ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
-            {activeWindow ? windows[activeWindow].title : "Desktop"}
-          </span>
-
-          {/* Hyprland Tiling Mode Pills */}
-          <div className={`flex items-center gap-1 p-0.5 rounded border text-[10px] font-mono ${isDark ? "bg-black/40 border-white/5" : "bg-black/5 border-black/10"}`}>
-            {/* All Apps Launcher Button */}
+        {/* Left Side: Apple Menu, App Name, macOS Menu Items */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Apple Logo Icon with Dropdown Menu */}
+          <div className="relative">
             <button
               type="button"
-              onClick={() => setShowLauncher((prev) => !prev)}
-              className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${isDark ? "text-zinc-300 hover:text-zinc-100 hover:bg-white/10" : "text-zinc-700 hover:text-zinc-950 hover:bg-black/5"}`}
-              title="All Apps Launcher (Alt+Space)"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAppleMenu((prev) => !prev);
+                setShowControlCenter(false);
+              }}
+              className={`px-1.5 py-0.5 rounded transition-colors cursor-pointer flex items-center justify-center font-semibold text-sm ${
+                showAppleMenu
+                  ? "bg-primary text-black"
+                  : (isDark ? "hover:bg-white/10 text-zinc-100" : "hover:bg-black/5 text-zinc-900")
+              }`}
+              title="Apple Menu"
             >
-              <FiGrid className="size-2.5 text-primary" />
-              <span>All Apps</span>
+              
             </button>
-            <span className="text-white/20">|</span>
-            {(
-              [
-                { mode: "floating", label: "Float", icon: FiLayers },
-                { mode: "tiling-horizontal", label: "Columns", icon: FiColumns },
-                { mode: "tiling-vertical", label: "Rows", icon: FiMinus },
-                { mode: "tiling-grid", label: "Grid", icon: FiGrid },
-              ] as const
-            ).map((l) => (
-              <button
-                key={l.mode}
-                type="button"
-                onClick={() => setLayoutMode(l.mode)}
-                className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
-                  layoutMode === l.mode
-                    ? "font-semibold shadow-xs"
-                    : (isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-600 hover:text-zinc-950")
+
+            {/* Apple Dropdown Menu */}
+            {showAppleMenu && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className={`absolute left-0 top-full mt-1 w-56 rounded-xl border p-1 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-100 text-xs font-sans ${
+                  isDark ? "text-zinc-200" : "text-zinc-800"
                 }`}
                 style={{
-                  backgroundColor: layoutMode === l.mode ? currentTheme.primary : "transparent",
-                  color: layoutMode === l.mode ? "#000" : undefined,
+                  backgroundColor: isDark ? `${currentTheme.card}FB` : "rgba(255, 255, 255, 0.98)",
+                  borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
                 }}
-                title={`Switch layout to ${l.label} (Alt+${l.label[0]})`}
               >
-                <l.icon className="size-2.5" />
-                <span className="hidden md:inline">{l.label}</span>
-              </button>
-            ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    focusWindow("about");
+                    setShowAppleMenu(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
+                >
+                  <span className="font-medium">About This Portfolio</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">⌥1</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    focusWindow("settings");
+                    setShowAppleMenu(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
+                >
+                  <span>System Settings...</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">⌥6</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    focusWindow("taskmanager");
+                    setShowAppleMenu(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
+                >
+                  <span>Activity Monitor</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">⌥7</span>
+                </button>
+
+                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDesktopIcons((prev) => !prev);
+                    setShowAppleMenu(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
+                >
+                  <span>{showDesktopIcons ? "Hide Desktop Icons" : "Show Desktop Icons"}</span>
+                  {showDesktopIcons && <FiCheck className="size-3 text-primary" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLauncher(true);
+                    setShowAppleMenu(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+                  }`}
+                >
+                  <span>App Launcher (Spotlight)</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">⌥Space</span>
+                </button>
+
+                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleOsMode();
+                    setShowAppleMenu(false);
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-500 transition-colors flex items-center justify-between cursor-pointer"
+                >
+                  <span>Shut Down / Exit OS</span>
+                  <FiExternalLink className="size-3" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Active Application Name in bold macOS typography */}
+          <span className={`font-bold px-1.5 py-0.5 rounded text-xs ${isDark ? "text-zinc-100" : "text-zinc-950"}`}>
+            {activeWindow ? windows[activeWindow].title.split(" ")[0] : "Finder"}
+          </span>
+
+          {/* Classic macOS Top App Menus */}
+          <div className="hidden md:flex items-center gap-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => focusWindow("settings")}
+              className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+              }`}
+            >
+              Settings
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowLauncher(true)}
+              className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+              }`}
+            >
+              Window
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDesktopIcons((prev) => !prev)}
+              className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+              }`}
+            >
+              {showDesktopIcons ? "Hide Desktop" : "Show Desktop"}
+            </button>
+            <button
+              type="button"
+              onClick={() => focusWindow("about")}
+              className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+              }`}
+            >
+              Help
+            </button>
           </div>
         </div>
 
-        {/* Right Status Tray */}
-        <div className={`flex items-center gap-2 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
-          {/* Task Manager Quick Gauge */}
+        {/* Right Status Tray (macOS Control Center, Battery, Clock, Exit) */}
+        <div className={`flex items-center gap-1.5 sm:gap-2.5 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
+          {/* Spotlight Search Icon */}
           <button
             type="button"
-            onClick={() => toggleWindow("taskmanager")}
-            className={`flex items-center gap-1.5 transition-colors cursor-pointer text-[10px] font-mono px-2 py-0.5 rounded border ${isDark ? "border-white/10 bg-white/5 hover:text-zinc-100" : "border-black/10 bg-black/5 text-zinc-700 hover:text-zinc-950"}`}
-            title="Open Task Manager (Alt+7)"
+            onClick={() => setShowLauncher(true)}
+            className={`p-1 rounded cursor-pointer transition-colors ${
+              isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+            }`}
+            title="Spotlight Search (Alt+Space)"
           >
-            <FiActivity className="size-3 text-emerald-400" />
-            <span className="text-emerald-400 font-bold">{Math.round(cpuUsage)}%</span>
-            <span className="hidden md:inline text-zinc-500">CPU</span>
+            <FiSearch className="size-3.5" />
           </button>
 
-          {/* Quick Settings Icon */}
-          <button
-            type="button"
-            onClick={() => toggleWindow("settings")}
-            className={`flex items-center gap-1 transition-colors cursor-pointer text-[11px] px-1.5 py-0.5 rounded border ${isDark ? "border-white/10 bg-white/5 hover:text-zinc-100" : "border-black/10 bg-black/5 text-zinc-700 hover:text-zinc-950"}`}
-            title="Settings & Themes (Alt+6)"
-          >
-            <FiSettings className="size-3 text-primary" />
-            <span className="hidden md:inline font-mono">Settings</span>
-          </button>
-
-
-
-          {/* Direct Theme Mode Switcher */}
-          <div className={`flex items-center gap-0.5 p-0.5 rounded border text-[10px] font-mono ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
+          {/* macOS Control Center Button */}
+          <div className="relative">
             <button
               type="button"
-              onClick={() => setTheme("dark")}
-              className={`p-1 rounded cursor-pointer transition-colors ${
-                theme === "dark" || (!theme && isDark)
-                  ? "bg-primary text-primary-foreground font-bold"
-                  : "text-zinc-400 hover:text-zinc-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowControlCenter((prev) => !prev);
+                setShowAppleMenu(false);
+              }}
+              className={`p-1 rounded cursor-pointer transition-colors flex items-center gap-1 ${
+                showControlCenter
+                  ? "bg-primary text-black"
+                  : (isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900")
               }`}
-              title="Dark Mode"
+              title="Control Center (Quick Settings)"
             >
-              <FiMoon className="size-3" />
+              <FiSliders className="size-3.5" />
             </button>
-            <button
-              type="button"
-              onClick={() => setTheme("light")}
-              className={`p-1 rounded cursor-pointer transition-colors ${
-                theme === "light"
-                  ? "bg-primary text-primary-foreground font-bold"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-              title="Light Mode"
-            >
-              <FiSun className="size-3" />
-            </button>
+
+            {/* macOS Control Center Flyout Modal */}
+            {showControlCenter && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className={`absolute right-0 top-full mt-1.5 w-72 rounded-2xl border p-3 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-100 font-sans text-xs ${
+                  isDark ? "text-zinc-200" : "text-zinc-800"
+                }`}
+                style={{
+                  backgroundColor: isDark ? `${currentTheme.card}F8` : "rgba(255, 255, 255, 0.96)",
+                  borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
+                }}
+              >
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10 font-medium">
+                  <span>Control Center</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">macOS Style</span>
+                </div>
+
+                {/* Quick Toggles Grid */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {/* Theme Mode Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setTheme(isDark ? "light" : "dark")}
+                    className={`p-2.5 rounded-xl border flex flex-col gap-1 text-left cursor-pointer transition-all ${
+                      isDark
+                        ? "bg-white/5 border-white/10 hover:bg-white/10"
+                        : "bg-black/5 border-black/10 hover:bg-black/10"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      {isDark ? <FiMoon className="size-4 text-primary" /> : <FiSun className="size-4 text-amber-500" />}
+                      <span className="text-[10px] font-mono font-bold uppercase">{isDark ? "Dark" : "Light"}</span>
+                    </div>
+                    <span className="text-[11px] font-medium">Appearance</span>
+                  </button>
+
+                  {/* Desktop Icons Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowDesktopIcons((prev) => !prev)}
+                    className={`p-2.5 rounded-xl border flex flex-col gap-1 text-left cursor-pointer transition-all ${
+                      showDesktopIcons
+                        ? "bg-primary/20 border-primary/40 text-primary"
+                        : (isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/10 hover:bg-black/10")
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <FiEye className="size-4" />
+                      <span className="text-[10px] font-mono font-bold uppercase">{showDesktopIcons ? "ON" : "OFF"}</span>
+                    </div>
+                    <span className="text-[11px] font-medium">Desktop Icons</span>
+                  </button>
+                </div>
+
+                {/* Window Layout Mode Picker */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-[11px] font-medium mb-1.5">
+                    <span>Window Arrangement</span>
+                    <span className="text-[10px] text-primary font-mono">{layoutMode}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[
+                      { mode: "floating", label: "Float", icon: FiLayers },
+                      { mode: "tiling-horizontal", label: "Cols", icon: FiColumns },
+                      { mode: "tiling-vertical", label: "Rows", icon: FiMinus },
+                      { mode: "tiling-grid", label: "Grid", icon: FiGrid },
+                    ].map((l) => (
+                      <button
+                        key={l.mode}
+                        type="button"
+                        onClick={() => setLayoutMode(l.mode as LayoutMode)}
+                        className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-1 cursor-pointer transition-all ${
+                          layoutMode === l.mode
+                            ? "bg-primary text-black border-primary font-bold shadow-sm"
+                            : (isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/10 hover:bg-black/10")
+                        }`}
+                      >
+                        <l.icon className="size-3" />
+                        <span className="text-[9px]">{l.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Link to Full System Settings */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    focusWindow("settings");
+                    setShowControlCenter(false);
+                  }}
+                  className={`w-full py-1.5 px-2.5 rounded-xl border text-center font-medium cursor-pointer transition-colors flex items-center justify-center gap-1.5 ${
+                    isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/10 hover:bg-black/10"
+                  }`}
+                >
+                  <FiSettings className="size-3 text-primary" />
+                  <span>Open System Settings...</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <FiWifi className="size-3.5 hidden sm:inline" />
-          <FiVolume2 className="size-3.5 hidden sm:inline" />
           <FiBatteryCharging className="size-3.5 text-emerald-400" />
           <span className={`font-mono text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>{time}</span>
 
-          {/* Exit OS Mode */}
+          {/* Exit OS Button */}
           <button
             type="button"
             onClick={toggleOsMode}
-            className="ml-1 px-2.5 py-0.5 rounded-none font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-            style={{
-              backgroundColor: currentTheme.primary,
-              color: "#000",
-            }}
+            className="ml-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 border border-red-500/30 text-red-400 hover:bg-red-500/10"
             title="Exit Desktop OS & Return to Web Mode"
           >
             <span>Exit</span>
@@ -942,95 +1175,99 @@ export const DesktopOs = () => {
       <main
         className="relative flex-1 p-4 sm:p-6 overflow-hidden"
         onClick={() => {
+          setShowAppleMenu(false);
+          setShowControlCenter(false);
           setShowLauncher(false);
           setContextMenu((prev) => ({ ...prev, visible: false }));
           setAppContextMenu((prev) => ({ ...prev, visible: false }));
         }}
       >
-        {/* Desktop Application Icons (Filtered by desktopApps state with remove capability) */}
-        <div className="grid grid-flow-col grid-rows-4 sm:grid-rows-6 gap-4 sm:gap-6 w-max">
-          {(
-            [
-              { id: "about", label: "About.app", icon: FiUser, key: "1" },
-              { id: "terminal", label: "Terminal.app", icon: FiTerminal, key: "2" },
-              { id: "projects", label: "Projects.app", icon: FiFolder, key: "3" },
-              { id: "blog", label: "Notes.app", icon: FiBookOpen, key: "4" },
-              { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "5" },
-              { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
-              { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "7" },
-            ] as const
-          )
-            .filter((item) => desktopApps.includes(item.id))
-            .map((item) => (
-              <div key={item.id} className="relative group w-20">
-                <button
-                  type="button"
-                  onClick={() => focusWindow(item.id)}
-                  onContextMenu={(e) => handleAppContextMenu(e, item.id)}
-                  className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors cursor-pointer w-full text-center ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/10"
-                  }`}
-                >
-                  <div
-                    className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
-                    style={{
-                      backgroundColor: isDark ? `${currentTheme.card}E6` : "rgba(255, 255, 255, 0.9)",
-                      borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
-                      color: currentTheme.primary,
-                    }}
+        {/* Desktop Application Icons (Can be toggled or hidden via showDesktopIcons setting) */}
+        {showDesktopIcons && (
+          <div className="grid grid-flow-col grid-rows-4 sm:grid-rows-6 gap-4 sm:gap-6 w-max animate-in fade-in duration-150">
+            {(
+              [
+                { id: "about", label: "About.app", icon: FiUser, key: "1" },
+                { id: "terminal", label: "Terminal.app", icon: FiTerminal, key: "2" },
+                { id: "projects", label: "Projects.app", icon: FiFolder, key: "3" },
+                { id: "blog", label: "Notes.app", icon: FiBookOpen, key: "4" },
+                { id: "resume", label: "Resume.pdf", icon: FiFileText, key: "5" },
+                { id: "settings", label: "Settings.app", icon: FiSettings, key: "6" },
+                { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "7" },
+              ] as const
+            )
+              .filter((item) => desktopApps.includes(item.id))
+              .map((item) => (
+                <div key={item.id} className="relative group w-20">
+                  <button
+                    type="button"
+                    onClick={() => focusWindow(item.id)}
+                    onContextMenu={(e) => handleAppContextMenu(e, item.id)}
+                    className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors cursor-pointer w-full text-center ${
+                      isDark ? "hover:bg-white/10" : "hover:bg-black/10"
+                    }`}
                   >
-                    <item.icon className="size-6" />
-                    <span className={`absolute bottom-0.5 right-1 text-[8px] font-mono opacity-60 group-hover:opacity-100 ${
-                      isDark ? "text-zinc-400" : "text-zinc-600"
+                    <div
+                      className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
+                      style={{
+                        backgroundColor: isDark ? `${currentTheme.card}E6` : "rgba(255, 255, 255, 0.9)",
+                        borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
+                        color: currentTheme.primary,
+                      }}
+                    >
+                      <item.icon className="size-6" />
+                      <span className={`absolute bottom-0.5 right-1 text-[8px] font-mono opacity-60 group-hover:opacity-100 ${
+                        isDark ? "text-zinc-400" : "text-zinc-600"
+                      }`}>
+                        ⌥{item.key}
+                      </span>
+                    </div>
+                    <span className={`text-[11px] font-mono drop-shadow-md truncate max-w-[76px] font-medium ${
+                      isDark ? "text-zinc-200" : "text-zinc-900"
                     }`}>
-                      ⌥{item.key}
+                      {item.label}
                     </span>
-                  </div>
-                  <span className={`text-[11px] font-mono drop-shadow-md truncate max-w-[76px] font-medium ${
-                    isDark ? "text-zinc-200" : "text-zinc-900"
-                  }`}>
-                    {item.label}
-                  </span>
-                </button>
+                  </button>
 
-                {/* Subtle Hover Remove Shortcut Button on Desktop Icon */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeDesktopShortcut(item.id);
-                  }}
-                  className="absolute -top-1 -right-1 size-4 rounded-full bg-red-500/80 hover:bg-red-600 text-white text-[9px] font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-pointer border border-white/20"
-                  title={`Remove ${item.label} shortcut from desktop`}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+                  {/* Subtle Hover Remove Shortcut Button on Desktop Icon */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeDesktopShortcut(item.id);
+                    }}
+                    className="absolute -top-1 -right-1 size-4 rounded-full bg-red-500/80 hover:bg-red-600 text-white text-[9px] font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-pointer border border-white/20"
+                    title={`Remove ${item.label} shortcut from desktop`}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
 
-          {/* Quick "Add App" Desktop Tile if any shortcuts are removed */}
-          {desktopApps.length < 7 && (
-            <button
-              type="button"
-              onClick={() => setShowLauncher(true)}
-              className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border border-dashed hover:border-primary/50 transition-colors cursor-pointer group w-20 text-center ${
-                isDark ? "hover:bg-white/5 border-white/20" : "hover:bg-black/5 border-black/20"
-              }`}
-              title="Add Application Shortcut to Desktop"
-            >
-              <div className={`size-12 rounded-xl flex items-center justify-center group-hover:text-primary transition-colors ${
-                isDark ? "text-zinc-400" : "text-zinc-500"
-              }`}>
-                <FiPlus className="size-5" />
-              </div>
-              <span className={`text-[10px] font-mono ${
-                isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-zinc-600 group-hover:text-zinc-900"
-              }`}>
-                + Add App
-              </span>
-            </button>
-          )}
-        </div>
+            {/* Quick "Add App" Desktop Tile if any shortcuts are removed */}
+            {desktopApps.length < 7 && (
+              <button
+                type="button"
+                onClick={() => setShowLauncher(true)}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border border-dashed hover:border-primary/50 transition-colors cursor-pointer group w-20 text-center ${
+                  isDark ? "hover:bg-white/5 border-white/20" : "hover:bg-black/5 border-black/20"
+                }`}
+                title="Add Application Shortcut to Desktop"
+              >
+                <div className={`size-12 rounded-xl flex items-center justify-center group-hover:text-primary transition-colors ${
+                  isDark ? "text-zinc-400" : "text-zinc-500"
+                }`}>
+                  <FiPlus className="size-5" />
+                </div>
+                <span className={`text-[10px] font-mono ${
+                  isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-zinc-600 group-hover:text-zinc-900"
+                }`}>
+                  + Add App
+                </span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Windows Rendering Layer */}
 
@@ -1417,8 +1654,38 @@ export const DesktopOs = () => {
 
 
 
+              {/* Desktop Icons & Visibility Setting */}
+              <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
+                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                  <FiEye className="text-primary size-4" />
+                  <span>Desktop Applications Visibility</span>
+                </h4>
+                <div className="flex items-center justify-between p-3 rounded-xl border"
+                  style={{
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+                    borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
+                  }}
+                >
+                  <div>
+                    <span className={`font-medium block text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Show Desktop Application Shortcuts</span>
+                    <span className={`text-[10px] ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>Toggle whether app icons and files appear directly on the desktop canvas</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowDesktopIcons((prev) => !prev)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+                      showDesktopIcons
+                        ? "bg-primary text-black font-bold"
+                        : (isDark ? "bg-white/10 text-zinc-400 hover:text-zinc-200" : "bg-black/10 text-zinc-600 hover:text-zinc-900")
+                    }`}
+                  >
+                    {showDesktopIcons ? "Visible (On)" : "Hidden (Off)"}
+                  </button>
+                </div>
+              </div>
+
               {/* Tiling mode preference */}
-              <div className="border-t border-white/10 pt-4">
+              <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
                 <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
                   <FiSliders className="text-primary size-4" />
                   <span>Window Manager Layout (Hyprland / i3)</span>
@@ -1647,6 +1914,20 @@ export const DesktopOs = () => {
             >
               <FiActivity className="size-3.5 text-emerald-400" />
               <span>Task Manager</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowDesktopIcons((prev) => !prev);
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+              }}
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center justify-between cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
+            >
+              <div className="flex items-center gap-2">
+                <FiEye className="size-3.5 text-primary" />
+                <span>{showDesktopIcons ? "Hide Desktop Icons" : "Show Desktop Icons"}</span>
+              </div>
+              {showDesktopIcons && <FiCheck className="size-3 text-primary" />}
             </button>
             <button
               type="button"
