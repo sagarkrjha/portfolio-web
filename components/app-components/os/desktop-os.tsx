@@ -1449,39 +1449,55 @@ export const DesktopOs = () => {
                           ★ {p.stars}
                         </span>
                       )}
+                      {/* GitHub Source Code Interactive View */}
                       {p.githubUrl && (
                         <button
                           type="button"
                           onClick={() => openInBrowser(p.githubUrl!, `${p.title} Source (GitHub)`)}
-                          className={`p-1 transition-colors flex items-center gap-1 rounded hover:bg-white/10 cursor-pointer ${
-                            isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-950"
+                          className={`px-2 py-0.5 transition-colors flex items-center gap-1 rounded border text-[11px] font-mono cursor-pointer ${
+                            isDark
+                              ? "bg-white/5 border-white/10 text-zinc-300 hover:text-zinc-100 hover:bg-white/10"
+                              : "bg-black/5 border-black/10 text-zinc-700 hover:text-zinc-950 hover:bg-black/10"
                           }`}
-                          title="Open GitHub Source in Interactive Window"
+                          title="View GitHub repository and code in interactive OS browser"
                         >
-                          <FiGithub className="size-3.5" />
-                          <span className="text-[10px] font-mono hidden sm:inline">Source</span>
+                          <FiGithub className="size-3 text-primary" />
+                          <span>Source</span>
                         </button>
                       )}
-                      {p.liveUrl && (
+
+                      {/* Interactive Demo (Live hosted app or CLI simulation) */}
+                      {p.liveUrl ? (
                         <button
                           type="button"
-                          onClick={() => openInBrowser(p.liveUrl!, `${p.title} (Live Interactive)`)}
-                          className="text-primary hover:opacity-80 p-1 flex items-center gap-1 rounded hover:bg-primary/10 cursor-pointer"
-                          title="Launch Live Hosted App in Interactive Window"
+                          onClick={() => openInBrowser(p.liveUrl!, `${p.title} (Interactive Live Demo)`)}
+                          className="px-2 py-0.5 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 transition-colors flex items-center gap-1 rounded text-[11px] font-mono font-semibold cursor-pointer shadow-xs"
+                          title={`Launch ${p.title} interactive web preview`}
                         >
-                          <FiGlobe className="size-3.5" />
-                          <span className="text-[10px] font-mono font-bold hidden sm:inline">Demo</span>
+                          <FiGlobe className="size-3" />
+                          <span>Live Demo</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => focusWindow("terminal")}
+                          className="px-2 py-0.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 transition-colors flex items-center gap-1 rounded text-[11px] font-mono font-semibold cursor-pointer"
+                          title="Run interactive terminal command demo"
+                        >
+                          <FiTerminal className="size-3" />
+                          <span>CLI Demo</span>
                         </button>
                       )}
+
                       {p.liveUrl && (
                         <a
                           href={p.liveUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-zinc-500 hover:text-primary p-0.5"
-                          title="Open in new external tab"
+                          className="text-zinc-400 hover:text-primary transition-colors p-1"
+                          title="Open live link externally in new browser tab"
                         >
-                          <FiExternalLink className="size-3" />
+                          <FiExternalLink className="size-3.5" />
                         </a>
                       )}
                     </div>
@@ -1963,14 +1979,50 @@ export const DesktopOs = () => {
               </div>
             </div>
 
-            {/* Embedded Live IFrame */}
-            <div className="flex-1 w-full h-full min-h-[350px] relative bg-white">
+            {/* Browser Secondary Status & Navigation Bar */}
+            <div className={`px-3 py-1.5 border-b flex items-center justify-between text-[11px] font-mono ${
+              isDark ? "bg-[#1f1b19] border-white/10 text-zinc-400" : "bg-[#f0f0f0] border-black/10 text-zinc-600"
+            }`}>
+              <div className="flex items-center gap-2 truncate">
+                <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-semibold truncate">{browserTitle}</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cur = browserUrl;
+                    setBrowserUrl("");
+                    setTimeout(() => setBrowserUrl(cur), 50);
+                  }}
+                  className="hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Reload Interactive View"
+                >
+                  <FiRefreshCw className="size-3" />
+                  <span>Reload</span>
+                </button>
+                <span>|</span>
+                <a
+                  href={browserUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary transition-colors flex items-center gap-1"
+                  title="Open in new external tab"
+                >
+                  <FiExternalLink className="size-3" />
+                  <span>External Tab</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Embedded Live IFrame / Interactive View */}
+            <div className="flex-1 w-full h-full min-h-[420px] relative bg-white">
               <iframe
                 key={browserUrl}
                 src={browserUrl}
                 title={browserTitle}
                 className="w-full h-full border-0 absolute inset-0"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
                 loading="lazy"
               />
             </div>
