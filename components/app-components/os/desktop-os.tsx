@@ -20,7 +20,6 @@ import {
   FiExternalLink,
   FiSun,
   FiMoon,
-  FiImage,
   FiColumns,
   FiLayers,
   FiCommand,
@@ -60,7 +59,7 @@ export type WindowId =
   | "taskmanager";
 
 export type LayoutMode = "floating" | "tiling-horizontal" | "tiling-vertical" | "tiling-grid";
-export type WallpaperKey = "hero" | "carbon" | "aurora" | "matrix" | "minimal";
+export type WallpaperKey = "hero";
 export type OsThemeKey = "carbon" | "nord" | "matrix" | "dracula" | "paper";
 
 interface WindowState {
@@ -134,46 +133,14 @@ const OS_THEMES: Record<
   },
 };
 
-const WALLPAPERS: Record<WallpaperKey, { name: string; style: React.CSSProperties }> = {
-  hero: {
-    name: "Hero Cover (Default)",
-    style: {
-      backgroundImage: `linear-gradient(rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.96)), url('${heroConfig.media.src}')`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-    },
-  },
-  carbon: {
-    name: "Carbon Gradient",
-    style: {
-      background:
-        "radial-gradient(ellipse 80% 80% at 50% -20%, rgba(51, 177, 255, 0.14), rgba(28, 25, 23, 1))",
-    },
-  },
-  aurora: {
-    name: "Nordic Aurora",
-    style: {
-      background:
-        "radial-gradient(circle at 20% 20%, rgba(39, 201, 63, 0.18), transparent 45%), radial-gradient(circle at 80% 80%, rgba(51, 177, 255, 0.15), rgba(28, 25, 23, 1) 70%)",
-    },
-  },
-  matrix: {
-    name: "Cyber Grid",
-    style: {
-      backgroundColor: "#161616",
-      backgroundImage:
-        "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)",
-      backgroundSize: "32px 32px",
-    },
-  },
-  minimal: {
-    name: "Deep Stone",
-    style: {
-      backgroundColor: "#1c1917",
-    },
-  },
-};
+const getHeroWallpaperStyle = (isDark: boolean): React.CSSProperties => ({
+  backgroundImage: isDark
+    ? `linear-gradient(rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.96)), url('${heroConfig.media.src}')`
+    : `linear-gradient(rgba(244, 244, 244, 0.86), rgba(244, 244, 244, 0.97)), url('${heroConfig.media.src}')`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+});
 
 export const DesktopOs = () => {
   const { isOsMode, toggleOsMode } = useOsMode();
@@ -184,9 +151,7 @@ export const DesktopOs = () => {
   const [activeWindow, setActiveWindow] = useState<WindowId | null>("about");
   const [topZ, setTopZ] = useState(10);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("floating");
-  const [wallpaper, setWallpaper] = useState<WallpaperKey>("hero");
   const [osTheme, setOsTheme] = useState<OsThemeKey>("carbon");
-  const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
   const [launcherSearch, setLauncherSearch] = useState("");
@@ -504,10 +469,7 @@ export const DesktopOs = () => {
           setShowLauncher(false);
           return;
         }
-        if (showWallpaperMenu) {
-          setShowWallpaperMenu(false);
-          return;
-        }
+
         if (activeWindow && !isInput) {
           closeWindow(activeWindow);
           return;
@@ -595,7 +557,6 @@ export const DesktopOs = () => {
     contextMenu.visible,
     appContextMenu.visible,
     showLauncher,
-    showWallpaperMenu,
     closeWindow,
     cycleNextWindow,
     toggleMaximize,
@@ -749,8 +710,9 @@ export const DesktopOs = () => {
       onDoubleClick={() => toggleMaximize(id)}
       className="flex items-center justify-between px-3.5 py-2.5 border-b select-none cursor-move shrink-0"
       style={{
-        backgroundColor: currentTheme.card,
-        borderColor: currentTheme.border,
+        backgroundColor: isDark ? currentTheme.card : "#f4f4f4",
+        borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.1)",
+        color: isDark ? "#f4f4f4" : "#161616",
       }}
     >
       <div className="flex items-center gap-2">
@@ -797,14 +759,14 @@ export const DesktopOs = () => {
         </button>
       </div>
 
-      <span className="text-xs font-semibold text-zinc-200 pointer-events-none truncate max-w-[65%] font-mono">
+      <span className={`text-xs font-semibold pointer-events-none truncate max-w-[65%] font-mono ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
         {title}
       </span>
 
       <button
         type="button"
         onClick={() => toggleMaximize(id)}
-        className="text-zinc-400 hover:text-zinc-100 cursor-pointer p-0.5"
+        className={`cursor-pointer p-0.5 transition-colors ${isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-900"}`}
       >
         {windows[id].isMaximized ? (
           <FiMinimize2 className="size-3.5" />
@@ -820,15 +782,19 @@ export const DesktopOs = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onContextMenu={handleContextMenu}
-      style={WALLPAPERS[wallpaper].style}
-      className="fixed inset-0 z-50 flex flex-col text-[#f4f4f4] font-sans select-none overflow-hidden animate-in fade-in duration-200 transition-all"
+      style={getHeroWallpaperStyle(isDark)}
+      className={`fixed inset-0 z-50 flex flex-col font-sans select-none overflow-hidden animate-in fade-in duration-200 transition-all ${
+        isDark ? "text-zinc-100" : "text-zinc-900"
+      }`}
     >
       {/* Top Hyprland / macOS Bar */}
       <header
-        className="h-7.5 w-full border-b px-3 flex items-center justify-between text-xs backdrop-blur-md z-50 shadow-sm"
+        className={`h-7.5 w-full border-b px-3 flex items-center justify-between text-xs backdrop-blur-md z-50 shadow-sm ${
+          isDark ? "text-zinc-200" : "text-zinc-800"
+        }`}
         style={{
-          backgroundColor: `${currentTheme.card}F0`,
-          borderColor: currentTheme.border,
+          backgroundColor: isDark ? `${currentTheme.card}F0` : "rgba(255, 255, 255, 0.92)",
+          borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.1)",
         }}
       >
         <div className="flex items-center gap-3">
@@ -848,17 +814,17 @@ export const DesktopOs = () => {
           <span className="text-white/20">|</span>
 
           {/* Active Window Title */}
-          <span className="font-medium text-zinc-300 hidden sm:inline font-mono">
+          <span className={`font-medium hidden sm:inline font-mono ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
             {activeWindow ? windows[activeWindow].title : "Desktop"}
           </span>
 
           {/* Hyprland Tiling Mode Pills */}
-          <div className="flex items-center gap-1 bg-black/40 p-0.5 rounded border border-white/5 text-[10px] font-mono">
+          <div className={`flex items-center gap-1 p-0.5 rounded border text-[10px] font-mono ${isDark ? "bg-black/40 border-white/5" : "bg-black/5 border-black/10"}`}>
             {/* All Apps Launcher Button */}
             <button
               type="button"
               onClick={() => setShowLauncher((prev) => !prev)}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors text-zinc-300 hover:text-zinc-100 hover:bg-white/10"
+              className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${isDark ? "text-zinc-300 hover:text-zinc-100 hover:bg-white/10" : "text-zinc-700 hover:text-zinc-950 hover:bg-black/5"}`}
               title="All Apps Launcher (Alt+Space)"
             >
               <FiGrid className="size-2.5 text-primary" />
@@ -880,7 +846,7 @@ export const DesktopOs = () => {
                 className={`flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
                   layoutMode === l.mode
                     ? "font-semibold shadow-xs"
-                    : "text-zinc-400 hover:text-zinc-100"
+                    : (isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-600 hover:text-zinc-950")
                 }`}
                 style={{
                   backgroundColor: layoutMode === l.mode ? currentTheme.primary : "transparent",
@@ -896,12 +862,12 @@ export const DesktopOs = () => {
         </div>
 
         {/* Right Status Tray */}
-        <div className="flex items-center gap-2 text-zinc-400">
+        <div className={`flex items-center gap-2 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
           {/* Task Manager Quick Gauge */}
           <button
             type="button"
             onClick={() => toggleWindow("taskmanager")}
-            className="flex items-center gap-1.5 hover:text-zinc-100 transition-colors cursor-pointer text-[10px] font-mono px-2 py-0.5 rounded border border-white/10 bg-white/5"
+            className={`flex items-center gap-1.5 transition-colors cursor-pointer text-[10px] font-mono px-2 py-0.5 rounded border ${isDark ? "border-white/10 bg-white/5 hover:text-zinc-100" : "border-black/10 bg-black/5 text-zinc-700 hover:text-zinc-950"}`}
             title="Open Task Manager (Alt+7)"
           >
             <FiActivity className="size-3 text-emerald-400" />
@@ -913,63 +879,17 @@ export const DesktopOs = () => {
           <button
             type="button"
             onClick={() => toggleWindow("settings")}
-            className="flex items-center gap-1 hover:text-zinc-100 transition-colors cursor-pointer text-[11px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5"
+            className={`flex items-center gap-1 transition-colors cursor-pointer text-[11px] px-1.5 py-0.5 rounded border ${isDark ? "border-white/10 bg-white/5 hover:text-zinc-100" : "border-black/10 bg-black/5 text-zinc-700 hover:text-zinc-950"}`}
             title="Settings & Themes (Alt+6)"
           >
             <FiSettings className="size-3 text-primary" />
             <span className="hidden md:inline font-mono">Settings</span>
           </button>
 
-          {/* Wallpaper Quick Switcher */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowWallpaperMenu((prev) => !prev)}
-              className="flex items-center gap-1 hover:text-zinc-100 transition-colors cursor-pointer text-[11px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5"
-              title="Change Desktop Wallpaper"
-            >
-              <FiImage className="size-3 text-primary" />
-              <span className="hidden sm:inline font-mono">{WALLPAPERS[wallpaper].name}</span>
-            </button>
 
-            {showWallpaperMenu && (
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className="absolute right-0 top-full mt-1.5 w-48 rounded-lg border p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-xs font-mono"
-                style={{
-                  backgroundColor: currentTheme.card,
-                  borderColor: currentTheme.border,
-                }}
-              >
-                <div className="px-2 py-1 text-[10px] text-zinc-400 uppercase font-semibold">
-                  Wallpapers
-                </div>
-                {(Object.keys(WALLPAPERS) as WallpaperKey[]).map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      setWallpaper(key);
-                      setShowWallpaperMenu(false);
-                    }}
-                    className={`w-full text-left px-2 py-1.5 rounded transition-colors cursor-pointer flex items-center justify-between ${
-                      wallpaper === key ? "font-bold" : "hover:bg-white/10 text-zinc-300"
-                    }`}
-                    style={{
-                      backgroundColor: wallpaper === key ? currentTheme.primary : "transparent",
-                      color: wallpaper === key ? "#000" : undefined,
-                    }}
-                  >
-                    <span>{WALLPAPERS[key].name}</span>
-                    {wallpaper === key && <span className="size-1.5 rounded-full bg-black" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Direct Theme Mode Switcher */}
-          <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded border border-white/10 text-[10px] font-mono">
+          <div className={`flex items-center gap-0.5 p-0.5 rounded border text-[10px] font-mono ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
             <button
               type="button"
               onClick={() => setTheme("dark")}
@@ -999,7 +919,7 @@ export const DesktopOs = () => {
           <FiWifi className="size-3.5 hidden sm:inline" />
           <FiVolume2 className="size-3.5 hidden sm:inline" />
           <FiBatteryCharging className="size-3.5 text-emerald-400" />
-          <span className="font-mono text-[11px] text-zinc-200">{time}</span>
+          <span className={`font-mono text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>{time}</span>
 
           {/* Exit OS Mode */}
           <button
@@ -1022,7 +942,6 @@ export const DesktopOs = () => {
       <main
         className="relative flex-1 p-4 sm:p-6 overflow-hidden"
         onClick={() => {
-          setShowWallpaperMenu(false);
           setShowLauncher(false);
           setContextMenu((prev) => ({ ...prev, visible: false }));
           setAppContextMenu((prev) => ({ ...prev, visible: false }));
@@ -1048,22 +967,28 @@ export const DesktopOs = () => {
                   type="button"
                   onClick={() => focusWindow(item.id)}
                   onContextMenu={(e) => handleAppContextMenu(e, item.id)}
-                  className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer w-full text-center"
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors cursor-pointer w-full text-center ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-black/10"
+                  }`}
                 >
                   <div
                     className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
                     style={{
-                      backgroundColor: `${currentTheme.card}E6`,
-                      borderColor: currentTheme.border,
+                      backgroundColor: isDark ? `${currentTheme.card}E6` : "rgba(255, 255, 255, 0.9)",
+                      borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
                       color: currentTheme.primary,
                     }}
                   >
                     <item.icon className="size-6" />
-                    <span className="absolute bottom-0.5 right-1 text-[8px] font-mono text-zinc-400 opacity-60 group-hover:opacity-100">
+                    <span className={`absolute bottom-0.5 right-1 text-[8px] font-mono opacity-60 group-hover:opacity-100 ${
+                      isDark ? "text-zinc-400" : "text-zinc-600"
+                    }`}>
                       ⌥{item.key}
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-zinc-200 drop-shadow-md truncate max-w-[76px]">
+                  <span className={`text-[11px] font-mono drop-shadow-md truncate max-w-[76px] font-medium ${
+                    isDark ? "text-zinc-200" : "text-zinc-900"
+                  }`}>
                     {item.label}
                   </span>
                 </button>
@@ -1088,13 +1013,19 @@ export const DesktopOs = () => {
             <button
               type="button"
               onClick={() => setShowLauncher(true)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/5 border border-dashed border-white/20 hover:border-primary/50 transition-colors cursor-pointer group w-20 text-center"
+              className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border border-dashed hover:border-primary/50 transition-colors cursor-pointer group w-20 text-center ${
+                isDark ? "hover:bg-white/5 border-white/20" : "hover:bg-black/5 border-black/20"
+              }`}
               title="Add Application Shortcut to Desktop"
             >
-              <div className="size-12 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-primary transition-colors">
+              <div className={`size-12 rounded-xl flex items-center justify-center group-hover:text-primary transition-colors ${
+                isDark ? "text-zinc-400" : "text-zinc-500"
+              }`}>
                 <FiPlus className="size-5" />
               </div>
-              <span className="text-[10px] font-mono text-zinc-400 group-hover:text-zinc-200">
+              <span className={`text-[10px] font-mono ${
+                isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-zinc-600 group-hover:text-zinc-900"
+              }`}>
                 + Add App
               </span>
             </button>
@@ -1108,8 +1039,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("about"),
-              backgroundColor: `${currentTheme.bg}F5`,
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("about")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1118,8 +1049,10 @@ export const DesktopOs = () => {
           >
             {renderTitleBar("about", `About — ${siteConfig.name}`)}
 
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-zinc-300 font-sans">
-              <div className="flex items-center gap-4 border-b border-white/10 pb-4">
+            <div className={`p-4 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed font-sans ${
+              isDark ? "text-zinc-300" : "text-zinc-700"
+            }`}>
+              <div className={`flex items-center gap-4 border-b pb-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
                 <div
                   style={{
                     width: "56px",
@@ -1128,20 +1061,22 @@ export const DesktopOs = () => {
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                   }}
-                  className="shrink-0 size-14 rounded-xl bg-[#272220] border-2 border-primary/40 shadow-md"
+                  className={`shrink-0 size-14 rounded-xl border-2 border-primary/40 shadow-md ${
+                    isDark ? "bg-[#272220]" : "bg-white"
+                  }`}
                 />
                 <div>
-                  <h3 className="text-base font-bold text-zinc-100">{siteConfig.name}</h3>
+                  <h3 className={`text-base font-bold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{siteConfig.name}</h3>
                   <p className="text-primary font-mono text-xs font-medium">{siteConfig.role}</p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                  <p className={`text-[11px] mt-0.5 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
                     {siteConfig.location} · {siteConfig.availability}
                   </p>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-zinc-200 font-semibold mb-1 text-xs">Architectural Philosophy</h4>
-                <p className="text-zinc-300">{aboutConfig.description}</p>
+                <h4 className={`font-semibold mb-1 text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Architectural Philosophy</h4>
+                <p className={isDark ? "text-zinc-300" : "text-zinc-700"}>{aboutConfig.description}</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1150,32 +1085,36 @@ export const DesktopOs = () => {
                     key={f.title}
                     className="p-3 rounded-lg border space-y-1"
                     style={{
-                      backgroundColor: `${currentTheme.card}B3`,
-                      borderColor: currentTheme.border,
+                      backgroundColor: isDark ? `${currentTheme.card}B3` : "rgba(255, 255, 255, 0.8)",
+                      borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.08)",
                     }}
                   >
                     <span className="text-primary font-mono font-semibold text-[11px] block">
                       {f.title}
                     </span>
-                    <p className="text-zinc-400 text-[11px] leading-normal">{f.description}</p>
+                    <p className={`text-[11px] leading-normal ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>{f.description}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-white/10 pt-3">
-                <h4 className="text-zinc-200 font-semibold mb-2 text-xs">Technical Proficiency</h4>
+              <div className={`border-t pt-3 ${isDark ? "border-white/10" : "border-black/10"}`}>
+                <h4 className={`font-semibold mb-2 text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Technical Proficiency</h4>
                 <div className="space-y-2">
                   {siteConfig.skills.map((c) => (
                     <div
                       key={c.title}
                       className="flex flex-col sm:flex-row sm:items-center gap-1.5 font-mono text-[11px]"
                     >
-                      <span className="text-zinc-400 w-28 shrink-0">{c.title}:</span>
+                      <span className={`w-28 shrink-0 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>{c.title}:</span>
                       <div className="flex flex-wrap gap-1">
                         {c.skills.map((s) => (
                           <span
                             key={s.name}
-                            className="px-1.5 py-0.2 rounded bg-black/40 text-zinc-300 border border-white/5 text-[10px]"
+                            className={`px-1.5 py-0.2 rounded border text-[10px] ${
+                              isDark
+                                ? "bg-black/40 text-zinc-300 border-white/5"
+                                : "bg-black/5 text-zinc-800 border-black/10"
+                            }`}
                           >
                             {s.name}
                           </span>
@@ -1194,8 +1133,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("terminal"),
-              backgroundColor: "#1c1917",
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? "#1c1917" : "#24292e",
+              borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.15)",
             }}
             onClick={() => focusWindow("terminal")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1215,8 +1154,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("projects"),
-              backgroundColor: `${currentTheme.bg}F5`,
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("projects")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1234,13 +1173,13 @@ export const DesktopOs = () => {
                   key={p.title}
                   className="p-3.5 rounded-lg border space-y-2 hover:border-primary/50 transition-colors"
                   style={{
-                    backgroundColor: `${currentTheme.card}CC`,
-                    borderColor: currentTheme.border,
+                    backgroundColor: isDark ? `${currentTheme.card}CC` : "rgba(255, 255, 255, 0.9)",
+                    borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.08)",
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-semibold text-zinc-100">{p.title}</h4>
+                      <h4 className={`text-sm font-semibold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{p.title}</h4>
                       {p.featured && (
                         <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-primary/20 text-primary border border-primary/30 font-bold uppercase">
                           Featured
@@ -1258,7 +1197,7 @@ export const DesktopOs = () => {
                           href={p.githubUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-zinc-400 hover:text-zinc-100 p-1"
+                          className={`p-1 transition-colors ${isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-950"}`}
                           title="View on GitHub"
                         >
                           <FiGithub className="size-3.5" />
@@ -1277,12 +1216,16 @@ export const DesktopOs = () => {
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-300 leading-relaxed">{p.description}</p>
+                  <p className={`text-xs leading-relaxed ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>{p.description}</p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {p.techStack.map((tech) => (
                       <span
                         key={tech}
-                        className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/40 text-zinc-400 border border-white/5"
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                          isDark
+                            ? "bg-black/40 text-zinc-400 border-white/5"
+                            : "bg-black/5 text-zinc-700 border-black/10"
+                        }`}
                       >
                         {tech}
                       </span>
@@ -1299,8 +1242,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("blog"),
-              backgroundColor: `${currentTheme.bg}F5`,
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("blog")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1352,12 +1295,14 @@ export const DesktopOs = () => {
                   href={`/blog/${article.slug}`}
                   className="block p-3.5 rounded-lg border hover:border-primary/50 transition-colors group"
                   style={{
-                    backgroundColor: `${currentTheme.card}CC`,
-                    borderColor: currentTheme.border,
+                    backgroundColor: isDark ? `${currentTheme.card}CC` : "rgba(255, 255, 255, 0.9)",
+                    borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.08)",
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-zinc-100 group-hover:text-primary transition-colors">
+                    <p className={`text-xs font-semibold group-hover:text-primary transition-colors ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
+                    }`}>
                       {article.title}
                     </p>
                     <span className="text-[10px] font-mono text-zinc-500 shrink-0">
@@ -1365,13 +1310,17 @@ export const DesktopOs = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-2 font-mono text-[10px]">
-                    <span className="text-zinc-500">{article.date}</span>
-                    <span className="text-zinc-600">•</span>
+                    <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{article.date}</span>
+                    <span className="text-zinc-400">•</span>
                     <div className="flex gap-1">
                       {article.tags.map((t) => (
                         <span
                           key={t}
-                          className="px-1 py-0.2 rounded bg-black/40 text-primary border border-primary/20"
+                          className={`px-1 py-0.2 rounded border ${
+                            isDark
+                              ? "bg-black/40 text-primary border-primary/20"
+                              : "bg-primary/10 text-primary border-primary/30"
+                          }`}
                         >
                           {t}
                         </span>
@@ -1389,8 +1338,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("resume"),
-              backgroundColor: `${currentTheme.bg}F5`,
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? `${currentTheme.bg}F5` : "#ffffffF5",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("resume")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1410,8 +1359,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("settings"),
-              backgroundColor: `${currentTheme.bg}F8`,
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("settings")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1423,7 +1372,7 @@ export const DesktopOs = () => {
             <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs font-mono">
               {/* OS Theme selection section */}
               <div>
-                <h4 className="text-zinc-200 font-semibold mb-2 flex items-center gap-2">
+                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
                   <FiDroplet className="text-primary size-4" />
                   <span>Desktop OS Themes</span>
                 </h4>
@@ -1443,7 +1392,7 @@ export const DesktopOs = () => {
                         style={{ backgroundColor: t.card }}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-zinc-100">{t.name}</span>
+                          <span className={`text-[11px] font-bold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{t.name}</span>
                           {active && <FiCheck className="size-3 text-primary" />}
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
@@ -1466,39 +1415,11 @@ export const DesktopOs = () => {
                 </div>
               </div>
 
-              {/* Wallpaper selection section with Hero Image */}
-              <div className="border-t border-white/10 pt-4">
-                <h4 className="text-zinc-200 font-semibold mb-2 flex items-center gap-2">
-                  <FiImage className="text-primary size-4" />
-                  <span>Desktop Wallpapers (Hero Image Included)</span>
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {(Object.keys(WALLPAPERS) as WallpaperKey[]).map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setWallpaper(key)}
-                      style={WALLPAPERS[key].style}
-                      className={`h-22 rounded-lg border p-2 flex flex-col justify-end text-left cursor-pointer transition-all hover:scale-102 ${
-                        wallpaper === key
-                          ? "border-primary ring-2 ring-primary/40 shadow-lg"
-                          : "border-white/10"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full bg-black/75 px-1.5 py-0.5 rounded backdrop-blur-xs">
-                        <span className="text-[10px] text-zinc-100 font-medium truncate">
-                          {WALLPAPERS[key].name}
-                        </span>
-                        {wallpaper === key && <FiCheck className="size-3 text-primary shrink-0" />}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+
 
               {/* Tiling mode preference */}
               <div className="border-t border-white/10 pt-4">
-                <h4 className="text-zinc-200 font-semibold mb-2 flex items-center gap-2">
+                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
                   <FiSliders className="text-primary size-4" />
                   <span>Window Manager Layout (Hyprland / i3)</span>
                 </h4>
@@ -1516,14 +1437,14 @@ export const DesktopOs = () => {
                       className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between ${
                         layoutMode === l.mode
                           ? "bg-primary/20 border-primary text-primary"
-                          : "border-white/10 text-zinc-300 hover:bg-white/5"
+                          : (isDark ? "border-white/10 text-zinc-300 hover:bg-white/5" : "border-black/10 text-zinc-700 hover:bg-black/5")
                       }`}
                       style={{
                         backgroundColor: layoutMode === l.mode ? `${currentTheme.primary}20` : undefined,
                       }}
                     >
                       <span>{l.label}</span>
-                      <kbd className="px-1 py-0.5 rounded bg-black/40 text-[9px] text-zinc-400">
+                      <kbd className={`px-1 py-0.5 rounded text-[9px] ${isDark ? "bg-black/40 text-zinc-400" : "bg-black/5 text-zinc-600"}`}>
                         {l.key}
                       </kbd>
                     </button>
@@ -1532,26 +1453,26 @@ export const DesktopOs = () => {
               </div>
 
               {/* Keyboard Shortcuts Reference */}
-              <div className="border-t border-white/10 pt-4 text-[11px] text-zinc-400 space-y-1.5">
-                <span className="text-zinc-200 font-semibold block">Quick Keyboard Shortcuts:</span>
+              <div className={`border-t pt-4 text-[11px] space-y-1.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}>
+                <span className={`font-semibold block ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Quick Keyboard Shortcuts:</span>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div>
-                    <kbd className="text-zinc-200">Alt + Space</kbd>: Spotlight App Launcher
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Space</kbd>: Spotlight App Launcher
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + Tab</kbd>: Cycle Open Windows
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Tab</kbd>: Cycle Open Windows
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + M</kbd>: Toggle Maximize
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + M</kbd>: Toggle Maximize
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">ESC</kbd>: Close Active Window / Menus
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>ESC</kbd>: Close Active Window / Menus
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + 1..7</kbd>: Direct App Launchers
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + 1..7</kbd>: Direct App Launchers
                   </div>
                   <div>
-                    <kbd className="text-zinc-200">Alt + H/V/G/F</kbd>: Hyprland Tiling
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + H/V/G/F</kbd>: Hyprland Tiling
                   </div>
                 </div>
               </div>
@@ -1564,8 +1485,8 @@ export const DesktopOs = () => {
           <div
             style={{
               ...getTilingStyle("taskmanager"),
-              backgroundColor: `${currentTheme.bg}F8`,
-              borderColor: currentTheme.border,
+              backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
             onClick={() => focusWindow("taskmanager")}
             className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.8)] backdrop-blur-md overflow-hidden ${
@@ -1577,9 +1498,9 @@ export const DesktopOs = () => {
             <div className="p-4 sm:p-5 overflow-y-auto space-y-4 font-mono text-xs">
               {/* CPU & Memory Gauges */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10 space-y-2">
+                <div className={`p-3 rounded-lg border space-y-2 ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-400 text-[11px]">CPU UTILIZATION</span>
+                    <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>CPU UTILIZATION</span>
                     <span className="text-emerald-400 font-bold">{Math.round(cpuUsage)}%</span>
                   </div>
                   <div className="w-full h-2 rounded bg-white/10 overflow-hidden">
@@ -1590,9 +1511,9 @@ export const DesktopOs = () => {
                   </div>
                 </div>
 
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10 space-y-2">
+                <div className={`p-3 rounded-lg border space-y-2 ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-400 text-[11px]">MEMORY IN USE</span>
+                    <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>MEMORY IN USE</span>
                     <span className="text-primary font-bold">{memUsage.toFixed(1)} GB / 16 GB</span>
                   </div>
                   <div className="w-full h-2 rounded bg-white/10 overflow-hidden">
@@ -1606,10 +1527,10 @@ export const DesktopOs = () => {
 
               {/* Running Processes Table */}
               <div>
-                <h4 className="text-zinc-200 font-semibold mb-2 text-[11px]">Active Window Processes</h4>
+                <h4 className={`font-semibold mb-2 text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Active Window Processes</h4>
                 <div className="border border-white/10 rounded-lg overflow-hidden">
                   <table className="w-full text-left text-[11px]">
-                    <thead className="bg-black/60 text-zinc-400 border-b border-white/10 text-[10px]">
+                    <thead className={`border-b text-[10px] ${isDark ? "bg-black/60 text-zinc-400 border-white/10" : "bg-black/10 text-zinc-700 border-black/10"}`}>
                       <tr>
                         <th className="p-2">APP / PROCESS</th>
                         <th className="p-2">STATUS</th>
@@ -1622,7 +1543,7 @@ export const DesktopOs = () => {
                         <tr key={w.id} className="hover:bg-white/5 transition-colors">
                           <td className="p-2 flex items-center gap-2">
                             <w.icon className="size-3.5 text-primary" />
-                            <span className="text-zinc-200 font-medium">{w.title}</span>
+                            <span className={`font-medium ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>{w.title}</span>
                           </td>
                           <td className="p-2">
                             {w.isOpen ? (
@@ -1634,7 +1555,7 @@ export const DesktopOs = () => {
                               <span className="text-zinc-500">Stopped</span>
                             )}
                           </td>
-                          <td className="p-2 text-zinc-400">
+                          <td className={`p-2 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
                             {w.isOpen ? `${Math.floor(Math.random() * 40 + 30)} MB` : "—"}
                           </td>
                           <td className="p-2 text-right">
@@ -1674,11 +1595,11 @@ export const DesktopOs = () => {
               left: `${contextMenu.x}px`,
               top: `${contextMenu.y}px`,
               backgroundColor: currentTheme.card,
-              borderColor: currentTheme.border,
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
-            className="fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs text-zinc-200"
+            className={`fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
-            <div className="px-2.5 py-1 text-[10px] text-zinc-400 uppercase font-semibold border-b border-white/5 mb-1">
+            <div className={`px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}>
               Desktop
             </div>
             <button
@@ -1687,7 +1608,7 @@ export const DesktopOs = () => {
                 focusWindow("terminal");
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
             >
               <FiTerminal className="size-3.5 text-primary" />
               <span>Open Terminal</span>
@@ -1698,7 +1619,7 @@ export const DesktopOs = () => {
                 setShowLauncher(true);
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
             >
               <FiCommand className="size-3.5 text-primary" />
               <span>Launch Application</span>
@@ -1709,10 +1630,12 @@ export const DesktopOs = () => {
                 focusWindow("settings");
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-black/5"
+              }`}
             >
               <FiSettings className="size-3.5 text-primary" />
-              <span>Change Wallpaper</span>
+              <span>Settings & Themes</span>
             </button>
             <button
               type="button"
@@ -1720,7 +1643,7 @@ export const DesktopOs = () => {
                 focusWindow("taskmanager");
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
             >
               <FiActivity className="size-3.5 text-emerald-400" />
               <span>Task Manager</span>
@@ -1731,19 +1654,19 @@ export const DesktopOs = () => {
                 resetDesktopShortcuts();
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
             >
               <FiRotateCcw className="size-3.5 text-zinc-400" />
               <span>Reset Desktop Icons</span>
             </button>
-            <div className="my-1 border-t border-white/10" />
+            <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
             <button
               type="button"
               onClick={() => {
                 setLayoutMode((prev) => (prev === "tiling-grid" ? "floating" : "tiling-grid"));
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
             >
               <FiGrid className="size-3.5 text-primary" />
               <span>Toggle Tile Grid</span>
@@ -1770,11 +1693,11 @@ export const DesktopOs = () => {
               left: `${appContextMenu.x}px`,
               top: `${appContextMenu.y}px`,
               backgroundColor: currentTheme.card,
-              borderColor: currentTheme.border,
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
             }}
-            className="fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs text-zinc-200"
+            className={`fixed z-50 w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
-            <div className="flex items-center gap-2 px-2.5 py-1 text-[10px] text-zinc-400 uppercase font-semibold border-b border-white/5 mb-1">
+            <div className={`flex items-center gap-2 px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}>
               <span>{windows[appContextMenu.windowId].title}</span>
             </div>
 
@@ -1785,7 +1708,7 @@ export const DesktopOs = () => {
                 if (appContextMenu.windowId) focusWindow(appContextMenu.windowId);
                 setAppContextMenu((prev) => ({ ...prev, visible: false }));
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+              className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
             >
               <FiEye className="size-3.5 text-primary" />
               <span>
@@ -1811,7 +1734,7 @@ export const DesktopOs = () => {
                     }
                     setAppContextMenu((prev) => ({ ...prev, visible: false }));
                   }}
-                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
                 >
                   <FiMinimize className="size-3.5 text-yellow-400" />
                   <span>
@@ -1825,7 +1748,7 @@ export const DesktopOs = () => {
                     if (appContextMenu.windowId) toggleMaximize(appContextMenu.windowId);
                     setAppContextMenu((prev) => ({ ...prev, visible: false }));
                   }}
-                  className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
+                  className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}`}
                 >
                   <FiMaximize2 className="size-3.5 text-emerald-400" />
                   <span>
@@ -1836,7 +1759,7 @@ export const DesktopOs = () => {
             )}
 
             {/* Remove / Add Desktop Shortcut */}
-            <div className="my-1 border-t border-white/10" />
+            <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
             {desktopApps.includes(appContextMenu.windowId) ? (
               <button
                 type="button"
@@ -1844,7 +1767,7 @@ export const DesktopOs = () => {
                   if (appContextMenu.windowId) removeDesktopShortcut(appContextMenu.windowId);
                   setAppContextMenu((prev) => ({ ...prev, visible: false }));
                 }}
-                className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 text-zinc-300 transition-colors flex items-center gap-2 cursor-pointer"
+                className={`w-full text-left px-2.5 py-1.5 rounded transition-colors flex items-center gap-2 cursor-pointer ${isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700"}`}
               >
                 <FiTrash2 className="size-3.5 text-zinc-400" />
                 <span>Remove Shortcut</span>
@@ -1902,11 +1825,11 @@ export const DesktopOs = () => {
               className="w-full max-w-lg rounded-2xl border shadow-2xl p-4 font-mono overflow-hidden flex flex-col gap-3"
               style={{
                 backgroundColor: currentTheme.card,
-                borderColor: currentTheme.border,
+                borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
               }}
             >
               {/* Launcher Header & Live Search Bar */}
-              <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs">
+              <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border text-xs ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
                 <FiSearch className="size-4 text-primary shrink-0" />
                 <input
                   type="text"
@@ -1914,7 +1837,7 @@ export const DesktopOs = () => {
                   value={launcherSearch}
                   onChange={(e) => setLauncherSearch(e.target.value)}
                   placeholder="Search applications, tools, system specs (Alt+Space)..."
-                  className="w-full bg-transparent border-0 outline-none text-zinc-100 placeholder:text-zinc-500 font-mono text-xs focus:ring-0 p-0"
+                  className={`w-full bg-transparent border-0 outline-none font-mono text-xs focus:ring-0 p-0 ${isDark ? "text-zinc-100 placeholder:text-zinc-500" : "text-zinc-900 placeholder:text-zinc-400"}`}
                 />
                 <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-zinc-400 shrink-0">
                   ESC
@@ -1988,7 +1911,7 @@ export const DesktopOs = () => {
                   .map((app) => (
                     <div
                       key={app.id}
-                      className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 border border-transparent hover:border-white/10 transition-all group relative text-center"
+                      className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border border-transparent transition-all group relative text-center ${isDark ? "hover:bg-white/10 hover:border-white/10" : "hover:bg-black/5 hover:border-black/10"}`}
                     >
                       <button
                         type="button"
@@ -2003,13 +1926,13 @@ export const DesktopOs = () => {
                           className="size-11 rounded-xl flex items-center justify-center border shadow-sm group-hover:scale-105 transition-transform"
                           style={{
                             backgroundColor: `${currentTheme.bg}CC`,
-                            borderColor: currentTheme.border,
+                            borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
                             color: currentTheme.primary,
                           }}
                         >
                           <app.icon className="size-5" />
                         </div>
-                        <span className="text-[11px] font-semibold text-zinc-200 truncate w-full">
+                        <span className={`text-[11px] font-semibold truncate w-full ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
                           {app.label}
                         </span>
                         <span className="text-[9px] text-zinc-400 font-mono">Alt+{app.key}</span>
@@ -2059,7 +1982,7 @@ export const DesktopOs = () => {
               className="flex items-center gap-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-xl"
               style={{
                 backgroundColor: `${currentTheme.card}F2`,
-                borderColor: currentTheme.border,
+                borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
               }}
             >
               {openWindows.map((w) => (
@@ -2092,8 +2015,8 @@ export const DesktopOs = () => {
         <div
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border backdrop-blur-xl shadow-2xl"
           style={{
-            backgroundColor: `${currentTheme.card}E6`,
-            borderColor: currentTheme.border,
+            backgroundColor: isDark ? `${currentTheme.card}E6` : "rgba(255, 255, 255, 0.92)",
+            borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
           }}
         >
           {(
@@ -2118,7 +2041,7 @@ export const DesktopOs = () => {
                 onClick={() => toggleWindow(item.id)}
                 onContextMenu={(e) => handleAppContextMenu(e, item.id)}
                 className={`group relative flex flex-col items-center justify-center size-11 rounded-xl transition-all hover:scale-115 active:scale-95 cursor-pointer ${
-                  isFocused ? "border" : "hover:bg-white/10 text-zinc-300"
+                  isFocused ? "border" : (isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700")
                 }`}
                 style={{
                   backgroundColor: isFocused ? `${currentTheme.primary}25` : undefined,
