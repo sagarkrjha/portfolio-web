@@ -701,6 +701,17 @@ export const DesktopOs = () => {
       if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "f" || e.key === "F")) {
         e.preventDefault();
         if (activeWindow) focusWindow(activeWindow);
+        return;
+      }
+
+      // 11. Quick Terminal Dropdown Toggle: Ctrl + ` or Alt + T
+      if (
+        ((e.ctrlKey && !e.altKey && !e.metaKey) || (e.altKey && !e.ctrlKey && !e.metaKey)) &&
+        (e.key === "`" || e.code === "Backquote" || e.key === "t" || e.key === "T")
+      ) {
+        e.preventDefault();
+        toggleWindow("terminal");
+        return;
       }
     };
 
@@ -2027,66 +2038,89 @@ export const DesktopOs = () => {
 
               {/* Keyboard Shortcuts Reference */}
               <div
-                className={`border-t pt-4 text-[11px] space-y-2.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}
+                className={`border-t pt-4 text-[11px] space-y-3 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                    className={`font-semibold flex items-center gap-1.5 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
                   >
+                    <FiCommand className="size-3.5 text-primary" />
                     Conflict-Free Keyboard Shortcuts
                   </span>
                   <span className="text-[10px] font-mono opacity-60">
-                    Works across macOS, Windows & Linux
+                    macOS • Windows • Linux
                   </span>
                 </div>
                 <p className="text-[10px] leading-relaxed opacity-75">
                   Scoped with <kbd className="font-semibold text-primary">Alt / ⌥</kbd> modifiers to guarantee zero collisions with browser native shortcuts (such as browser back/refresh, address bar, or system tab switching).
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px]">
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Spotlight App Launcher</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Space</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Cycle Open Windows</span>
-                    <div className="flex items-center gap-1">
-                      <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Tab</kbd>
-                      <span className="text-[9px] text-zinc-500">or</span>
-                      <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + `</kbd>
+                {/* Categorized Shortcuts */}
+                <div className="space-y-3">
+                  {/* System & Window Management */}
+                  <div>
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-primary block mb-1">
+                      System & Window Management
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px]">
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Cycle Open Windows</span>
+                        <div className="flex items-center gap-1">
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + `</kbd>
+                          <span className="text-[9px] text-zinc-500">/</span>
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Tab</kbd>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Spotlight App Launcher</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + Space</kbd>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Close Active Window</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + W / Esc</kbd>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Toggle Maximize / Restore</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + M</kbd>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Center Active Window</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + F</kbd>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Mission Control</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl/Alt + ↑</kbd>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Switch Virtual Space</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl/Alt + ← / →</kbd>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Shut Down Carbon OS</span>
+                        <kbd className="font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">Alt + Q</kbd>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Shut Down Carbon OS</span>
-                    <kbd className="font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">Alt + Q</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Close Active Window</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + W / ESC</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Toggle Maximize / Restore</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + M</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Center Active Window</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + F</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Launch Apps by Number</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + 1..0</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Mission Control</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl/Alt + ↑</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Integrated Terminal Toggle</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl + ` / ⌃`</kbd>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5 border-b border-white/5">
-                    <span className="text-zinc-400">Switch Virtual Space</span>
-                    <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl/Alt + ← / →</kbd>
+
+                  {/* Quick Launch & Tools */}
+                  <div>
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-primary block mb-1">
+                      Quick Launch & Terminal
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px]">
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Toggle Terminal</span>
+                        <div className="flex items-center gap-1">
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Ctrl + `</kbd>
+                          <span className="text-[9px] text-zinc-500">/</span>
+                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + T</kbd>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Launch Apps by Number</span>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + 1..0</kbd>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
