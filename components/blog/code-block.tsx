@@ -2,15 +2,21 @@
 
 import React, { useState } from "react";
 import { FiCode, FiCopy, FiCheck } from "react-icons/fi";
+import { highlightCode } from "@/lib/prism";
 
 interface CodeBlockProps {
   code: string;
   lang: string;
-  highlightedHtml: string | null;
-  language: string;
+  highlightedHtml?: string | null;
+  language?: string;
 }
 
-export function CodeBlock({ code, lang, highlightedHtml, language }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  lang,
+  highlightedHtml: initialHtml,
+  language: initialLang,
+}: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -18,6 +24,17 @@ export function CodeBlock({ code, lang, highlightedHtml, language }: CodeBlockPr
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  // If highlightedHtml wasn't precomputed (or in client component), compute it
+  const { highlightedHtml, language } = React.useMemo(() => {
+    if (initialHtml !== undefined) {
+      return {
+        highlightedHtml: initialHtml,
+        language: initialLang || lang.toLowerCase(),
+      };
+    }
+    return highlightCode(code, lang);
+  }, [code, lang, initialHtml, initialLang]);
 
   return (
     <div className="relative my-5 rounded-lg border border-border bg-muted/60 p-4 font-mono text-xs sm:text-sm leading-relaxed text-foreground shadow-sm group">
