@@ -230,22 +230,9 @@ export const DesktopOs = () => {
   const [activeSpace, setActiveSpace] = useState<number>(0);
   const [isMissionControl, setIsMissionControl] = useState(false);
   const [minimizeEffect, setMinimizeEffect] = useState<"genie" | "scale">("genie");
-  const [isBooting, setIsBooting] = useState(true);
-  const [isExiting, setIsExiting] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsBooting(false);
-    }, 1100);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleExitOs = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      toggleOsMode();
-      setIsExiting(false);
-    }, 450);
+    toggleOsMode();
   };
 
   // Customizable Desktop Shortcuts list (supports removing/restoring desktop shortcuts)
@@ -955,6 +942,11 @@ export const DesktopOs = () => {
 
   if (!isOsMode) return null;
 
+  // Defensive guard: Desktop OS is exclusively tailored for desktop screens (>= 768px)
+  if (typeof window !== "undefined" && window.innerWidth < 768) {
+    return null;
+  }
+
   // Compute Tiling Styles if Tiling Layout is active
   const getWindowStyle = (id: WindowId): React.CSSProperties => {
     const w = windows[id];
@@ -1175,57 +1167,9 @@ export const DesktopOs = () => {
       onContextMenu={handleContextMenu}
       style={getHeroWallpaperStyle(isDark)}
       className={`fixed inset-0 z-[9990] flex flex-col font-sans select-none overflow-hidden transition-all duration-300 ${
-        isExiting ? "opacity-0 scale-95 blur-md" : "opacity-100 scale-100 blur-none"
-      } ${isDark ? "text-zinc-100" : "text-zinc-900"}`}
+        isDark ? "text-zinc-100" : "text-zinc-900"
+      }`}
     >
-      {/* Carbon OS Boot Sequence Curtain */}
-      <AnimatePresence>
-        {isBooting && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="fixed inset-0 z-[10050] bg-black flex flex-col items-center justify-center select-none"
-          >
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="flex flex-col items-center gap-6"
-            >
-              {/* Apple / Carbon Boot Logo with glow */}
-              <div className="relative">
-                <div className="absolute -inset-4 rounded-full bg-white/5 blur-xl pointer-events-none" />
-                <span className="text-white text-6xl font-light tracking-tighter drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]">
-                  
-                </span>
-              </div>
-
-              {/* Progress bar and subtitle */}
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-52 h-1 bg-zinc-800/80 rounded-full overflow-hidden border border-white/5">
-                  <motion.div
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 0.9, ease: "easeInOut" }}
-                    className="h-full bg-zinc-100 rounded-full"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-zinc-500 font-mono text-[10px] tracking-wider uppercase">
-                    Carbon OS 15.1
-                  </span>
-                  <span className="size-1 rounded-full bg-zinc-600" />
-                  <span className="text-zinc-600 font-mono text-[10px]">
-                    Apple Silicon
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* macOS Native Top Menu Bar */}
       <header
         className={`h-7 w-full border-b px-2.5 sm:px-3 flex items-center justify-between text-xs backdrop-blur-xl z-[10000] shadow-sm select-none ${

@@ -64,7 +64,7 @@ export const Header = () => {
             <button
               type="button"
               onClick={toggleOsMode}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs font-mono font-medium rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer border border-border/40"
+              className="hidden md:flex items-center gap-1.5 px-2 py-1 text-xs font-mono font-medium rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer border border-border/40"
               title="Launch Desktop OS Mode"
             >
               <FiMonitor className="size-3.5 text-primary" />
@@ -76,15 +76,6 @@ export const Header = () => {
 
         {/* Mobile Navigation Controls */}
         <div className="flex sm:hidden items-center gap-2">
-          <button
-            type="button"
-            onClick={toggleOsMode}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-mono font-medium rounded-none text-foreground bg-muted/60 border border-border/60"
-            title="Launch Desktop OS Mode"
-          >
-            <FiMonitor className="size-3.5 text-primary" />
-            <span>OS</span>
-          </button>
           <ThemeToggleButton />
           <button
             type="button"
