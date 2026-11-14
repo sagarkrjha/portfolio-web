@@ -49,6 +49,7 @@ import { siteConfig, heroConfig, aboutConfig, blogConfig } from "@/lib/config";
 import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import { AboutView } from "@/components/app-components/about";
+import { BlogReaderView } from "@/components/app-components/blog";
 import cachedData from "@/lib/generated/portfolio-data.json";
 
 export type WindowId =
@@ -2079,16 +2080,25 @@ export const DesktopOs = () => {
               </div>
             </div>
 
-            {/* Embedded Live IFrame / Interactive View */}
-            <div className="flex-1 w-full h-full min-h-[420px] relative bg-white">
-              <iframe
-                key={browserUrl}
-                src={browserUrl}
-                title={browserTitle}
-                className="w-full h-full border-0 absolute inset-0"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-                loading="lazy"
-              />
+            {/* Embedded Live View / Native Reader / External IFrame */}
+            <div className={`flex-1 w-full h-full min-h-[420px] relative overflow-y-auto ${
+              isDark ? "bg-[#181514] text-zinc-100" : "bg-white text-zinc-900"
+            }`}>
+              {browserUrl.startsWith("/blog/") ? (
+                <BlogReaderView
+                  slug={browserUrl.replace(/^\/blog\//, "").split("?")[0]}
+                  isDark={isDark}
+                />
+              ) : (
+                <iframe
+                  key={browserUrl}
+                  src={browserUrl}
+                  title={browserTitle}
+                  className="w-full h-full border-0 absolute inset-0 bg-white"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+                  loading="lazy"
+                />
+              )}
             </div>
           </div>
         )}
