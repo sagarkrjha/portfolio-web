@@ -131,7 +131,7 @@ Once $V[k]$ reaches $N$ and $y$ reaches $M$, the shortest edit distance has been
 
 Below is the language-agnostic algorithm for determining the shortest edit distance $D$ and reconstructing the edit path:
 
-```text
+```pseudocode
 Algorithm: MyersDiff(Sequence A of length N, Sequence B of length M)
 Returns: List of edit operations (Keep, Add, Delete)
 
@@ -170,7 +170,7 @@ Returns: List of edit operations (Keep, Add, Delete)
 
 Once $(N, M)$ is reached at distance $D$, we reconstruct the path by walking backward from $d = D$ down to $1$:
 
-```text
+```pseudocode
 Function Backtrack(History, Sequence A, Sequence B, Distance D):
     Set x = N
     Set y = M

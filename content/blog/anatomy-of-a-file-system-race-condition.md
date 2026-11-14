@@ -127,7 +127,7 @@ flowchart TD
 ### Why This Guarantees 100% Snapshot Isolation:
 
 1. **Same-Directory Sibling Placement:**
-   ```
+   ```pseudocode
    dir = dirname(file_path)
    temp_path = dir + "/." + basename(file_path) + "." + timestamp() + "." + random_id() + ".tmp"
    ```
@@ -135,7 +135,7 @@ flowchart TD
    > The temporary file **must** be allocated in the exact same directory (and thus the same filesystem mount) as the destination file. If a temp file is placed in a global `/tmp` volume and moved across mount boundaries, the operating system cannot perform an atomic inode pointer update; it is forced to perform a non-atomic `copy + unlink` fallback.
 
 2. **The Durability Barrier (`fsync`):**
-   ```
+   ```pseudocode
    fsync(temp_fd)  // Linux / macOS: fsync(2)
    // Windows: FlushFileBuffers(handle)
    ```
