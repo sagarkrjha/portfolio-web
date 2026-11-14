@@ -65,6 +65,7 @@ function formatMathExpression(expr: string): string {
     .replace(/\^\{([^}]+)\}/g, "^$1");
 }
 
+// Helper to format inline code, bold, italics, math, and links without broken symbols
 function renderInlineFormatted(text: string): React.ReactNode {
   const tokens = text.split(
     /(\[[^\]]+\]\([^\)]+\)|`[^`]+`|\$(?:[^\$\n]+)\$|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|(?<=\s|^)\*[^*\n]+?\*(?=\s|$|[.,:;!?]))/g,
@@ -82,7 +83,7 @@ function renderInlineFormatted(text: string): React.ReactNode {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary underline underline-offset-4 font-medium hover:opacity-80 transition-opacity"
+          className="text-primary underline underline-offset-4 font-medium hover:text-primary/80 transition-colors"
         >
           {renderInlineFormatted(label)}
         </a>
@@ -93,7 +94,7 @@ function renderInlineFormatted(text: string): React.ReactNode {
       return (
         <code
           key={i}
-          className="rounded bg-black/10 dark:bg-white/10 px-1.5 py-0.5 font-mono text-xs font-medium border border-black/10 dark:border-white/10"
+          className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground font-medium border border-border/50"
         >
           {token.slice(1, -1)}
         </code>
@@ -105,7 +106,7 @@ function renderInlineFormatted(text: string): React.ReactNode {
       return (
         <span
           key={i}
-          className="font-mono text-xs bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded font-medium border border-black/10 dark:border-white/10 inline-block align-baseline whitespace-nowrap"
+          className="font-mono text-xs sm:text-[13px] bg-muted/60 px-1.5 py-0.5 rounded text-foreground font-medium border border-border/40 inline-block align-baseline whitespace-nowrap"
         >
           {mathContent}
         </span>
@@ -114,7 +115,7 @@ function renderInlineFormatted(text: string): React.ReactNode {
 
     if (token.startsWith("***") && token.endsWith("***") && token.length > 6) {
       return (
-        <strong key={i} className="font-semibold italic">
+        <strong key={i} className="font-semibold italic text-foreground">
           {renderInlineFormatted(token.slice(3, -3))}
         </strong>
       );
@@ -122,14 +123,18 @@ function renderInlineFormatted(text: string): React.ReactNode {
 
     if (token.startsWith("**") && token.endsWith("**")) {
       return (
-        <strong key={i} className="font-semibold">
+        <strong key={i} className="font-semibold text-foreground">
           {renderInlineFormatted(token.slice(2, -2))}
         </strong>
       );
     }
 
     if (token.startsWith("*") && token.endsWith("*") && token.length > 2) {
-      return <em key={i} className="italic">{token.slice(1, -1)}</em>;
+      return (
+        <em key={i} className="italic text-foreground">
+          {token.slice(1, -1)}
+        </em>
+      );
     }
 
     return token;
@@ -148,17 +153,17 @@ function CodeBlockWithCopy({ code, lang }: { code: string; lang: string }) {
   const { highlightedHtml, language } = highlightCode(code, lang);
 
   return (
-    <div className="relative my-5 rounded-lg border border-black/10 dark:border-white/10 bg-[#1e1e1e] text-zinc-100 overflow-hidden font-mono shadow-md group">
+    <div className="relative my-5 rounded-lg border border-border bg-muted/60 p-4 font-mono text-xs sm:text-sm leading-relaxed text-foreground shadow-sm group">
       {/* VS Code editor file/tab header */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-b border-black/20 text-[11px] text-zinc-400 select-none">
-        <span className="flex items-center gap-1.5 font-mono uppercase font-semibold text-[10px] text-zinc-300">
+      <div className="flex items-center justify-between pb-2 mb-3 border-b border-border/50 text-[11px] text-muted-foreground select-none">
+        <span className="flex items-center gap-1.5 font-mono uppercase font-semibold text-[10px] text-foreground/90">
           <FiCode className="size-3 text-primary" />
           {lang || "code"}
         </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer text-[10px]"
+          className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-[10px]"
           title="Copy code snippet"
         >
           {copied ? <FiCheck className="size-3 text-emerald-400" /> : <FiCopy className="size-3" />}
@@ -166,7 +171,7 @@ function CodeBlockWithCopy({ code, lang }: { code: string; lang: string }) {
         </button>
       </div>
 
-      <div className="p-4 overflow-x-auto text-xs sm:text-sm leading-relaxed">
+      <div className="overflow-x-auto text-xs sm:text-sm leading-relaxed">
         {highlightedHtml ? (
           <code
             className={`language-${language} font-mono`}
@@ -214,7 +219,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
           if (!trimmed) return null;
 
           if (trimmed === "---") {
-            return <hr key={pIdx} className="my-8 border-black/10 dark:border-white/10" />;
+            return <hr key={pIdx} className="my-8 border-border" />;
           }
 
           if (trimmed.startsWith("# ")) {
@@ -239,7 +244,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
               <h2
                 key={pIdx}
                 id={headingId}
-                className="scroll-mt-6 text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-black/10 dark:border-white/10 pb-2"
+                className="scroll-mt-6 text-xl sm:text-2xl font-semibold tracking-tight mt-8 mb-3 border-b border-border pb-2"
               >
                 {renderInlineFormatted(h2Text)}
               </h2>
@@ -252,7 +257,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
               <h3
                 key={pIdx}
                 id={headingId}
-                className="scroll-mt-6 text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2"
+                className="scroll-mt-6 text-lg sm:text-xl font-semibold tracking-tight mt-6 mb-2 text-foreground"
               >
                 {renderInlineFormatted(h3Text)}
               </h3>
@@ -262,7 +267,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             return (
               <h4
                 key={pIdx}
-                className="text-base font-semibold tracking-tight mt-4 mb-1"
+                className="text-base font-semibold tracking-tight mt-4 mb-1 text-foreground"
               >
                 {renderInlineFormatted(trimmed.replace("#### ", ""))}
               </h4>
@@ -275,12 +280,9 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             return (
               <div
                 key={pIdx}
-                className="my-5 py-4 px-5 rounded-lg bg-black/5 dark:bg-[#1a1716] border border-primary/20 text-center font-mono text-sm sm:text-base overflow-x-auto shadow-inner"
+                className="my-4 py-3 px-4 rounded-md bg-muted/40 border border-border/40 text-center font-mono text-sm sm:text-base text-foreground overflow-x-auto"
               >
-                <div className="text-[10px] uppercase font-mono text-primary/70 mb-1 text-left select-none">
-                  Mathematical Notation (LaTeX)
-                </div>
-                <div className="py-1">{formattedExpr}</div>
+                {formattedExpr}
               </div>
             );
           }
@@ -298,18 +300,34 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                 (l) => l.trim().length > 0,
               );
 
+              const alertColors: Record<string, { border: string; bg: string; title: string; text: string }> = {
+                NOTE: { border: "border-blue-500/40", bg: "bg-blue-500/10", title: "text-blue-500", text: "Note" },
+                IMPORTANT: { border: "border-amber-500/40", bg: "bg-amber-500/10", title: "text-amber-500", text: "Important" },
+                WARNING: { border: "border-red-500/40", bg: "bg-red-500/10", title: "text-red-500", text: "Warning" },
+                TIP: { border: "border-emerald-500/40", bg: "bg-emerald-500/10", title: "text-emerald-500", text: "Tip" },
+                CAUTION: { border: "border-red-600/40", bg: "bg-red-600/10", title: "text-red-600", text: "Caution" },
+              };
+
+              const conf = alertColors[alertType] || alertColors.NOTE;
+
               return (
-                <div
-                  key={pIdx}
-                  className="my-4 rounded-lg border border-primary/40 bg-primary/10 p-4 text-sm leading-relaxed"
-                >
-                  <div className="font-semibold mb-2 text-xs uppercase tracking-wider text-primary">
-                    {alertType}
+                <div key={pIdx} className={`my-4 rounded-lg border ${conf.border} ${conf.bg} p-4 text-sm leading-relaxed`}>
+                  <div className={`font-semibold mb-2 text-xs uppercase tracking-wider ${conf.title}`}>
+                    {conf.text}
                   </div>
-                  <div className="space-y-2 opacity-90">
-                    {restLines.map((rl, rIdx) => (
-                      <p key={rIdx}>{renderInlineFormatted(rl)}</p>
-                    ))}
+                  <div className="text-foreground/90 space-y-2">
+                    {restLines.map((rl, rIdx) => {
+                      const trimmedLine = rl.trim();
+                      if (trimmedLine.startsWith("* ") || trimmedLine.startsWith("- ")) {
+                        return (
+                          <div key={rIdx} className="flex items-start gap-2 text-sm text-foreground/90">
+                            <span className="text-primary mt-1">•</span>
+                            <span>{renderInlineFormatted(trimmedLine.replace(/^[-*]\s+/, ""))}</span>
+                          </div>
+                        );
+                      }
+                      return <p key={rIdx}>{renderInlineFormatted(rl)}</p>;
+                    })}
                   </div>
                 </div>
               );
@@ -318,11 +336,35 @@ function renderMarkdownContent(content: string, postTitle?: string) {
             return (
               <blockquote
                 key={pIdx}
-                className="my-4 border-l-2 border-primary/60 pl-4 py-1 space-y-2 text-sm sm:text-base italic opacity-80 bg-black/5 dark:bg-white/5 rounded-r-md"
+                className="my-4 border-l-2 border-primary/60 pl-4 py-1 space-y-2 text-sm sm:text-base text-muted-foreground bg-muted/20 rounded-r-md"
               >
-                {rawQuoteLines.map((ql, qIdx) => (
-                  <p key={qIdx}>{renderInlineFormatted(ql)}</p>
-                ))}
+                {rawQuoteLines.map((ql, qIdx) => {
+                  const lineTrimmed = ql.trim();
+                  if (!lineTrimmed) return null;
+
+                  if (lineTrimmed.startsWith("### ")) {
+                    return (
+                      <h4 key={qIdx} className="text-base font-semibold text-foreground tracking-tight not-italic">
+                        {renderInlineFormatted(lineTrimmed.replace("### ", ""))}
+                      </h4>
+                    );
+                  }
+
+                  if (lineTrimmed.startsWith("* ") || lineTrimmed.startsWith("- ")) {
+                    return (
+                      <div key={qIdx} className="flex items-start gap-2 text-sm not-italic text-foreground/90 pl-1">
+                        <span className="text-primary mt-1">•</span>
+                        <span>{renderInlineFormatted(lineTrimmed.replace(/^[-*]\s+/, ""))}</span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <p key={qIdx} className="italic">
+                      {renderInlineFormatted(ql)}
+                    </p>
+                  );
+                })}
               </blockquote>
             );
           }
@@ -365,9 +407,9 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                 const bodyLines = tableLines.slice(2);
 
                 return (
-                  <div key={pIdx} className="my-6 overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
+                  <div key={pIdx} className="my-6 overflow-x-auto rounded-lg border border-border">
                     <table className="w-full text-left text-sm">
-                      <thead className="bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10 font-semibold">
+                      <thead className="bg-muted/50 border-b border-border text-foreground font-semibold">
                         <tr>
                           {headerCells.map((h, hIdx) => (
                             <th key={hIdx} className="px-4 py-2.5">
@@ -376,15 +418,15 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-black/5 dark:divide-white/5">
+                      <tbody className="divide-y divide-border">
                         {bodyLines.map((row, rIdx) => {
                           const cells = parseRowCells(row);
                           return (
-                            <tr key={rIdx} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                            <tr key={rIdx} className="hover:bg-muted/30 transition-colors">
                               {cells.map((cell, cIdx) => {
                                 const subLines = cell.split(/<br\s*\/?>/i);
                                 return (
-                                  <td key={cIdx} className="px-4 py-2 opacity-90 align-top">
+                                  <td key={cIdx} className="px-4 py-2 text-muted-foreground align-top">
                                     {subLines.map((sub, sIdx) => (
                                       <div key={sIdx} className={sIdx > 0 ? "mt-1.5" : ""}>
                                         {renderInlineFormatted(sub.trim())}
@@ -422,7 +464,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                     return (
                       <div
                         key={lIdx}
-                        className="my-2 py-2 px-3 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-center font-mono text-sm sm:text-base overflow-x-auto mx-4"
+                        className="my-2 py-2 px-3 rounded-md bg-muted/50 border border-border/40 text-center font-mono text-sm sm:text-base text-foreground overflow-x-auto mx-4"
                       >
                         {formattedExpr}
                       </div>
@@ -443,7 +485,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                           type="checkbox"
                           checked={checked}
                           readOnly
-                          className="mt-1 h-3.5 w-3.5 rounded accent-primary pointer-events-none"
+                          className="mt-1 h-3.5 w-3.5 rounded border-border accent-primary pointer-events-none"
                         />
                         <div className="leading-relaxed flex-1">
                           {renderInlineFormatted(cleanText)}
@@ -456,7 +498,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                     const cleanText = lineTrimmed.replace(/^\d+\.\s+/, "");
                     return (
                       <div key={lIdx} className="flex items-start gap-2 pt-2 first:pt-0">
-                        <span className="font-semibold text-primary shrink-0 select-none">
+                        <span className="font-semibold text-foreground shrink-0 select-none">
                           {lineTrimmed.match(/^\d+\./)?.[0]}
                         </span>
                         <div className="leading-relaxed flex-1">
@@ -471,20 +513,20 @@ function renderMarkdownContent(content: string, postTitle?: string) {
                     return (
                       <div
                         key={lIdx}
-                        className={`flex items-start gap-2.5 ${isSubItem ? "pl-5 opacity-90" : "pt-1"}`}
+                        className={`flex items-start gap-2 leading-relaxed ${
+                          isSubItem ? "pl-8 text-muted-foreground/90" : "pl-4"
+                        }`}
                       >
-                        <span className="text-primary mt-1.5 text-[8px] leading-none select-none">
-                          {isSubItem ? "○" : "●"}
+                        <span className="text-primary/70 shrink-0 select-none mt-1">
+                          {isSubItem ? "◦" : "•"}
                         </span>
-                        <div className="leading-relaxed flex-1">
-                          {renderInlineFormatted(cleanText)}
-                        </div>
+                        <div className="flex-1">{renderInlineFormatted(cleanText)}</div>
                       </div>
                     );
                   }
 
                   return (
-                    <div key={lIdx} className="leading-relaxed pl-5">
+                    <div key={lIdx} className="leading-relaxed pl-8">
                       {renderInlineFormatted(lineTrimmed)}
                     </div>
                   );
@@ -496,7 +538,7 @@ function renderMarkdownContent(content: string, postTitle?: string) {
           if (trimmed.includes("\n")) {
             const lines = trimmed.split("\n");
             return (
-              <p key={pIdx} className="text-sm sm:text-base leading-7 opacity-90">
+              <p key={pIdx} className="text-sm sm:text-base leading-7 text-muted-foreground">
                 {lines.map((line, lIdx) => (
                   <React.Fragment key={lIdx}>
                     {lIdx > 0 && <br />}
@@ -506,6 +548,12 @@ function renderMarkdownContent(content: string, postTitle?: string) {
               </p>
             );
           }
+
+          return (
+            <p key={pIdx} className="text-sm sm:text-base leading-7 text-muted-foreground">
+              {renderInlineFormatted(trimmed)}
+            </p>
+          );
         })}
       </div>
     );
@@ -595,12 +643,10 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
   return (
     <div className="flex flex-col h-full select-text">
       {/* VS Code like Editor / Markdown Header Bar */}
-      <div className={`flex items-center justify-between px-4 py-2 border-b select-none shrink-0 text-xs font-mono ${
-        isDark ? "bg-[#1f1c1a] border-white/10 text-zinc-300" : "bg-[#f5f5f5] border-black/10 text-zinc-700"
-      }`}>
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30 select-none shrink-0 text-xs font-mono text-muted-foreground">
         <div className="flex items-center gap-2 truncate">
           <FiFileText className="size-3.5 text-primary" />
-          <span className="font-semibold truncate">{post.meta.slug}.md</span>
+          <span className="font-semibold text-foreground truncate">{post.meta.slug}.md</span>
           <span className="text-[10px] opacity-60">({post.meta.readTime})</span>
         </div>
 
@@ -613,7 +659,7 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
               className={`flex items-center gap-1 px-2 py-0.8 rounded text-[11px] transition-colors cursor-pointer border ${
                 showToc
                   ? "bg-primary/20 text-primary border-primary/40 font-semibold"
-                  : "hover:bg-black/5 dark:hover:bg-white/10 border-transparent"
+                  : "hover:bg-muted text-muted-foreground hover:text-foreground border-transparent"
               }`}
               title="Toggle Table of Contents"
             >
@@ -623,14 +669,14 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
           )}
 
           {/* Toggle Markdown Preview vs Raw Source */}
-          <div className="flex items-center rounded border border-black/10 dark:border-white/10 overflow-hidden text-[11px]">
+          <div className="flex items-center rounded border border-border overflow-hidden text-[11px]">
             <button
               type="button"
               onClick={() => setViewMode("preview")}
               className={`flex items-center gap-1 px-2.5 py-0.8 transition-colors cursor-pointer ${
                 viewMode === "preview"
                   ? "bg-primary text-black font-bold"
-                  : "hover:bg-black/5 dark:hover:bg-white/10 opacity-70"
+                  : "hover:bg-muted opacity-70"
               }`}
             >
               <FiEye className="size-3" />
@@ -642,7 +688,7 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
               className={`flex items-center gap-1 px-2.5 py-0.8 transition-colors cursor-pointer ${
                 viewMode === "raw"
                   ? "bg-primary text-black font-bold"
-                  : "hover:bg-black/5 dark:hover:bg-white/10 opacity-70"
+                  : "hover:bg-muted opacity-70"
               }`}
             >
               <FiCode className="size-3" />
@@ -666,9 +712,7 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
       <div className="flex-1 flex overflow-hidden">
         {/* Table of Contents sidebar */}
         {showToc && headings.length > 0 && viewMode === "preview" && (
-          <aside className={`w-56 shrink-0 border-r p-3 overflow-y-auto space-y-1 text-xs select-none ${
-            isDark ? "bg-[#181514] border-white/5" : "bg-[#fbfbfb] border-black/5"
-          }`}>
+          <aside className="w-56 shrink-0 border-r border-border p-3 overflow-y-auto space-y-1 text-xs select-none bg-muted/20">
             <span className="text-[10px] font-mono uppercase font-bold text-primary block mb-2 px-1">
               Table of Contents
             </span>
@@ -702,44 +746,34 @@ export const BlogReaderView = ({ slug, isDark }: BlogReaderViewProps) => {
           ) : (
             <article className="max-w-3xl mx-auto space-y-8 select-text">
               {/* Article Header */}
-              <div className="space-y-4 border-b border-black/10 dark:border-white/10 pb-6">
-                <div className="flex flex-wrap items-center gap-3 font-mono text-xs opacity-75">
-                  <span className="flex items-center gap-1">
-                    <FiCalendar className="size-3 text-primary" />
-                    {post.meta.date}
-                  </span>
+              <div className="mb-8">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3 font-mono">
+                  <time dateTime={post.meta.date}>{post.meta.date}</time>
                   <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <FiClock className="size-3 text-primary" />
-                    {post.meta.readTime}
-                  </span>
+                  <span>{post.meta.readTime}</span>
                 </div>
-
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
                   {post.meta.title}
                 </h1>
-
                 {post.meta.subtitle && (
-                  <p className="text-sm sm:text-base opacity-80 leading-relaxed font-normal">
+                  <p className="mt-3 text-lg sm:text-xl text-muted-foreground font-normal leading-relaxed">
                     {post.meta.subtitle}
                   </p>
                 )}
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 pt-2">
-                  {post.meta.tags.map((t) => (
+                <div className="flex flex-wrap gap-1.5 mt-4">
+                  {post.meta.tags.map((tag) => (
                     <span
-                      key={t}
-                      className="px-2 py-0.5 rounded text-[11px] font-mono border border-primary/30 bg-primary/10 text-primary font-medium"
+                      key={tag}
+                      className="text-[11px] font-mono bg-muted/60 px-2 py-0.5 rounded text-muted-foreground border border-border/40"
                     >
-                      {t}
+                      {tag}
                     </span>
                   ))}
                 </div>
               </div>
 
               {/* Rendered Markdown Body */}
-              <div className="space-y-5 leading-relaxed text-sm sm:text-base">
+              <div className="border-t border-border pt-8 space-y-4">
                 {renderMarkdownContent(post.content, post.meta.title)}
               </div>
             </article>
