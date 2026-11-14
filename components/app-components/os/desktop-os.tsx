@@ -42,6 +42,7 @@ import {
   FiRotateCcw,
   FiTrash2,
   FiPlus,
+  FiMessageSquare,
 } from "react-icons/fi";
 import { useTheme } from "next-themes";
 import { useOsMode } from "@/components/providers";
@@ -50,7 +51,9 @@ import TerminalModal from "@/components/app-components/terminal/terminal";
 import { ResumePdfViewer } from "@/components/app-components/resume";
 import { AboutView } from "@/components/app-components/about";
 import { BlogReaderView } from "@/components/app-components/blog";
+import { MessagesApp } from "@/components/app-components/messages";
 import { formatBlogDate } from "@/lib/utils";
+import { motion, AnimatePresence } from "motion/react";
 import cachedData from "@/lib/generated/portfolio-data.json";
 
 export type WindowId =
@@ -62,7 +65,8 @@ export type WindowId =
   | "resume"
   | "settings"
   | "taskmanager"
-  | "browser";
+  | "browser"
+  | "messages";
 
 export type LayoutMode = "floating" | "tiling-horizontal" | "tiling-vertical" | "tiling-grid";
 export type WallpaperKey = "hero";
@@ -223,6 +227,26 @@ export const DesktopOs = () => {
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
   const [launcherSearch, setLauncherSearch] = useState("");
+  const [activeSpace, setActiveSpace] = useState<number>(0);
+  const [isMissionControl, setIsMissionControl] = useState(false);
+  const [minimizeEffect, setMinimizeEffect] = useState<"genie" | "scale">("genie");
+  const [isBooting, setIsBooting] = useState(true);
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsBooting(false);
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleExitOs = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      toggleOsMode();
+      setIsExiting(false);
+    }, 450);
+  };
 
   // Customizable Desktop Shortcuts list (supports removing/restoring desktop shortcuts)
   const [desktopApps, setDesktopApps] = useState<WindowId[]>([
@@ -491,6 +515,17 @@ export const DesktopOs = () => {
       position: { x: 70, y: 35 },
       size: { width: 840, height: 600 },
     },
+    messages: {
+      id: "messages",
+      title: "Messages (Sequoia Motion Typography)",
+      icon: FiMessageSquare,
+      isOpen: false,
+      isMinimized: false,
+      isMaximized: false,
+      zIndex: 85,
+      position: { x: 130, y: 55 },
+      size: { width: 580, height: 530 },
+    },
   });
 
   // Browser state for interactive iframes
@@ -671,6 +706,10 @@ export const DesktopOs = () => {
           setShowLauncher(false);
           return;
         }
+        if (isMissionControl) {
+          setIsMissionControl(false);
+          return;
+        }
 
         if (activeWindow && !isInput) {
           closeWindow(activeWindow);
@@ -708,6 +747,7 @@ export const DesktopOs = () => {
           "7": "settings",
           "8": "taskmanager",
           "9": "browser",
+          "0": "messages",
         };
         if (appKeys[e.key]) {
           e.preventDefault();
@@ -720,6 +760,25 @@ export const DesktopOs = () => {
       if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key === "m" || e.key === "M")) {
         e.preventDefault();
         if (activeWindow) toggleMaximize(activeWindow);
+        return;
+      }
+
+      // 6. Ctrl + Up / Alt + Up: Mission Control
+      if ((e.ctrlKey || e.altKey) && e.key === "ArrowUp") {
+        e.preventDefault();
+        setIsMissionControl((prev) => !prev);
+        return;
+      }
+
+      // 7. Ctrl + Left / Right: Switch Spaces
+      if ((e.ctrlKey || e.altKey) && e.key === "ArrowLeft") {
+        e.preventDefault();
+        setActiveSpace((prev) => (prev > 0 ? prev - 1 : 2));
+        return;
+      }
+      if ((e.ctrlKey || e.altKey) && e.key === "ArrowRight") {
+        e.preventDefault();
+        setActiveSpace((prev) => (prev < 2 ? prev + 1 : 0));
         return;
       }
 
@@ -906,6 +965,36 @@ export const DesktopOs = () => {
         ? Math.max(w.zIndex, 200)
         : w.zIndex;
 
+    if (w.isMinimized) {
+      if (minimizeEffect === "genie") {
+        return {
+          position: "absolute",
+          left: `${w.position.x + w.size.width / 4}px`,
+          top: "calc(100vh - 60px)",
+          width: `${w.size.width * 0.25}px`,
+          height: "40px",
+          opacity: 0,
+          transform: "scale(0.08, 0.08) perspective(600px) rotateX(45deg) translateY(120px)",
+          transformOrigin: "bottom center",
+          pointerEvents: "none",
+          zIndex: computedZ,
+          transition: "all 380ms cubic-bezier(0.4, 0, 0.2, 1)",
+        };
+      }
+      return {
+        position: "absolute",
+        left: `${w.position.x}px`,
+        top: `${w.position.y}px`,
+        width: `${w.size.width}px`,
+        height: `${w.size.height}px`,
+        opacity: 0,
+        transform: "scale(0.7) translateY(40px)",
+        pointerEvents: "none",
+        zIndex: computedZ,
+        transition: "all 260ms cubic-bezier(0.16, 1, 0.3, 1)",
+      };
+    }
+
     if (w.isMaximized) {
       return {
         position: "absolute",
@@ -1022,46 +1111,46 @@ export const DesktopOs = () => {
   );
 
   // Helper renderer for Smart Window Resize Handles (Edges and Corners)
-  // Attached directly to outer perimeter without overlapping the inner scrolling track
+  // Attached cleanly on the outer boundary with an outward margin so it NEVER overlaps the inner scrolling track
   const renderResizeHandles = (id: WindowId) => {
     if (layoutMode !== "floating" || windows[id].isMaximized) return null;
 
     return (
       <div className="pointer-events-none select-none">
-        {/* Cardinal Edges: thin 4px zones strictly along outer perimeter */}
+        {/* Cardinal Edges: placed outside/edge without inner overlap */}
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "n")}
-          className="absolute top-0 left-3 right-3 h-1 cursor-ns-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
+          className="absolute -top-1 left-4 right-4 h-2 cursor-ns-resize z-50 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "s")}
-          className="absolute bottom-0 left-3 right-3 h-1.5 cursor-ns-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
+          className="absolute -bottom-1 left-4 right-4 h-2 cursor-ns-resize z-50 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "w")}
-          className="absolute top-3 bottom-3 left-0 w-1 cursor-ew-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
+          className="absolute top-4 bottom-4 -left-1 w-2 cursor-ew-resize z-50 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "e")}
-          className="absolute top-3 bottom-3 right-0 w-1.5 cursor-ew-resize z-40 pointer-events-auto hover:bg-primary/30 transition-colors"
+          className="absolute top-4 bottom-4 -right-1 w-2 cursor-ew-resize z-50 pointer-events-auto hover:bg-primary/30 transition-colors"
         />
 
         {/* Diagonal Corners */}
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "nw")}
-          className="absolute top-0 left-0 size-3 cursor-nwse-resize z-40 pointer-events-auto hover:bg-primary/40"
+          className="absolute -top-1 -left-1 size-3.5 cursor-nwse-resize z-50 pointer-events-auto hover:bg-primary/40"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "ne")}
-          className="absolute top-0 right-0 size-3 cursor-nesw-resize z-40 pointer-events-auto hover:bg-primary/40"
+          className="absolute -top-1 -right-1 size-3.5 cursor-nesw-resize z-50 pointer-events-auto hover:bg-primary/40"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "sw")}
-          className="absolute bottom-0 left-0 size-3.5 cursor-nesw-resize z-40 pointer-events-auto hover:bg-primary/40"
+          className="absolute -bottom-1 -left-1 size-3.5 cursor-nesw-resize z-50 pointer-events-auto hover:bg-primary/40"
         />
         <div
           onMouseDown={(e) => handleMouseDownResize(e, id, "se")}
-          className="absolute bottom-0 right-0 size-4 cursor-nwse-resize z-40 pointer-events-auto hover:bg-primary/50 flex items-end justify-end p-0.5 group"
+          className="absolute -bottom-1 -right-1 size-4 cursor-nwse-resize z-50 pointer-events-auto hover:bg-primary/50 flex items-end justify-end p-0.5 group"
           title="Drag to resize window"
         >
           <svg
@@ -1084,10 +1173,50 @@ export const DesktopOs = () => {
       onMouseUp={handleMouseUp}
       onContextMenu={handleContextMenu}
       style={getHeroWallpaperStyle(isDark)}
-      className={`fixed inset-0 z-[9990] flex flex-col font-sans select-none overflow-hidden animate-in fade-in duration-200 transition-all ${
-        isDark ? "text-zinc-100" : "text-zinc-900"
-      }`}
+      className={`fixed inset-0 z-[9990] flex flex-col font-sans select-none overflow-hidden transition-all duration-300 ${
+        isExiting ? "opacity-0 scale-95 blur-md" : "opacity-100 scale-100 blur-none"
+      } ${isDark ? "text-zinc-100" : "text-zinc-900"}`}
     >
+      {/* Carbon OS Boot Sequence Curtain */}
+      <AnimatePresence>
+        {isBooting && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="fixed inset-0 z-[10050] bg-black flex flex-col items-center justify-center select-none"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center gap-5"
+            >
+              <div className="size-16 rounded-3xl bg-zinc-900 border border-zinc-700/50 flex items-center justify-center text-primary shadow-2xl">
+                <FiTerminal className="size-8" />
+              </div>
+              <div className="space-y-1.5 text-center">
+                <h2 className="text-white font-mono font-bold text-sm tracking-widest uppercase">
+                  Carbon OS
+                </h2>
+                <p className="text-zinc-500 font-mono text-[10px]">
+                  Initializing Sequoia Desktop Environment...
+                </p>
+              </div>
+              {/* Progress bar */}
+              <div className="w-48 h-1 bg-zinc-800 rounded-full overflow-hidden mt-2">
+                <motion.div
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 0.85, ease: "easeInOut" }}
+                  className="h-full bg-primary"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* macOS Native Top Menu Bar */}
       <header
         className={`h-7 w-full border-b px-2.5 sm:px-3 flex items-center justify-between text-xs backdrop-blur-xl z-[10000] shadow-sm select-none ${
@@ -1206,7 +1335,7 @@ export const DesktopOs = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    toggleOsMode();
+                    handleExitOs();
                     setShowAppleMenu(false);
                   }}
                   className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-500/20 text-red-500 transition-colors flex items-center justify-between cursor-pointer"
@@ -1266,6 +1395,41 @@ export const DesktopOs = () => {
 
         {/* Right Status Tray (macOS Control Center, Battery, Clock, Exit) */}
         <div className={`flex items-center gap-1.5 sm:gap-2.5 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
+          {/* Spaces / Virtual Desktops Indicator */}
+          <div className="hidden sm:flex items-center gap-1 bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-[10px] font-mono">
+            {[0, 1, 2].map((sIndex) => (
+              <button
+                key={sIndex}
+                type="button"
+                onClick={() => setActiveSpace(sIndex)}
+                className={`px-1.5 py-0.2 rounded transition-all cursor-pointer ${
+                  activeSpace === sIndex
+                    ? "bg-primary text-black font-bold shadow-xs scale-105"
+                    : "opacity-60 hover:opacity-100"
+                }`}
+                title={`Switch to Desktop Space ${sIndex + 1} (Ctrl+Arrow)`}
+              >
+                Space {sIndex + 1}
+              </button>
+            ))}
+          </div>
+
+          {/* Mission Control Button */}
+          <button
+            type="button"
+            onClick={() => setIsMissionControl((prev) => !prev)}
+            className={`p-1 rounded cursor-pointer transition-colors ${
+              isMissionControl
+                ? "bg-primary text-black"
+                : isDark
+                ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+            }`}
+            title="Mission Control / Spaces Overview (Ctrl+Up)"
+          >
+            <FiLayers className="size-3.5" />
+          </button>
+
           {/* Spotlight Search Icon */}
           <button
             type="button"
@@ -1378,8 +1542,8 @@ export const DesktopOs = () => {
           {/* Exit OS Button */}
           <button
             type="button"
-            onClick={toggleOsMode}
-            className="ml-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 border border-red-500/30 text-red-400 hover:bg-red-500/10"
+            onClick={handleExitOs}
+            className="ml-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 border border-red-500/30 text-red-400 hover:bg-red-500/10 active:scale-95"
             title="Exit Desktop OS & Return to Web Mode"
           >
             <span>Exit</span>
@@ -1413,6 +1577,7 @@ export const DesktopOs = () => {
                 { id: "settings", label: "Settings.app", icon: FiSettings, key: "7" },
                 { id: "taskmanager", label: "Tasks.app", icon: FiActivity, key: "8" },
                 { id: "browser", label: "Browser.app", icon: FiGlobe, key: "9" },
+                { id: "messages", label: "Messages.app", icon: FiMessageSquare, key: "0" },
               ] as const
             )
               .filter((item) => desktopApps.includes(item.id))
@@ -1839,6 +2004,51 @@ export const DesktopOs = () => {
 
 
 
+              {/* Window Transition Physics & Dock Minimization Setting */}
+              <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
+                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                  <FiSliders className="text-primary size-4" />
+                  <span>Window & Dock Motion Physics</span>
+                </h4>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setMinimizeEffect("genie")}
+                    className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col gap-1 ${
+                      minimizeEffect === "genie"
+                        ? "border-primary bg-primary/20 text-primary"
+                        : isDark
+                        ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
+                        : "border-black/10 bg-black/5 hover:bg-black/10 text-zinc-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[11px]">🧞 Genie Effect</span>
+                      {minimizeEffect === "genie" && <FiCheck className="size-3" />}
+                    </div>
+                    <span className="text-[10px] opacity-75">Curved warp dock morph</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMinimizeEffect("scale")}
+                    className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col gap-1 ${
+                      minimizeEffect === "scale"
+                        ? "border-primary bg-primary/20 text-primary"
+                        : isDark
+                        ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
+                        : "border-black/10 bg-black/5 hover:bg-black/10 text-zinc-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[11px]">📐 Scale Effect</span>
+                      {minimizeEffect === "scale" && <FiCheck className="size-3" />}
+                    </div>
+                    <span className="text-[10px] opacity-75">Swift geometric scale</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Desktop Icons & Visibility Setting */}
               <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
                 <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
@@ -2152,13 +2362,40 @@ export const DesktopOs = () => {
                 key={browserUrl}
                 src={browserUrl}
                 title={browserTitle}
-                className="w-full h-full border-0 absolute inset-0 bg-white"
+                className={`w-full h-full border-0 absolute inset-0 bg-white ${
+                  isInteracting ? "pointer-events-none" : "pointer-events-auto"
+                }`}
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
                 loading="lazy"
               />
-            </div>
+            {/* Drag/Resize transparent overlay shield to capture mouse events smoothly */}
+            {isInteracting && (
+              <div className="absolute inset-0 z-30 bg-transparent" />
+            )}
           </div>
-        )}
+        </div>
+      )}
+
+      {/* 9. Sequoia Messages Window */}
+      {windows.messages.isOpen && (
+        <div
+          style={{
+            ...getWindowStyle("messages"),
+            backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
+            borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
+          }}
+          onClick={() => focusWindow("messages")}
+          className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
+            windows.messages.isMinimized ? "hidden" : ""
+          }`}
+        >
+          {renderTitleBar("messages", "Messages — Sagar Kumar Jha")}
+
+          <div className="flex-1 overflow-hidden">
+            <MessagesApp isDark={isDark} />
+          </div>
+        </div>
+      )}
 
         {/* Desktop Context Menu (Right Click on Empty Desktop) */}
         {contextMenu.visible && (
@@ -2251,7 +2488,7 @@ export const DesktopOs = () => {
             <button
               type="button"
               onClick={() => {
-                toggleOsMode();
+                handleExitOs();
                 setContextMenu((prev) => ({ ...prev, visible: false }));
               }}
               className="w-full text-left px-2.5 py-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-2 text-red-400 cursor-pointer"
@@ -2474,6 +2711,20 @@ export const DesktopOs = () => {
                       icon: FiActivity,
                       key: "7",
                     },
+                    {
+                      id: "browser",
+                      label: "Safari Preview",
+                      sub: "Web Projects",
+                      icon: FiGlobe,
+                      key: "8",
+                    },
+                    {
+                      id: "messages",
+                      label: "Messages",
+                      sub: "Sequoia Motion",
+                      icon: FiMessageSquare,
+                      key: "9",
+                    },
                   ] as const
                 )
                   .filter((app) => {
@@ -2548,6 +2799,74 @@ export const DesktopOs = () => {
                 <span>Select app or press Alt+1..7</span>
                 <span>Carbon OS v2.0</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mission Control Spaces Overview Overlay */}
+        {isMissionControl && (
+          <div
+            onClick={() => setIsMissionControl(false)}
+            className="fixed inset-0 z-[10030] bg-black/60 backdrop-blur-md flex flex-col p-6 animate-in fade-in duration-200"
+          >
+            {/* Spaces Bar Top */}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              {[0, 1, 2].map((sIndex) => (
+                <button
+                  key={sIndex}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveSpace(sIndex);
+                    setIsMissionControl(false);
+                  }}
+                  className={`w-36 h-20 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    activeSpace === sIndex
+                      ? "ring-2 ring-primary border-primary bg-primary/20 scale-105"
+                      : "border-white/20 bg-white/5 hover:bg-white/10"
+                  }`}
+                >
+                  <span className="text-xs font-mono font-bold text-zinc-100">
+                    Desktop {sIndex + 1}
+                  </span>
+                  <span className="text-[10px] text-zinc-400 font-mono">
+                    {sIndex === 0 ? "Main Space" : sIndex === 1 ? "Development" : "Research"}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Mission Control Windows Grid */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl w-full p-4">
+                {openWindows.map((w) => (
+                  <motion.div
+                    key={w.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      focusWindow(w.id);
+                      setIsMissionControl(false);
+                    }}
+                    className="p-4 rounded-2xl border border-white/20 bg-black/50 backdrop-blur-xl shadow-2xl flex flex-col items-center gap-3 cursor-pointer group hover:border-primary/60 transition-colors"
+                  >
+                    <div className="size-14 rounded-2xl bg-white/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                      <w.icon className="size-7" />
+                    </div>
+                    <span className="text-xs font-semibold text-zinc-100 truncate max-w-full text-center">
+                      {w.title}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-mono">
+                      {w.isMinimized ? "Minimized" : "Active"}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-center text-zinc-400 font-mono text-xs">
+              Click any window or press ESC to exit Mission Control
             </div>
           </div>
         )}
@@ -2633,6 +2952,7 @@ export const DesktopOs = () => {
               { id: "settings", label: "Settings", icon: FiSettings },
               { id: "taskmanager", label: "Tasks", icon: FiActivity },
               { id: "browser", label: "Web", icon: FiGlobe },
+              { id: "messages", label: "Messages", icon: FiMessageSquare },
             ] as const
           ).map((item) => {
             const w = windows[item.id];

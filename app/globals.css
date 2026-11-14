@@ -151,7 +151,7 @@
   }
 }
 
-/* Custom terminal scrollbar */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -163,9 +163,33 @@
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 0px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+/* OS Window specific scrollbar styling - narrow, non-intrusive */
+.os-window-content {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.os-window-content::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.os-window-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.os-window-content::-webkit-scrollbar-thumb {
+  background: rgba(160, 160, 160, 0.25);
+  border-radius: 9999px;
+}
+
+.os-window-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(160, 160, 160, 0.5);
 }
