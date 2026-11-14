@@ -735,12 +735,14 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
         </button>
       </div>
 
-      {/* macOS Terminal Window Modal Dialog (Fixed Size, Do Not Resize) */}
+      {/* macOS Terminal Window Modal Dialog */}
       {isOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
+          className={`fixed inset-0 z-50 flex items-center justify-center ${
+            isFullScreen ? "p-0" : "p-3 sm:p-6"
+          } bg-black/70 backdrop-blur-sm animate-in fade-in duration-150`}
           onClick={() => setIsOpen(false)}
         >
           <div
@@ -750,9 +752,9 @@ export const TerminalModal = ({ projects = [] }: TerminalModalProps) => {
             }}
             className={`w-full ${
               isFullScreen
-                ? "max-w-5xl h-[92vh] sm:h-[88vh]"
-                : "max-w-2xl h-[80vh] sm:h-[520px] max-h-[580px]"
-            } rounded-xl border border-white/10 dark:border-white/10 bg-[#1c1917]/95 text-[#f4f4f4] font-mono shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] dark:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_40px_rgba(255,255,255,0.03)] overflow-hidden flex flex-col backdrop-blur-md animate-in zoom-in-95 duration-150 transition-[max-width,height]`}
+                ? "fixed inset-0 h-screen w-screen max-w-none rounded-none border-0"
+                : "max-w-2xl h-[80vh] sm:h-[520px] max-h-[580px] rounded-xl border border-white/10 dark:border-white/10"
+            } bg-[#1c1917]/95 text-[#f4f4f4] font-mono shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] dark:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85),0_0_40px_rgba(255,255,255,0.03)] overflow-hidden flex flex-col backdrop-blur-md animate-in zoom-in-95 duration-150 transition-all`}
           >
             {/* Authentic macOS Terminal Window Titlebar */}
             <div
