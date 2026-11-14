@@ -212,3 +212,14 @@ body.os-mode-active::-webkit-scrollbar {
   width: 0px !important;
   height: 0px !important;
 }
+
+/* Full-bleed responsive breakout container for wide content like /blog/[slug] */
+.full-bleed-article {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  max-width: 100vw;
+}

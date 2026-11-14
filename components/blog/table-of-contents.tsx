@@ -28,7 +28,7 @@ export function TableOfContents({ headings, variant }: TableOfContentsProps) {
 
   if (variant === "mobile") {
     return (
-      <div className="xl:hidden my-6 rounded-lg border border-border bg-muted/30 overflow-hidden text-xs">
+      <div className="lg:hidden my-6 rounded-lg border border-border bg-muted/30 overflow-hidden text-xs">
         <button
           type="button"
           onClick={() => setMobileExpanded((prev) => !prev)}
@@ -66,7 +66,7 @@ export function TableOfContents({ headings, variant }: TableOfContentsProps) {
 
   if (variant === "desktop") {
     return (
-      <aside className="hidden xl:block w-64 shrink-0">
+      <aside className="hidden lg:block w-64 shrink-0">
         <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 space-y-2 text-xs">
           <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold text-primary uppercase tracking-wider pb-2 border-b border-border">
             <FiList className="size-3.5" />

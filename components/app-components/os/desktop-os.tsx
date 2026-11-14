@@ -614,15 +614,12 @@ export const DesktopOs = () => {
         return;
       }
 
-      // 3. Alt+\ or Alt+`: Cycle Open Windows
+      // 3. Alt+\: Cycle Open Windows
       if (
         e.altKey &&
         !e.ctrlKey &&
         !e.shiftKey &&
-        (e.key === "\\" ||
-          e.code === "Backslash" ||
-          e.key === "`" ||
-          e.code === "Backquote")
+        (e.key === "\\" || e.code === "Backslash")
       ) {
         e.preventDefault();
         setShowSwitcher(true);
@@ -2081,11 +2078,7 @@ export const DesktopOs = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px]">
                       <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                         <span className="text-zinc-400">Cycle Open Windows</span>
-                        <div className="flex items-center gap-1">
-                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + \</kbd>
-                          <span className="text-[9px] text-zinc-500">/</span>
-                          <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + `</kbd>
-                        </div>
+                        <kbd className={`font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Alt + \</kbd>
                       </div>
                       <div className="flex items-center justify-between py-0.5 border-b border-white/5">
                         <span className="text-zinc-400">Spotlight App Launcher</span>
