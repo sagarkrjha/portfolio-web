@@ -9,3 +9,5 @@ export * from "./activity";
 export * from "./resume";
 export * from "./foxy/foxy";
 export * from "./intro";
+export { DesktopOs } from "./os/desktop-os";
+

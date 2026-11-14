@@ -1,11 +1,11 @@
 import "./globals.css";
 import "./prism.css";
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/providers";
+import { ThemeProvider, OsProvider } from "@/components/providers";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Header, Footer, RouteTransition } from "@/components/layouts";
-import { Terminal, IntroAnimation, Foxy } from "@/components/app-components";
+import { Terminal, IntroAnimation, Foxy, DesktopOs } from "@/components/app-components";
 import { siteConfig } from "@/lib/config";
 
 // Option A: Modern Systems Engineer Typography
@@ -51,14 +51,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full max-w-4xl mx-auto flex flex-col bg-background text-foreground px-4 sm:px-6 lg:px-8 selection:bg-foreground selection:text-background font-sans">
         <ThemeProvider>
-          <IntroAnimation />
-          <Header />
-          <div className="flex-1 w-full">
-            <RouteTransition>{children}</RouteTransition>
-          </div>
-          <Footer />
-          <Terminal />
-          <Foxy />
+          <OsProvider>
+            <IntroAnimation />
+            <Header />
+            <div className="flex-1 w-full">
+              <RouteTransition>{children}</RouteTransition>
+            </div>
+            <Footer />
+            <Terminal />
+            <Foxy />
+            <DesktopOs />
+          </OsProvider>
         </ThemeProvider>
       </body>
     </html>

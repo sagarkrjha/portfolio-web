@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiMenu, FiX, FiDownload, FiExternalLink } from "react-icons/fi";
+import { FiMenu, FiX, FiDownload, FiExternalLink, FiMonitor } from "react-icons/fi";
 import { siteConfig } from "@/lib/config";
 import { ThemeToggleButton } from "../app-components";
+import { useOsMode } from "@/components/providers";
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { toggleOsMode } = useOsMode();
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -58,13 +60,31 @@ export const Header = () => {
               {item.label}
             </Link>
           ))}
-          <div className="ml-1 pl-1 border-l">
+          <div className="ml-1 pl-1 border-l flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={toggleOsMode}
+              className="flex items-center gap-1.5 px-2 py-1 text-xs font-mono font-medium rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer border border-border/40"
+              title="Launch Desktop OS Mode"
+            >
+              <FiMonitor className="size-3.5 text-primary" />
+              <span>OS</span>
+            </button>
             <ThemeToggleButton />
           </div>
         </nav>
 
         {/* Mobile Navigation Controls */}
         <div className="flex sm:hidden items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleOsMode}
+            className="flex items-center gap-1 px-2 py-1 text-xs font-mono font-medium rounded-none text-foreground bg-muted/60 border border-border/60"
+            title="Launch Desktop OS Mode"
+          >
+            <FiMonitor className="size-3.5 text-primary" />
+            <span>OS</span>
+          </button>
           <ThemeToggleButton />
           <button
             type="button"
