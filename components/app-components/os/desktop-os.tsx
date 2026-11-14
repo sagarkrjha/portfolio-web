@@ -1,60 +1,61 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import {
-  FiTerminal,
-  FiUser,
-  FiFolder,
-  FiFileText,
-  FiBookOpen,
-  FiSettings,
-  FiX,
-  FiMinus,
-  FiMaximize2,
-  FiMinimize2,
-  FiGrid,
-  FiWifi,
-  FiVolume2,
-  FiBatteryCharging,
-  FiExternalLink,
-  FiSun,
-  FiMoon,
-  FiColumns,
-  FiLayers,
-  FiCommand,
-  FiCheck,
-  FiSliders,
-  FiGithub,
-  FiAward,
-  FiCode,
-  FiCpu,
-  FiClock,
-  FiActivity,
-  FiRefreshCw,
-  FiPlay,
-  FiSquare,
-  FiDroplet,
-  FiSearch,
-  FiGlobe,
-  FiEye,
-  FiMinimize,
-  FiRotateCcw,
-  FiTrash2,
-  FiPlus,
-  FiMessageSquare,
-} from "react-icons/fi";
 import { useTheme } from "next-themes";
-import { useOsMode } from "@/components/providers";
-import { siteConfig, heroConfig, aboutConfig, blogConfig } from "@/lib/config";
-import TerminalModal from "@/components/app-components/terminal/terminal";
-import { ResumePdfViewer } from "@/components/app-components/resume";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  FiActivity,
+  FiAward,
+  FiBatteryCharging,
+  FiBookOpen,
+  FiCheck,
+  FiClock,
+  FiCode,
+  FiColumns,
+  FiCommand,
+  FiCpu,
+  FiDroplet,
+  FiExternalLink,
+  FiEye,
+  FiFileText,
+  FiFolder,
+  FiGithub,
+  FiGlobe,
+  FiGrid,
+  FiLayers,
+  FiMaximize2,
+  FiMessageSquare,
+  FiMinimize,
+  FiMinimize2,
+  FiMinus,
+  FiMoon,
+  FiPlay,
+  FiPlus,
+  FiRefreshCw,
+  FiRotateCcw,
+  FiSearch,
+  FiSettings,
+  FiSliders,
+  FiSquare,
+  FiSun,
+  FiTerminal,
+  FiTrash2,
+  FiUser,
+  FiVolume2,
+  FiWifi,
+  FiX,
+} from "react-icons/fi";
 import { AboutView } from "@/components/app-components/about";
 import { BlogReaderView } from "@/components/app-components/blog";
 import { MessagesApp } from "@/components/app-components/messages";
-import { formatBlogDate } from "@/lib/utils";
-import { motion, AnimatePresence } from "motion/react";
+import { ResumePdfViewer } from "@/components/app-components/resume";
+import TerminalModal from "@/components/app-components/terminal/terminal";
+import { useOsMode } from "@/components/providers";
+import { aboutConfig, blogConfig, heroConfig, siteConfig } from "@/lib/config";
 import cachedData from "@/lib/generated/portfolio-data.json";
+import { formatBlogDate } from "@/lib/utils";
 
 export type WindowId =
   | "about"
@@ -257,11 +258,14 @@ export const DesktopOs = () => {
         }
       }
       const savedTheme = localStorage.getItem("portfolio_os_theme") as OsThemeKey | null;
-      if (savedTheme && (savedTheme in OS_THEMES)) {
+      if (savedTheme && savedTheme in OS_THEMES) {
         setOsThemeState(savedTheme);
       }
       const savedLayout = localStorage.getItem("portfolio_layout_mode") as LayoutMode | null;
-      if (savedLayout && ["floating", "tiling-horizontal", "tiling-vertical", "tiling-grid"].includes(savedLayout)) {
+      if (
+        savedLayout &&
+        ["floating", "tiling-horizontal", "tiling-vertical", "tiling-grid"].includes(savedLayout)
+      ) {
         setLayoutModeState(savedLayout);
       }
       const savedDesktopIcons = localStorage.getItem("portfolio_show_desktop_icons");
@@ -328,15 +332,7 @@ export const DesktopOs = () => {
   };
 
   const resetDesktopShortcuts = () => {
-    saveDesktopApps([
-      "about",
-      "terminal",
-      "projects",
-      "blog",
-      "resume",
-      "settings",
-      "taskmanager",
-    ]);
+    saveDesktopApps(["about", "terminal", "projects", "blog", "resume", "settings", "taskmanager"]);
   };
 
   // Context Menu state (Right Click on Desktop Canvas)
@@ -522,11 +518,12 @@ export const DesktopOs = () => {
 
   // Separate dedicated Reader Window state
   const [activeArticleSlug, setActiveArticleSlug] = useState<string>("dsa-sheet-2027");
-  const [activeArticleTitle, setActiveArticleTitle] = useState<string>("Data Structures & Algorithmic Patterns");
+  const [activeArticleTitle, setActiveArticleTitle] = useState<string>(
+    "Data Structures & Algorithmic Patterns",
+  );
 
   // Track if user is actively dragging or resizing a window (to disable transition smoothing during gestures)
   const [isInteracting, setIsInteracting] = useState(false);
-
 
   // Clock & system metrics jitter
   useEffect(() => {
@@ -575,18 +572,24 @@ export const DesktopOs = () => {
     setActiveWindow(id);
   }, []);
 
-  const openInBrowser = useCallback((url: string, title?: string) => {
-    setBrowserUrl(url);
-    setInputUrl(url);
-    if (title) setBrowserTitle(title);
-    focusWindow("browser");
-  }, [focusWindow]);
+  const openInBrowser = useCallback(
+    (url: string, title?: string) => {
+      setBrowserUrl(url);
+      setInputUrl(url);
+      if (title) setBrowserTitle(title);
+      focusWindow("browser");
+    },
+    [focusWindow],
+  );
 
-  const openInReader = useCallback((slug: string, title: string) => {
-    setActiveArticleSlug(slug);
-    setActiveArticleTitle(title);
-    focusWindow("reader");
-  }, [focusWindow]);
+  const openInReader = useCallback(
+    (slug: string, title: string) => {
+      setActiveArticleSlug(slug);
+      setActiveArticleTitle(title);
+      focusWindow("reader");
+    },
+    [focusWindow],
+  );
 
   const toggleMaximize = useCallback((id: WindowId) => {
     setWindows((prev) => ({
@@ -667,9 +670,7 @@ export const DesktopOs = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
+        target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
 
       // 1. Escape key behavior: close topmost overlays/context menus or active window
       if (e.key === "Escape") {
@@ -954,8 +955,8 @@ export const DesktopOs = () => {
       id === "settings" && activeWindow === "settings"
         ? Math.max(w.zIndex, 500)
         : activeWindow === id
-        ? Math.max(w.zIndex, 200)
-        : w.zIndex;
+          ? Math.max(w.zIndex, 200)
+          : w.zIndex;
 
     if (w.isMinimized) {
       if (minimizeEffect === "genie") {
@@ -1084,7 +1085,9 @@ export const DesktopOs = () => {
           </button>
         </div>
 
-        <span className={`text-xs font-semibold pointer-events-none truncate max-w-[65%] font-mono ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
+        <span
+          className={`text-xs font-semibold pointer-events-none truncate max-w-[65%] font-mono ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
+        >
           {title}
         </span>
 
@@ -1194,7 +1197,9 @@ export const DesktopOs = () => {
               className={`px-1.5 py-0.5 rounded transition-colors cursor-pointer flex items-center justify-center font-semibold text-sm ${
                 showAppleMenu
                   ? "bg-primary text-black"
-                  : (isDark ? "hover:bg-white/10 text-zinc-100" : "hover:bg-black/5 text-zinc-900")
+                  : isDark
+                    ? "hover:bg-white/10 text-zinc-100"
+                    : "hover:bg-black/5 text-zinc-900"
               }`}
               title="Apple Menu"
             >
@@ -1253,7 +1258,9 @@ export const DesktopOs = () => {
                   <span className="text-[10px] text-zinc-400 font-mono">⌥7</span>
                 </button>
 
-                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
+                <div
+                  className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`}
+                />
 
                 <button
                   type="button"
@@ -1283,7 +1290,9 @@ export const DesktopOs = () => {
                   <span className="text-[10px] text-zinc-400 font-mono">⌥Space</span>
                 </button>
 
-                <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`} />
+                <div
+                  className={`my-1 border-t ${isDark ? "border-white/10" : "border-black/10"}`}
+                />
 
                 <button
                   type="button"
@@ -1301,7 +1310,9 @@ export const DesktopOs = () => {
           </div>
 
           {/* Active Application Name in bold macOS typography */}
-          <span className={`font-bold px-1.5 py-0.5 rounded text-xs ${isDark ? "text-zinc-100" : "text-zinc-950"}`}>
+          <span
+            className={`font-bold px-1.5 py-0.5 rounded text-xs ${isDark ? "text-zinc-100" : "text-zinc-950"}`}
+          >
             {activeWindow ? windows[activeWindow].title.split(" ")[0] : "Finder"}
           </span>
 
@@ -1311,7 +1322,9 @@ export const DesktopOs = () => {
               type="button"
               onClick={() => focusWindow("settings")}
               className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
-                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+                isDark
+                  ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                  : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
               }`}
             >
               Settings
@@ -1320,7 +1333,9 @@ export const DesktopOs = () => {
               type="button"
               onClick={() => setShowLauncher(true)}
               className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
-                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+                isDark
+                  ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                  : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
               }`}
             >
               Window
@@ -1329,7 +1344,9 @@ export const DesktopOs = () => {
               type="button"
               onClick={() => setShowDesktopIcons((prev) => !prev)}
               className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
-                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+                isDark
+                  ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                  : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
               }`}
             >
               {showDesktopIcons ? "Hide Desktop" : "Show Desktop"}
@@ -1338,7 +1355,9 @@ export const DesktopOs = () => {
               type="button"
               onClick={() => focusWindow("about")}
               className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
-                isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+                isDark
+                  ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                  : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
               }`}
             >
               Help
@@ -1347,7 +1366,9 @@ export const DesktopOs = () => {
         </div>
 
         {/* Right Status Tray (macOS Control Center, Battery, Clock, Exit) */}
-        <div className={`flex items-center gap-1.5 sm:gap-2.5 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
+        <div
+          className={`flex items-center gap-1.5 sm:gap-2.5 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
+        >
           {/* Spaces / Virtual Desktops Indicator */}
           <div className="hidden sm:flex items-center gap-1 bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-[10px] font-mono">
             {[0, 1, 2].map((sIndex) => (
@@ -1375,8 +1396,8 @@ export const DesktopOs = () => {
               isMissionControl
                 ? "bg-primary text-black"
                 : isDark
-                ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
-                : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+                  ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                  : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
             }`}
             title="Mission Control / Spaces Overview (Ctrl+Up)"
           >
@@ -1388,7 +1409,9 @@ export const DesktopOs = () => {
             type="button"
             onClick={() => setShowLauncher(true)}
             className={`p-1 rounded cursor-pointer transition-colors ${
-              isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
+              isDark
+                ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
             }`}
             title="Spotlight Search (Alt+Space)"
           >
@@ -1407,7 +1430,9 @@ export const DesktopOs = () => {
               className={`p-1 rounded cursor-pointer transition-colors flex items-center gap-1 ${
                 showControlCenter
                   ? "bg-primary text-black"
-                  : (isDark ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100" : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900")
+                  : isDark
+                    ? "hover:bg-white/10 text-zinc-300 hover:text-zinc-100"
+                    : "hover:bg-black/5 text-zinc-700 hover:text-zinc-900"
               }`}
               title="Control Center (Quick Settings)"
             >
@@ -1444,8 +1469,14 @@ export const DesktopOs = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      {isDark ? <FiMoon className="size-4 text-primary" /> : <FiSun className="size-4 text-amber-500" />}
-                      <span className="text-[10px] font-mono font-bold uppercase">{isDark ? "Dark" : "Light"}</span>
+                      {isDark ? (
+                        <FiMoon className="size-4 text-primary" />
+                      ) : (
+                        <FiSun className="size-4 text-amber-500" />
+                      )}
+                      <span className="text-[10px] font-mono font-bold uppercase">
+                        {isDark ? "Dark" : "Light"}
+                      </span>
                     </div>
                     <span className="text-[11px] font-medium">Appearance</span>
                   </button>
@@ -1457,18 +1488,20 @@ export const DesktopOs = () => {
                     className={`p-2.5 rounded-xl border flex flex-col gap-1 text-left cursor-pointer transition-all ${
                       showDesktopIcons
                         ? "bg-primary/20 border-primary/40 text-primary"
-                        : (isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/10 hover:bg-black/10")
+                        : isDark
+                          ? "bg-white/5 border-white/10 hover:bg-white/10"
+                          : "bg-black/5 border-black/10 hover:bg-black/10"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <FiEye className="size-4" />
-                      <span className="text-[10px] font-mono font-bold uppercase">{showDesktopIcons ? "ON" : "OFF"}</span>
+                      <span className="text-[10px] font-mono font-bold uppercase">
+                        {showDesktopIcons ? "ON" : "OFF"}
+                      </span>
                     </div>
                     <span className="text-[11px] font-medium">Desktop Icons</span>
                   </button>
                 </div>
-
-
 
                 {/* Quick Link to Full System Settings */}
                 <button
@@ -1478,7 +1511,9 @@ export const DesktopOs = () => {
                     setShowControlCenter(false);
                   }}
                   className={`w-full py-1.5 px-2.5 rounded-xl border text-center font-medium cursor-pointer transition-colors flex items-center justify-center gap-1.5 ${
-                    isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-black/5 border-black/10 hover:bg-black/10"
+                    isDark
+                      ? "bg-white/5 border-white/10 hover:bg-white/10"
+                      : "bg-black/5 border-black/10 hover:bg-black/10"
                   }`}
                 >
                   <FiSettings className="size-3 text-primary" />
@@ -1490,7 +1525,9 @@ export const DesktopOs = () => {
 
           <FiWifi className="size-3.5 hidden sm:inline" />
           <FiBatteryCharging className="size-3.5 text-emerald-400" />
-          <span className={`font-mono text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>{time}</span>
+          <span className={`font-mono text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
+            {time}
+          </span>
 
           {/* Exit OS Button */}
           <button
@@ -1547,21 +1584,27 @@ export const DesktopOs = () => {
                     <div
                       className="relative size-12 rounded-xl border flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform backdrop-blur-xs"
                       style={{
-                        backgroundColor: isDark ? `${currentTheme.card}E6` : "rgba(255, 255, 255, 0.9)",
+                        backgroundColor: isDark
+                          ? `${currentTheme.card}E6`
+                          : "rgba(255, 255, 255, 0.9)",
                         borderColor: isDark ? currentTheme.border : "rgba(0, 0, 0, 0.12)",
                         color: currentTheme.primary,
                       }}
                     >
                       <item.icon className="size-6" />
-                      <span className={`absolute bottom-0.5 right-1 text-[8px] font-mono opacity-60 group-hover:opacity-100 ${
-                        isDark ? "text-zinc-400" : "text-zinc-600"
-                      }`}>
+                      <span
+                        className={`absolute bottom-0.5 right-1 text-[8px] font-mono opacity-60 group-hover:opacity-100 ${
+                          isDark ? "text-zinc-400" : "text-zinc-600"
+                        }`}
+                      >
                         ⌥{item.key}
                       </span>
                     </div>
-                    <span className={`text-[11px] font-mono drop-shadow-md truncate max-w-[76px] font-medium ${
-                      isDark ? "text-zinc-200" : "text-zinc-900"
-                    }`}>
+                    <span
+                      className={`text-[11px] font-mono drop-shadow-md truncate max-w-[76px] font-medium ${
+                        isDark ? "text-zinc-200" : "text-zinc-900"
+                      }`}
+                    >
                       {item.label}
                     </span>
                   </button>
@@ -1591,14 +1634,20 @@ export const DesktopOs = () => {
                 }`}
                 title="Add Application Shortcut to Desktop"
               >
-                <div className={`size-12 rounded-xl flex items-center justify-center group-hover:text-primary transition-colors ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
-                }`}>
+                <div
+                  className={`size-12 rounded-xl flex items-center justify-center group-hover:text-primary transition-colors ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
+                  }`}
+                >
                   <FiPlus className="size-5" />
                 </div>
-                <span className={`text-[10px] font-mono ${
-                  isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-zinc-600 group-hover:text-zinc-900"
-                }`}>
+                <span
+                  className={`text-[10px] font-mono ${
+                    isDark
+                      ? "text-zinc-400 group-hover:text-zinc-200"
+                      : "text-zinc-600 group-hover:text-zinc-900"
+                  }`}
+                >
                   + Add App
                 </span>
               </button>
@@ -1623,9 +1672,11 @@ export const DesktopOs = () => {
           >
             {renderTitleBar("about", `About — ${siteConfig.name}`)}
 
-            <div className={`p-4 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed font-sans ${
-              isDark ? "text-zinc-300" : "text-zinc-700"
-            }`}>
+            <div
+              className={`p-4 sm:p-6 overflow-y-auto space-y-4 text-xs leading-relaxed font-sans ${
+                isDark ? "text-zinc-300" : "text-zinc-700"
+              }`}
+            >
               <AboutView metrics={cachedData?.profile} />
             </div>
           </div>
@@ -1682,7 +1733,11 @@ export const DesktopOs = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h4 className={`text-sm font-semibold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{p.title}</h4>
+                      <h4
+                        className={`text-sm font-semibold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}
+                      >
+                        {p.title}
+                      </h4>
                       {p.featured && (
                         <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-primary/20 text-primary border border-primary/30 font-bold uppercase">
                           Featured
@@ -1716,7 +1771,9 @@ export const DesktopOs = () => {
                       {p.liveUrl ? (
                         <button
                           type="button"
-                          onClick={() => openInBrowser(p.liveUrl!, `${p.title} (Interactive Live Demo)`)}
+                          onClick={() =>
+                            openInBrowser(p.liveUrl!, `${p.title} (Interactive Live Demo)`)
+                          }
                           className="px-2 py-0.5 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 transition-colors flex items-center gap-1 rounded text-[11px] font-mono font-semibold cursor-pointer shadow-xs"
                           title={`Launch ${p.title} interactive web preview`}
                         >
@@ -1748,7 +1805,11 @@ export const DesktopOs = () => {
                       )}
                     </div>
                   </div>
-                  <p className={`text-xs leading-relaxed ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>{p.description}</p>
+                  <p
+                    className={`text-xs leading-relaxed ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
+                  >
+                    {p.description}
+                  </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {p.techStack.map((tech) => (
                       <span
@@ -1796,9 +1857,11 @@ export const DesktopOs = () => {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <p className={`text-xs font-semibold group-hover:text-primary transition-colors ${
-                      isDark ? "text-zinc-100" : "text-zinc-900"
-                    }`}>
+                    <p
+                      className={`text-xs font-semibold group-hover:text-primary transition-colors ${
+                        isDark ? "text-zinc-100" : "text-zinc-900"
+                      }`}
+                    >
                       {article.title}
                     </p>
                     <span className="text-[10px] font-mono text-zinc-500 shrink-0">
@@ -1806,13 +1869,17 @@ export const DesktopOs = () => {
                     </span>
                   </div>
                   {article.subtitle && (
-                    <p className={`text-[11px] mt-1 line-clamp-1 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
+                    <p
+                      className={`text-[11px] mt-1 line-clamp-1 ${isDark ? "text-zinc-400" : "text-zinc-600"}`}
+                    >
                       {article.subtitle}
                     </p>
                   )}
                   <div className="flex items-center justify-between mt-2 font-mono text-[10px]">
                     <div className="flex items-center gap-2">
-                      <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>{formatBlogDate(article.date)}</span>
+                      <span className={isDark ? "text-zinc-500" : "text-zinc-600"}>
+                        {formatBlogDate(article.date)}
+                      </span>
                       <span className="text-zinc-400">•</span>
                       <div className="flex flex-wrap gap-1">
                         {article.tags.map((t) => (
@@ -1906,7 +1973,9 @@ export const DesktopOs = () => {
             <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs font-mono">
               {/* OS Theme selection section */}
               <div>
-                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                <h4
+                  className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                >
                   <FiDroplet className="text-primary size-4" />
                   <span>Desktop OS Themes</span>
                 </h4>
@@ -1921,15 +1990,21 @@ export const DesktopOs = () => {
                         type="button"
                         onClick={() => setOsTheme(key)}
                         className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all flex flex-col gap-1.5 ${
-                          active ? "border-primary ring-2 ring-primary/40 shadow-lg" : "border-white/10"
+                          active
+                            ? "border-primary ring-2 ring-primary/40 shadow-lg"
+                            : "border-white/10"
                         }`}
                         style={{
                           backgroundColor: isDark ? t.dark.card : t.light.card,
-                          borderColor: active ? t.primary : (isDark ? t.dark.border : t.light.border),
+                          borderColor: active ? t.primary : isDark ? t.dark.border : t.light.border,
                         }}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-[11px] font-bold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>{t.name}</span>
+                          <span
+                            className={`text-[11px] font-bold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}
+                          >
+                            {t.name}
+                          </span>
                           {active && <FiCheck className="size-3 text-primary" />}
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
@@ -1955,11 +2030,11 @@ export const DesktopOs = () => {
                 </div>
               </div>
 
-
-
               {/* Window Transition Physics & Dock Minimization Setting */}
               <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
-                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                <h4
+                  className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                >
                   <FiSliders className="text-primary size-4" />
                   <span>Window & Dock Motion Physics</span>
                 </h4>
@@ -1971,8 +2046,8 @@ export const DesktopOs = () => {
                       minimizeEffect === "genie"
                         ? "border-primary bg-primary/20 text-primary"
                         : isDark
-                        ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
-                        : "border-black/10 bg-black/5 hover:bg-black/10 text-zinc-700"
+                          ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
+                          : "border-black/10 bg-black/5 hover:bg-black/10 text-zinc-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1989,8 +2064,8 @@ export const DesktopOs = () => {
                       minimizeEffect === "scale"
                         ? "border-primary bg-primary/20 text-primary"
                         : isDark
-                        ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
-                        : "border-black/10 bg-black/5 hover:bg-black/10 text-zinc-700"
+                          ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
+                          : "border-black/10 bg-black/5 hover:bg-black/10 text-zinc-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -2004,19 +2079,28 @@ export const DesktopOs = () => {
 
               {/* Desktop Icons & Visibility Setting */}
               <div className={`border-t pt-4 ${isDark ? "border-white/10" : "border-black/10"}`}>
-                <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                <h4
+                  className={`font-semibold mb-2 flex items-center gap-2 ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                >
                   <FiEye className="text-primary size-4" />
                   <span>Desktop Applications Visibility</span>
                 </h4>
-                <div className="flex items-center justify-between p-3 rounded-xl border"
+                <div
+                  className="flex items-center justify-between p-3 rounded-xl border"
                   style={{
                     backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
                     borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
                   }}
                 >
                   <div>
-                    <span className={`font-medium block text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Show Desktop Application Shortcuts</span>
-                    <span className={`text-[10px] ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>Toggle whether app icons and files appear directly on the desktop canvas</span>
+                    <span
+                      className={`font-medium block text-xs ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                    >
+                      Show Desktop Application Shortcuts
+                    </span>
+                    <span className={`text-[10px] ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+                      Toggle whether app icons and files appear directly on the desktop canvas
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -2024,7 +2108,9 @@ export const DesktopOs = () => {
                     className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                       showDesktopIcons
                         ? "bg-primary text-black font-bold"
-                        : (isDark ? "bg-white/10 text-zinc-400 hover:text-zinc-200" : "bg-black/10 text-zinc-600 hover:text-zinc-900")
+                        : isDark
+                          ? "bg-white/10 text-zinc-400 hover:text-zinc-200"
+                          : "bg-black/10 text-zinc-600 hover:text-zinc-900"
                     }`}
                   >
                     {showDesktopIcons ? "Visible (On)" : "Hidden (Off)"}
@@ -2032,29 +2118,39 @@ export const DesktopOs = () => {
                 </div>
               </div>
 
-
-
               {/* Keyboard Shortcuts Reference */}
-              <div className={`border-t pt-4 text-[11px] space-y-1.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}>
-                <span className={`font-semibold block ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Quick Keyboard Shortcuts:</span>
+              <div
+                className={`border-t pt-4 text-[11px] space-y-1.5 ${isDark ? "border-white/10 text-zinc-400" : "border-black/10 text-zinc-600"}`}
+              >
+                <span
+                  className={`font-semibold block ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                >
+                  Quick Keyboard Shortcuts:
+                </span>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Space</kbd>: Spotlight App Launcher
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Space</kbd>:
+                    Spotlight App Launcher
                   </div>
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Tab</kbd>: Cycle Open Windows
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + Tab</kbd>:
+                    Cycle Open Windows
                   </div>
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + M</kbd>: Toggle Maximize
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + M</kbd>:
+                    Toggle Maximize
                   </div>
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>ESC</kbd>: Close Active Window / Menus
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>ESC</kbd>: Close
+                    Active Window / Menus
                   </div>
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + 1..7</kbd>: Direct App Launchers
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + 1..7</kbd>:
+                    Direct App Launchers
                   </div>
                   <div>
-                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + F</kbd>: Center Active Window
+                    <kbd className={isDark ? "text-zinc-200" : "text-zinc-900"}>Alt + F</kbd>:
+                    Center Active Window
                   </div>
                 </div>
               </div>
@@ -2080,9 +2176,13 @@ export const DesktopOs = () => {
             <div className="p-4 sm:p-5 overflow-y-auto space-y-4 font-mono text-xs">
               {/* CPU & Memory Gauges */}
               <div className="grid grid-cols-2 gap-3">
-                <div className={`p-3 rounded-lg border space-y-2 ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
+                <div
+                  className={`p-3 rounded-lg border space-y-2 ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}
+                >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>CPU UTILIZATION</span>
+                    <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
+                      CPU UTILIZATION
+                    </span>
                     <span className="text-emerald-400 font-bold">{Math.round(cpuUsage)}%</span>
                   </div>
                   <div className="w-full h-2 rounded bg-white/10 overflow-hidden">
@@ -2093,9 +2193,13 @@ export const DesktopOs = () => {
                   </div>
                 </div>
 
-                <div className={`p-3 rounded-lg border space-y-2 ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
+                <div
+                  className={`p-3 rounded-lg border space-y-2 ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}
+                >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>MEMORY IN USE</span>
+                    <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>
+                      MEMORY IN USE
+                    </span>
                     <span className="text-primary font-bold">{memUsage.toFixed(1)} GB / 16 GB</span>
                   </div>
                   <div className="w-full h-2 rounded bg-white/10 overflow-hidden">
@@ -2109,10 +2213,16 @@ export const DesktopOs = () => {
 
               {/* Running Processes Table */}
               <div>
-                <h4 className={`font-semibold mb-2 text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>Active Window Processes</h4>
+                <h4
+                  className={`font-semibold mb-2 text-[11px] ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                >
+                  Active Window Processes
+                </h4>
                 <div className="border border-white/10 rounded-lg overflow-hidden">
                   <table className="w-full text-left text-[11px]">
-                    <thead className={`border-b text-[10px] ${isDark ? "bg-black/60 text-zinc-400 border-white/10" : "bg-black/10 text-zinc-700 border-black/10"}`}>
+                    <thead
+                      className={`border-b text-[10px] ${isDark ? "bg-black/60 text-zinc-400 border-white/10" : "bg-black/10 text-zinc-700 border-black/10"}`}
+                    >
                       <tr>
                         <th className="p-2">APP / PROCESS</th>
                         <th className="p-2">STATUS</th>
@@ -2125,7 +2235,11 @@ export const DesktopOs = () => {
                         <tr key={w.id} className="hover:bg-white/5 transition-colors">
                           <td className="p-2 flex items-center gap-2">
                             <w.icon className="size-3.5 text-primary" />
-                            <span className={`font-medium ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>{w.title}</span>
+                            <span
+                              className={`font-medium ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                            >
+                              {w.title}
+                            </span>
                           </td>
                           <td className="p-2">
                             {w.isOpen ? (
@@ -2169,7 +2283,7 @@ export const DesktopOs = () => {
           </div>
         )}
 
-                {/* 8. Interactive Hosted Projects & GitHub iframe Window */}
+        {/* 8. Interactive Hosted Projects & GitHub iframe Window */}
         {windows.browser.isOpen && (
           <div
             style={{
@@ -2238,7 +2352,9 @@ export const DesktopOs = () => {
                   if (inputUrl) setBrowserUrl(inputUrl);
                 }}
                 className={`flex-1 max-w-md mx-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono ${
-                  isDark ? "bg-black/40 border-white/10 text-zinc-200" : "bg-white border-black/10 text-zinc-900"
+                  isDark
+                    ? "bg-black/40 border-white/10 text-zinc-200"
+                    : "bg-white border-black/10 text-zinc-900"
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -2266,18 +2382,28 @@ export const DesktopOs = () => {
                   type="button"
                   onClick={() => toggleMaximize("browser")}
                   className={`cursor-pointer p-0.5 transition-colors ${
-                    isDark ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-500 hover:text-zinc-900"
+                    isDark
+                      ? "text-zinc-400 hover:text-zinc-100"
+                      : "text-zinc-500 hover:text-zinc-900"
                   }`}
                 >
-                  {windows.browser.isMaximized ? <FiMinimize2 className="size-3.5" /> : <FiMaximize2 className="size-3.5" />}
+                  {windows.browser.isMaximized ? (
+                    <FiMinimize2 className="size-3.5" />
+                  ) : (
+                    <FiMaximize2 className="size-3.5" />
+                  )}
                 </button>
               </div>
             </div>
 
             {/* Browser Secondary Status & Navigation Bar */}
-            <div className={`px-3 py-1.5 border-b flex items-center justify-between text-[11px] font-mono ${
-              isDark ? "bg-[#1f1b19] border-white/10 text-zinc-400" : "bg-[#f0f0f0] border-black/10 text-zinc-600"
-            }`}>
+            <div
+              className={`px-3 py-1.5 border-b flex items-center justify-between text-[11px] font-mono ${
+                isDark
+                  ? "bg-[#1f1b19] border-white/10 text-zinc-400"
+                  : "bg-[#f0f0f0] border-black/10 text-zinc-600"
+              }`}
+            >
               <div className="flex items-center gap-2 truncate">
                 <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="font-semibold truncate">{browserTitle}</span>
@@ -2310,7 +2436,7 @@ export const DesktopOs = () => {
               </div>
             </div>
 
-            {/* Embedded Live View / External IFrame */}
+            {/* Embedded Live View / External IFrame (Sandboxed & Isolated from host session) */}
             <div className="flex-1 w-full h-full min-h-[420px] relative bg-white">
               <iframe
                 key={browserUrl}
@@ -2319,37 +2445,35 @@ export const DesktopOs = () => {
                 className={`w-full h-full border-0 absolute inset-0 bg-white ${
                   isInteracting ? "pointer-events-none" : "pointer-events-auto"
                 }`}
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+                sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
                 loading="lazy"
               />
-            {/* Drag/Resize transparent overlay shield to capture mouse events smoothly */}
-            {isInteracting && (
-              <div className="absolute inset-0 z-30 bg-transparent" />
-            )}
+              {/* Drag/Resize transparent overlay shield to capture mouse events smoothly */}
+              {isInteracting && <div className="absolute inset-0 z-30 bg-transparent" />}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 9. Sequoia Messages Window */}
-      {windows.messages.isOpen && (
-        <div
-          style={{
-            ...getWindowStyle("messages"),
-            backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
-            borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
-          }}
-          onClick={() => focusWindow("messages")}
-          className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
-            windows.messages.isMinimized ? "hidden" : ""
-          }`}
-        >
-          {renderTitleBar("messages", "Messages — Sagar Kumar Jha")}
+        {/* 9. Sequoia Messages Window */}
+        {windows.messages.isOpen && (
+          <div
+            style={{
+              ...getWindowStyle("messages"),
+              backgroundColor: isDark ? `${currentTheme.bg}F8` : "#ffffffF8",
+              borderColor: isDark ? currentTheme.border : "rgba(0,0,0,0.12)",
+            }}
+            onClick={() => focusWindow("messages")}
+            className={`flex flex-col rounded-xl border shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out ${
+              windows.messages.isMinimized ? "hidden" : ""
+            }`}
+          >
+            {renderTitleBar("messages", "Messages — Sagar Kumar Jha")}
 
-          <div className="flex-1 overflow-hidden">
-            <MessagesApp isDark={isDark} />
+            <div className="flex-1 overflow-hidden">
+              <MessagesApp isDark={isDark} />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
         {/* Desktop Context Menu (Right Click on Empty Desktop) */}
         {contextMenu.visible && (
@@ -2363,7 +2487,9 @@ export const DesktopOs = () => {
             }}
             className={`fixed z-[10020] w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
-            <div className={`px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}>
+            <div
+              className={`px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}
+            >
               Desktop
             </div>
             <button
@@ -2465,7 +2591,9 @@ export const DesktopOs = () => {
             }}
             className={`fixed z-[10020] w-52 rounded-xl border p-1 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 font-mono text-xs ${isDark ? "text-zinc-200" : "text-zinc-800"}`}
           >
-            <div className={`flex items-center gap-2 px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}>
+            <div
+              className={`flex items-center gap-2 px-2.5 py-1 text-[10px] uppercase font-semibold border-b mb-1 ${isDark ? "text-zinc-400 border-white/10" : "text-zinc-600 border-black/10"}`}
+            >
               <span>{windows[appContextMenu.windowId].title}</span>
             </div>
 
@@ -2597,7 +2725,9 @@ export const DesktopOs = () => {
               }}
             >
               {/* Launcher Header & Live Search Bar */}
-              <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border text-xs ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}>
+              <div
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border text-xs ${isDark ? "bg-black/40 border-white/10" : "bg-black/5 border-black/10"}`}
+              >
                 <FiSearch className="size-4 text-primary shrink-0" />
                 <input
                   type="text"
@@ -2714,7 +2844,9 @@ export const DesktopOs = () => {
                         >
                           <app.icon className="size-5" />
                         </div>
-                        <span className={`text-[11px] font-semibold truncate w-full ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                        <span
+                          className={`text-[11px] font-semibold truncate w-full ${isDark ? "text-zinc-200" : "text-zinc-900"}`}
+                        >
                           {app.label}
                         </span>
                         <span className="text-[9px] text-zinc-400 font-mono">Alt+{app.key}</span>
@@ -2844,7 +2976,8 @@ export const DesktopOs = () => {
                       : "bg-white/5 border border-transparent"
                   }`}
                   style={{
-                    backgroundColor: activeWindow === w.id ? `${currentTheme.primary}25` : undefined,
+                    backgroundColor:
+                      activeWindow === w.id ? `${currentTheme.primary}25` : undefined,
                     borderColor: activeWindow === w.id ? currentTheme.primary : "transparent",
                     color: activeWindow === w.id ? currentTheme.primary : "#a1a1aa",
                   }}
@@ -2876,7 +3009,9 @@ export const DesktopOs = () => {
             className={`group relative flex flex-col items-center justify-center size-11 rounded-xl transition-all hover:scale-115 active:scale-95 cursor-pointer ${
               showLauncher
                 ? "border"
-                : (isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700")
+                : isDark
+                  ? "hover:bg-white/10 text-zinc-300"
+                  : "hover:bg-black/5 text-zinc-700"
             }`}
             style={{
               backgroundColor: showLauncher ? `${currentTheme.primary}25` : undefined,
@@ -2920,7 +3055,11 @@ export const DesktopOs = () => {
                 onClick={() => toggleWindow(item.id)}
                 onContextMenu={(e) => handleAppContextMenu(e, item.id)}
                 className={`group relative flex flex-col items-center justify-center size-11 rounded-xl transition-all hover:scale-115 active:scale-95 cursor-pointer ${
-                  isFocused ? "border" : (isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-black/5 text-zinc-700")
+                  isFocused
+                    ? "border"
+                    : isDark
+                      ? "hover:bg-white/10 text-zinc-300"
+                      : "hover:bg-black/5 text-zinc-700"
                 }`}
                 style={{
                   backgroundColor: isFocused ? `${currentTheme.primary}25` : undefined,

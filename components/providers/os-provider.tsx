@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { siteConfig } from "@/lib/config";
 
 interface OsContextType {
@@ -32,12 +33,13 @@ export const OsProvider = ({ children }: { children: React.ReactNode }) => {
         setIsOsMode(false);
         return;
       }
-      const saved = localStorage.getItem("portfolio_os_mode");
-      if (saved === "true") {
+      // Use sessionStorage so OS mode never permanently overwrites the primary browser session across new tabs/windows
+      const savedSession = sessionStorage.getItem("portfolio_os_mode");
+      if (savedSession === "true") {
         setIsOsMode(true);
       }
     } catch {
-      // Ignore localStorage errors
+      // Ignore storage errors
     }
   }, []);
 
@@ -56,7 +58,9 @@ export const OsProvider = ({ children }: { children: React.ReactNode }) => {
     setTimeout(() => {
       setIsOsMode(enabled);
       try {
-        localStorage.setItem("portfolio_os_mode", enabled ? "true" : "false");
+        sessionStorage.setItem("portfolio_os_mode", enabled ? "true" : "false");
+        // Also remove legacy localStorage override so future browser sessions default cleanly to standard mode
+        localStorage.removeItem("portfolio_os_mode");
       } catch {
         // Ignore
       }
@@ -90,7 +94,9 @@ export const OsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [isOsMode]);
 
   return (
-    <OsContext.Provider value={{ isOsMode, isTransitioning, transitionPhase, toggleOsMode, setOsMode }}>
+    <OsContext.Provider
+      value={{ isOsMode, isTransitioning, transitionPhase, toggleOsMode, setOsMode }}
+    >
       {children}
 
       {/* Global 2-Second Carbon OS Transition Sequence */}
