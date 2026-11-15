@@ -197,8 +197,8 @@ importers:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       pdfjs-dist:
-        specifier: ^6.5.438
-        version: 6.5.438
+        specifier: 6.3.289
+        version: 6.3.289
       prismjs:
         specifier: ^1.30.0
         version: 1.30.0
