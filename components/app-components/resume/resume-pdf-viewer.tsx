@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -45,11 +44,35 @@ export const ResumePdfViewer = () => {
     scrollTop: 0,
   });
 
-  // Set worker safely on client
+  // Set worker safely on client with legacy worker fallback for cross-browser support (e.g. Brave, older Chromium engines)
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Polyfill modern JS methods used by pdfjs if missing in browser runtime
+      const mapProto = Map.prototype as unknown as Record<string, unknown>;
+      if (typeof mapProto.getOrInsertComputed !== "function") {
+        mapProto.getOrInsertComputed = function (
+          this: Map<unknown, unknown>,
+          key: unknown,
+          cb: (k: unknown) => unknown,
+        ) {
+          if (this.has(key)) return this.get(key);
+          const computed = cb(key);
+          this.set(key, computed);
+          return computed;
+        };
+      }
+      const mathObj = Math as unknown as Record<string, unknown>;
+      if (typeof mathObj.sumPrecise !== "function") {
+        mathObj.sumPrecise = (nums: Iterable<number>) => {
+          let sum = 0;
+          for (const n of nums) sum += n;
+          return sum;
+        };
+      }
+
       import("react-pdf").then(({ pdfjs }) => {
-        pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+        // Use self-hosted legacy worker containing full polyfills for web workers
+        pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
       });
     }
   }, []);
@@ -201,7 +224,7 @@ export const ResumePdfViewer = () => {
           </button>
 
           {/* Download */}
-          <Link
+          <a
             href="/sagar-resume.pdf"
             download="sagar-resume.pdf"
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
@@ -209,7 +232,7 @@ export const ResumePdfViewer = () => {
             aria-label="Download resume PDF"
           >
             <FiDownload className="size-3.5 sm:size-4" />
-          </Link>
+          </a>
 
           {/* Fullscreen toggle */}
           <button
