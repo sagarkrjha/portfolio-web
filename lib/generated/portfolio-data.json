@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-11-19T05:06:02.946526703+00:00",
+  "lastUpdated": "2026-11-20T04:56:15.954977905+00:00",
   "profile": {
     "role": "Systems & Full-Stack Developer",
-    "bio": "Engineer specializing in TypeScript, C++20, Rust, JavaScript. Architect of cp-workspace (⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O). Passionate about building high-performance, clean-architecture software and developer tools.",
-    "totalRepos": 7,
+    "bio": "Engineer specializing in TypeScript, Rust, JavaScript, C++20. Architect of cp-workspace (⚡ Lightweight, cross-platform competitive programming setup for C++ in VS Code with auto-compiler detection and fast I/O). Passionate about building high-performance, clean-architecture software and developer tools.",
+    "totalRepos": 8,
     "totalStars": 16,
     "primaryLanguages": [
       "TypeScript",
-      "C++20",
       "Rust",
-      "JavaScript"
+      "JavaScript",
+      "C++20"
     ],
     "activeProjectsCount": 4
   },
@@ -22,6 +22,18 @@
       "cp-workspace"
     ],
     "repos": [
+      {
+        "name": "silex",
+        "description": "Silex - Native Rust-powered, framework-independent UI component engine and design system",
+        "html_url": "https://github.com/sagarkrjha/silex",
+        "homepage": null,
+        "stargazers_count": 0,
+        "forks_count": 0,
+        "language": "TypeScript",
+        "topics": [],
+        "fork": false,
+        "updated_at": "2026-11-19T08:18:16Z"
+      },
       {
         "name": "portfolio-web",
         "description": "Config-driven developer portfolio and blog built with Next.js 16 (App Router), React 19, Tailwind CSS v4, terminal CLI, and automated GitHub CI sync",
@@ -197,6 +209,14 @@
       }
     ],
     "repoBadges": [
+      {
+        "name": "silex",
+        "techStack": [
+          "TypeScript",
+          "Rust",
+          "JavaScript"
+        ]
+      },
       {
         "name": "portfolio-web",
         "techStack": [
